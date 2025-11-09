@@ -89,6 +89,44 @@ class BlockParser {
     // Clone the tree WITHOUT processing pending
     final clonedRoot = root.deepCopy();
 
+    // If the currently open container ended with a blank line, the next line
+    // would cause the block parser to close that container before adding new
+    // content. Mirror that by clearing the OPEN flag on the corresponding
+    // cloned nodes so we don't treat the pending text as belonging inside the
+    // still-open list item (common when the model keeps a “persistent footer”).
+    CmarkNode origCursor = root;
+    CmarkNode cloneCursor = clonedRoot;
+    while (origCursor.lastChild != null && _isOpen(origCursor.lastChild)) {
+      final origChild = origCursor.lastChild!;
+
+      // Find matching child in the cloned tree by sibling index.
+      var index = 0;
+      var sibling = origCursor.firstChild;
+      while (sibling != null && sibling != origChild) {
+        index++;
+        sibling = sibling.next;
+      }
+
+      var cloneChild = cloneCursor.firstChild;
+      for (var i = 0; i < index && cloneChild != null; i++) {
+        cloneChild = cloneChild.next;
+      }
+      if (cloneChild == null) {
+        break;
+      }
+
+      if ((origChild.flags & 2) != 0) { // LAST_LINE_BLANK
+        cloneChild.flags &= ~1; // Treat as closed in clone
+        final cloneParent = cloneChild.parent;
+        if (cloneParent != null && cloneParent.type == CmarkNodeType.list) {
+          cloneParent.flags &= ~1;
+        }
+      }
+
+      origCursor = origChild;
+      cloneCursor = cloneChild;
+    }
+
     // If there's pending text, add it to the clone as a partial paragraph
     if (_pending.isNotEmpty) {
       // Find or create a paragraph in the clone to hold pending text
