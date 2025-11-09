@@ -1,0 +1,13 @@
+name: cmark_gfm
+version: 0.1.0-dev
+publish_to: "none"
+description: >-
+  Pure Dart port of the cmark-gfm Markdown parser with streaming support.
+repository: https://github.com/your-org/cmark_gfm_dart
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+dependencies:
+  meta: ^1.10.0
+dev_dependencies:
+  lints: ^3.0.0
+  test: ^1.25.0
