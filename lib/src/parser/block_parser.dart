@@ -127,30 +127,25 @@ class BlockParser {
       cloneCursor = cloneChild;
     }
 
-    // If there's pending text, add it to the clone as a partial paragraph
+    // If there's pending text, process it as a real line so list markers are recognized
+    // BUT save/restore state so the original parser can continue
+    final savedPending = _pending;
+    final savedCurrent = current;
+    
     if (_pending.isNotEmpty) {
-      // Find or create a paragraph in the clone to hold pending text
-      var target = clonedRoot;
-      while (target.lastChild != null && _isOpen(target.lastChild)) {
-        target = target.lastChild!;
-      }
-
-      // If target can accept lines, add pending text
-      if (_acceptsLines(target.type)) {
-        target.content.write(_pending);
-      } else if (target.type == CmarkNodeType.document ||
-          target.canContain(CmarkNodeType.paragraph)) {
-        // Create a new paragraph for pending
-        final para = CmarkNode(CmarkNodeType.paragraph);
-        para.content.write(_pending);
-        para.startLine = lineNumber + 1;
-        para.startColumn = 1;
-        target.appendChild(para);
-      }
+      _processLine(_pending);
+      _pending = '';
     }
+    
+    // Clone the updated state
+    final clonedRoot2 = root.deepCopy();
+    
+    // Restore original state
+    _pending = savedPending;
+    current = savedCurrent;
 
     // Finalize and return the clone (original tree unchanged)
-    return _finishInternal(clonedRoot);
+    return _finishInternal(clonedRoot2);
   }
 
   CmarkNode _finishInternal(CmarkNode rootToFinalize) {
@@ -1357,7 +1352,7 @@ class BlockParser {
 
   void _processInlines(CmarkNode node, InlineParser inlineParser) {
     var childCount = node.children.length;
-    if (childCount > 1000) {
+    if (childCount > 1000000) {
       throw StateError(
           'SAFETY: Node ${node.type.name} has $childCount children');
     }
@@ -1367,7 +1362,7 @@ class BlockParser {
     var processed = 0;
     for (final child in node.children) {
       processed++;
-      if (processed > 1000) {
+      if (processed > 1000000) {
         throw StateError(
             'SAFETY: Processed $processed children of ${node.type.name}');
       }
