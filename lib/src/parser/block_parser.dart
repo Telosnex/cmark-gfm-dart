@@ -21,6 +21,7 @@ class BlockParser {
 
   final CmarkNode root = CmarkNode(CmarkNodeType.document);
   late CmarkNode current;
+  bool _initialized = false;
 
   // Parser state per line
   int offset = 0;
@@ -40,12 +41,10 @@ class BlockParser {
   bool _skipAddText = false;
 
   void feed(String text) {
+    _initialize();
+
     if (text.isEmpty) {
       return;
-    }
-
-    if (lineNumber == 0) {
-      _initialize();
     }
 
     _pending += text;
@@ -79,6 +78,7 @@ class BlockParser {
   /// Finish and return the document tree.
   /// After calling this, the parser cannot accept more input.
   CmarkNode finish() {
+    _initialize();
     return _finishInternal(root);
   }
 
@@ -86,6 +86,8 @@ class BlockParser {
   /// but keep the parser alive to accept more feed() calls.
   /// Use this for streaming/incremental rendering.
   CmarkNode finishClone() {
+    _initialize();
+
     // Save complete parser state
     final savedTreeClone = root.deepCopy();
     final savedPending = _pending;
@@ -291,8 +293,13 @@ class BlockParser {
   }
 
   void _initialize() {
+    if (_initialized) {
+      return;
+    }
+
     root.flags |= 1; // OPEN
     current = root;
+    _initialized = true;
   }
 
   int _findNewline(String text) {
