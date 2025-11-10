@@ -4,6 +4,9 @@ import 'package:test/test.dart';
 // Generated from cmark-gfm/test/spec.txt
 // DO NOT EDIT - regenerate with tool/generate_spec_tests.dart
 
+const kSkipNongoal_MdToHtml = 'Skipping because the test verifies HTML is left undisturbed while Markdown becomes HTML. It is a non-goal for us to pass these tests: instead, the markdown is preserved.';
+const kSkipNongoal_MdNotToHtml = 'Skipping because the test verifies text that is *almost* correct HTML is left undisturbed and Markdown does not become HTML. It is a non-goal for us to pass these tests: instead, HTML isn\'t recognized, we leave the markdown as-is.';
+
 void main() {
   group('CommonMark Spec Tests', () {
     test('Tabs - Example 1', () {
@@ -1867,7 +1870,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 118', () {
+    test('HTML blocks - Example 118', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<table><tr><td>
 <pre>
 **Hello**,
@@ -1890,7 +1893,7 @@ _world_.
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 119', () {
+    test('HTML blocks - Example 119', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<table>
   <tr>
     <td>
@@ -1917,7 +1920,7 @@ okay.''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 120', () {
+    test('HTML blocks - Example 120', skip: kSkipNongoal_MdNotToHtml, () {
       final markdown = ''' <div>
   *hello*
          <foo><a>''';
@@ -1933,7 +1936,7 @@ okay.''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 121', () {
+    test('HTML blocks - Example 121',  skip: kSkipNongoal_MdNotToHtml,() {
       final markdown = '''</div>
 *foo*''';
       final expected = '''</div>
@@ -1947,7 +1950,7 @@ okay.''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 122', () {
+    test('HTML blocks - Example 122', skip: kSkipNongoal_MdToHtml,  () {
       final markdown = '''<DIV CLASS="foo">
 
 *Markdown*
@@ -1965,7 +1968,7 @@ okay.''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 123', () {
+    test('HTML blocks - Example 123', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<div id="foo"
   class="bar">
 </div>''';
@@ -1981,7 +1984,7 @@ okay.''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 124', () {
+    test('HTML blocks - Example 124', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<div id="foo" class="bar
   baz">
 </div>''';
@@ -1997,7 +2000,7 @@ okay.''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 125', () {
+    test('HTML blocks - Example 125', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<div>
 *foo*
 
@@ -2014,7 +2017,7 @@ okay.''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 126', () {
+    test('HTML blocks - Example 126', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<div id="foo"
 *hi*''';
       final expected = '''<div id="foo"
@@ -2028,7 +2031,7 @@ okay.''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 127', () {
+    test('HTML blocks - Example 127', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<div class
 foo''';
       final expected = '''<div class
@@ -2042,7 +2045,7 @@ foo''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 128', () {
+    test('HTML blocks - Example 128', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<div *???-&&&-<---
 *foo*''';
       final expected = '''<div *???-&&&-<---
@@ -2056,7 +2059,7 @@ foo''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 129', () {
+    test('HTML blocks - Example 129', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<div><a href="bar">*foo*</a></div>''';
       final expected = '''<div><a href="bar">*foo*</a></div>''';
 
@@ -2068,7 +2071,7 @@ foo''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 130', () {
+    test('HTML blocks - Example 130', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<table><tr><td>
 foo
 </td></tr></table>''';
@@ -2084,7 +2087,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 131', () {
+    test('HTML blocks - Example 131', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<div></div>
 ``` c
 int x = 33;
@@ -2102,7 +2105,7 @@ int x = 33;
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 132', () {
+    test('HTML blocks - Example 132', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<a href="foo">
 *bar*
 </a>''';
@@ -2118,7 +2121,7 @@ int x = 33;
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 133', () {
+    test('HTML blocks - Example 133', skip: kSkipNongoal_MdNotToHtml, () {
       final markdown = '''<Warning>
 *bar*
 </Warning>''';
@@ -2134,7 +2137,7 @@ int x = 33;
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 134', () {
+    test('HTML blocks - Example 134', skip: kSkipNongoal_MdNotToHtml, () {
       final markdown = '''<i class="foo">
 *bar*
 </i>''';
@@ -2150,7 +2153,7 @@ int x = 33;
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 135', () {
+    test('HTML blocks - Example 135', skip: kSkipNongoal_MdNotToHtml, () {
       final markdown = '''</ins>
 *bar*''';
       final expected = '''</ins>
@@ -2164,7 +2167,7 @@ int x = 33;
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 136', () {
+    test('HTML blocks - Example 136', skip: kSkipNongoal_MdNotToHtml, () {
       final markdown = '''<del>
 *foo*
 </del>''';
@@ -2180,7 +2183,7 @@ int x = 33;
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 137', () {
+    test('HTML blocks - Example 137', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<del>
 
 *foo*
@@ -2198,7 +2201,7 @@ int x = 33;
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 138', () {
+    test('HTML blocks - Example 138', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<del>*foo*</del>''';
       final expected = '''<p><del><em>foo</em></del></p>''';
 
@@ -2210,7 +2213,7 @@ int x = 33;
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 139', () {
+    test('HTML blocks - Example 139', skip: kSkipNongoal_MdToHtml,  () {
       final markdown = '''<pre language="haskell"><code>
 import Text.HTML.TagSoup
 
@@ -2234,7 +2237,7 @@ main = print \$ parseTags tags
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 140', () {
+    test('HTML blocks - Example 140', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<script type="text/javascript">
 // JavaScript example
 
@@ -2256,7 +2259,7 @@ document.getElementById("demo").innerHTML = "Hello JavaScript!";
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 141', () {
+    test('HTML blocks - Example 141',skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<style
   type="text/css">
 h1 {color:red;}
@@ -2280,7 +2283,7 @@ p {color:blue;}
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 142', () {
+    test('HTML blocks - Example 142', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<style
   type="text/css">
 
@@ -2298,7 +2301,7 @@ foo''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 143', () {
+    test('HTML blocks - Example 143', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''> <div>
 > foo
 
@@ -2317,7 +2320,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 144', () {
+    test('HTML blocks - Example 144', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''- <div>
 - foo''';
       final expected = '''<ul>
@@ -2335,7 +2338,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 145', () {
+    test('HTML blocks - Example 145',skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<style>p{color:red;}</style>
 *foo*''';
       final expected = '''<style>p{color:red;}</style>
@@ -2349,7 +2352,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 146', () {
+    test('HTML blocks - Example 146', skip: kSkipNongoal_MdToHtml,() {
       final markdown = '''<!-- foo -->*bar*
 *baz*''';
       final expected = '''<!-- foo -->*bar*
@@ -2363,7 +2366,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 147', () {
+    test('HTML blocks - Example 147', skip: kSkipNongoal_MdNotToHtml, () {
       final markdown = '''<script>
 foo
 </script>1. *bar*''';
@@ -2379,7 +2382,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 148', () {
+    test('HTML blocks - Example 148', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<!-- Foo
 
 bar
@@ -2399,7 +2402,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 149', () {
+    test('HTML blocks - Example 149', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<?php
 
   echo \'>\';
@@ -2421,7 +2424,7 @@ okay''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 150', () {
+    test('HTML blocks - Example 150', skip: kSkipNongoal_MdNotToHtml, () {
       final markdown = '''<!DOCTYPE html>''';
       final expected = '''<!DOCTYPE html>''';
 
@@ -2433,7 +2436,7 @@ okay''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 151', () {
+    test('HTML blocks - Example 151', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<![CDATA[
 function matchwo(a,b)
 {
@@ -2469,7 +2472,7 @@ function matchwo(a,b)
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 152', () {
+    test('HTML blocks - Example 152', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''  <!-- foo -->
 
     <!-- foo -->''';
@@ -2485,7 +2488,7 @@ function matchwo(a,b)
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 153', () {
+    test('HTML blocks - Example 153', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''  <div>
 
     <div>''';
@@ -2501,7 +2504,7 @@ function matchwo(a,b)
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 154', () {
+    test('HTML blocks - Example 154', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''Foo
 <div>
 bar
@@ -2519,7 +2522,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 155', () {
+    test('HTML blocks - Example 155', skip: kSkipNongoal_MdNotToHtml, () {
       final markdown = '''<div>
 bar
 </div>
@@ -2537,7 +2540,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 156', () {
+    test('HTML blocks - Example 156', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''Foo
 <a href="bar">
 baz''';
@@ -2553,7 +2556,7 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 157', () {
+    test('HTML blocks - Example 157', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<div>
 
 *Emphasized* text.
@@ -2571,7 +2574,7 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 158', () {
+    test('HTML blocks - Example 158', skip: kSkipNongoal_MdNotToHtml, () {
       final markdown = '''<div>
 *Emphasized* text.
 </div>''';
@@ -2587,7 +2590,7 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 159', () {
+    test('HTML blocks - Example 159', skip: kSkipNongoal_MdNotToHtml, () {
       final markdown = '''<table>
 
 <tr>
@@ -2615,7 +2618,7 @@ Hi
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 160', () {
+    test('HTML blocks - Example 160', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<table>
 
   <tr>
