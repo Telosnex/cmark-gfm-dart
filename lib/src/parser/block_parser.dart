@@ -86,66 +86,78 @@ class BlockParser {
   /// but keep the parser alive to accept more feed() calls.
   /// Use this for streaming/incremental rendering.
   CmarkNode finishClone() {
-    // Clone the tree WITHOUT processing pending
-    final clonedRoot = root.deepCopy();
-
-    // If the currently open container ended with a blank line, the next line
-    // would cause the block parser to close that container before adding new
-    // content. Mirror that by clearing the OPEN flag on the corresponding
-    // cloned nodes so we don't treat the pending text as belonging inside the
-    // still-open list item (common when the model keeps a “persistent footer”).
-    CmarkNode origCursor = root;
-    CmarkNode cloneCursor = clonedRoot;
-    while (origCursor.lastChild != null && _isOpen(origCursor.lastChild)) {
-      final origChild = origCursor.lastChild!;
-
-      // Find matching child in the cloned tree by sibling index.
+    // Save complete parser state
+    final savedTreeClone = root.deepCopy();
+    final savedPending = _pending;
+    final savedLineNumber = lineNumber;
+    final savedOffset = offset;
+    final savedColumn = column;
+    final savedBlank = blank;
+    final savedPartiallyConsumedTab = partiallyConsumedTab;
+    
+    // Build a path from root to current (so we can restore current pointer later)
+    final pathToCurrent = <int>[];
+    var node = current;
+    while (node != root) {
+      final parent = node.parent;
+      if (parent == null) break;
+      
+      // Find the index of this node among its siblings
       var index = 0;
-      var sibling = origCursor.firstChild;
-      while (sibling != null && sibling != origChild) {
+      var sibling = parent.firstChild;
+      while (sibling != null && sibling != node) {
         index++;
         sibling = sibling.next;
       }
-
-      var cloneChild = cloneCursor.firstChild;
-      for (var i = 0; i < index && cloneChild != null; i++) {
-        cloneChild = cloneChild.next;
-      }
-      if (cloneChild == null) {
-        break;
-      }
-
-      if ((origChild.flags & 2) != 0) { // LAST_LINE_BLANK
-        cloneChild.flags &= ~1; // Treat as closed in clone
-        final cloneParent = cloneChild.parent;
-        if (cloneParent != null && cloneParent.type == CmarkNodeType.list) {
-          cloneParent.flags &= ~1;
-        }
-      }
-
-      origCursor = origChild;
-      cloneCursor = cloneChild;
+      pathToCurrent.insert(0, index);
+      node = parent;
     }
-
-    // If there's pending text, process it as a real line so list markers are recognized
-    // BUT save/restore state so the original parser can continue
-    final savedPending = _pending;
-    final savedCurrent = current;
     
+    // Process pending text into the real tree (so block structure is recognized)
     if (_pending.isNotEmpty) {
       _processLine(_pending);
       _pending = '';
     }
     
-    // Clone the updated state
-    final clonedRoot2 = root.deepCopy();
+    // Clone the now-updated tree
+    final clonedRoot = root.deepCopy();
     
-    // Restore original state
+    // Restore the original tree by swapping children back
+    while (root.firstChild != null) {
+      root.firstChild!.unlink();
+    }
+    var child = savedTreeClone.firstChild;
+    while (child != null) {
+      final next = child.next;
+      child.unlink();
+      root.appendChild(child);
+      child = next;
+    }
+    
+    // Restore current pointer by following the saved path
+    current = root;
+    for (final index in pathToCurrent) {
+      var child = current.firstChild;
+      for (var i = 0; i < index && child != null; i++) {
+        child = child.next;
+      }
+      if (child != null) {
+        current = child;
+      } else {
+        break; // Path is invalid, stay at current level
+      }
+    }
+    
+    // Restore all other parser state
     _pending = savedPending;
-    current = savedCurrent;
-
-    // Finalize and return the clone (original tree unchanged)
-    return _finishInternal(clonedRoot2);
+    lineNumber = savedLineNumber;
+    offset = savedOffset;
+    column = savedColumn;
+    blank = savedBlank;
+    partiallyConsumedTab = savedPartiallyConsumedTab;
+    
+    // Finalize and return the clone (original state fully restored)
+    return _finishInternal(clonedRoot);
   }
 
   CmarkNode _finishInternal(CmarkNode rootToFinalize) {
@@ -157,21 +169,10 @@ class BlockParser {
         _processLine(_pending);
         _pending = '';
       }
-
-      // Finalize all open containers
-      var iterations = 0;
-      while (current != root && iterations < 100) {
-        current = _finalize(current);
-        iterations++;
-      }
-      if (iterations >= 100) {
-        throw StateError('Infinite loop in finish()');
-      }
-      _finalize(root);
-    } else {
-      // For clone, walk and finalize all nodes without mutating parser state
-      _finalizeTreeRecursive(rootToFinalize);
     }
+    
+    // Finalize all nodes in the tree (both for finish and finishClone)
+    _finalizeTreeRecursive(rootToFinalize);
 
     // Process inlines with V2 parser
     final inlineParser = InlineParser(referenceMap, footnoteMap: footnoteMap);
@@ -350,13 +351,15 @@ class BlockParser {
 
     while (_isOpen(container.lastChild)) {
       container = container.lastChild!;
-
+      
       _findFirstNonspace();
 
       final matched = _checkContinuation(container);
       if (!matched) {
         allMatched = false;
-        return _CheckOpenBlocksResult(container.parent, allMatched);
+        // Finalize the unmatched container before returning parent
+        container = _finalize(container);
+        return _CheckOpenBlocksResult(container, allMatched);
       }
     }
 
@@ -652,10 +655,8 @@ class BlockParser {
           final saveColumn = column;
           final saveTab = partiallyConsumedTab;
 
-          var spaces = 0;
           while (column - saveColumn <= 5 && _isSpaceOrTab(_charAt(offset))) {
             _advanceOffset(1, true);
-            spaces++;
           }
 
           final i = column - saveColumn;
@@ -772,17 +773,6 @@ class BlockParser {
         current.type == CmarkNodeType.paragraph) {
       _addLine(current);
     } else {
-      // Finalize unmatched containers
-      var finalizeIterations = 0;
-      while (current != lastMatchedContainer) {
-        finalizeIterations++;
-        if (finalizeIterations > 100) {
-          throw StateError(
-              'SAFETY: Finalize loop iterations=$finalizeIterations current=${current.type.name} lastMatched=${lastMatchedContainer.type.name}');
-        }
-        current = _finalize(current);
-      }
-
       if (container.type == CmarkNodeType.table) {
         // Add a table row
         _addTableRow(container);
@@ -1338,17 +1328,6 @@ class BlockParser {
 
   bool _isSpaceOrTab(int c) => c == 0x20 || c == 0x09;
   bool _isDigit(int c) => c >= 0x30 && c <= 0x39;
-
-  bool _isInList(CmarkNode node) {
-    var current = node.parent;
-    while (current != null) {
-      if (current.type == CmarkNodeType.list) {
-        return true;
-      }
-      current = current.parent;
-    }
-    return false;
-  }
 
   void _processInlines(CmarkNode node, InlineParser inlineParser) {
     var childCount = node.children.length;
