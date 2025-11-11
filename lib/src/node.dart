@@ -50,6 +50,8 @@ class CmarkNodeType {
       CmarkNodeType._inline(0x000b, 'footnote_reference');
   static const CmarkNodeType strikethrough =
       CmarkNodeType._inline(0x000c, 'strikethrough');
+  static const CmarkNodeType math =
+      CmarkNodeType._inline(0x000d, 'math');
 
   // GFM table extensions
   static const CmarkNodeType table = CmarkNodeType._block(0x000c, 'table');
@@ -57,6 +59,8 @@ class CmarkNodeType {
       CmarkNodeType._block(0x000d, 'table_row');
   static const CmarkNodeType tableCell =
       CmarkNodeType._block(0x000e, 'table_cell');
+  static const CmarkNodeType mathBlock =
+      CmarkNodeType._block(0x000f, 'math_block');
 
   static const List<CmarkNodeType> values = <CmarkNodeType>[
     document,
@@ -82,9 +86,11 @@ class CmarkNodeType {
     image,
     footnoteReference,
     strikethrough,
+    math,
     table,
     tableRow,
     tableCell,
+    mathBlock,
   ];
 
   final int _encoded;
@@ -211,6 +217,28 @@ class CmarkCustomData {
   CmarkCustomData copy() => CmarkCustomData(onEnter: onEnter, onExit: onExit);
 }
 
+/// Data carried by math nodes.
+class CmarkMathData {
+  CmarkMathData({
+    this.literal = '',
+    this.display = false,
+    this.openingDelimiter = '',
+    this.closingDelimiter = '',
+  });
+
+  String literal;
+  bool display;
+  String openingDelimiter;
+  String closingDelimiter;
+
+  CmarkMathData copy() => CmarkMathData(
+        literal: literal,
+        display: display,
+        openingDelimiter: openingDelimiter,
+        closingDelimiter: closingDelimiter,
+      );
+}
+
 /// Alignment for table cells.
 enum CmarkTableAlign { none, left, center, right }
 
@@ -260,7 +288,10 @@ class CmarkNode {
         _tableRowData =
             type == CmarkNodeType.tableRow ? CmarkTableRowData() : null,
         _tableCellData =
-            type == CmarkNodeType.tableCell ? CmarkTableCellData() : null;
+            type == CmarkNodeType.tableCell ? CmarkTableCellData() : null,
+        _mathData = type == CmarkNodeType.math || type == CmarkNodeType.mathBlock
+            ? CmarkMathData(display: type == CmarkNodeType.mathBlock)
+            : null;
 
   CmarkNodeType type;
 
@@ -306,6 +337,7 @@ class CmarkNode {
   CmarkCustomData? _customData;
   CmarkTableRowData? _tableRowData;
   CmarkTableCellData? _tableCellData;
+  CmarkMathData? _mathData;
 
   /// Returns true if this node can contain [childType]. The rules mirror
   /// `cmark_node_can_contain_type` from the C implementation.
@@ -332,6 +364,7 @@ class CmarkNode {
       case CmarkNodeType.image:
       case CmarkNodeType.customInline:
       case CmarkNodeType.strikethrough:
+      case CmarkNodeType.math:
         return childType.isInline;
       case CmarkNodeType.table:
         return childType == CmarkNodeType.tableRow;
@@ -458,6 +491,11 @@ class CmarkNode {
     return _customData!;
   }
 
+  CmarkMathData get mathData {
+    _assertData(_mathData, 'math');
+    return _mathData!;
+  }
+
   CmarkTableRowData get tableRowData {
     _assertData(_tableRowData, 'table row');
     return _tableRowData!;
@@ -529,6 +567,9 @@ class CmarkNode {
     }
     if (_tableCellData != null) {
       copy._tableCellData = _tableCellData!.copy();
+    }
+    if (_mathData != null) {
+      copy._mathData = _mathData!.copy();
     }
 
     for (final child in children) {

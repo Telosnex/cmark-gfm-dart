@@ -6,15 +6,21 @@ import '../reference/reference_parser.dart';
 import '../inline/inline_parser.dart';
 import '../util/node_iterator.dart';
 import '../footnote/footnote_map.dart';
+import 'parser_options.dart';
 
 const int kCodeIndent = 4;
 const int kTabStop = 4;
 
 /// Real port of cmark-gfm's block parser with proper container stack.
 class BlockParser {
-  BlockParser({int? maxReferenceSize})
-      : referenceMap = CmarkReferenceMap(maxRefSize: maxReferenceSize),
+  BlockParser({required CmarkParserOptions parserOptions})
+      : options = parserOptions,
+        referenceMap =
+            CmarkReferenceMap(maxRefSize: parserOptions.maxReferenceSize),
         footnoteMap = CmarkFootnoteMap();
+
+  final CmarkParserOptions options;
+  CmarkMathOptions get mathOptions => options.mathOptions;
 
   final CmarkReferenceMap referenceMap;
   final CmarkFootnoteMap footnoteMap;
@@ -96,14 +102,14 @@ class BlockParser {
     final savedColumn = column;
     final savedBlank = blank;
     final savedPartiallyConsumedTab = partiallyConsumedTab;
-    
+
     // Build a path from root to current (so we can restore current pointer later)
     final pathToCurrent = <int>[];
     var node = current;
     while (node != root) {
       final parent = node.parent;
       if (parent == null) break;
-      
+
       // Find the index of this node among its siblings
       var index = 0;
       var sibling = parent.firstChild;
@@ -114,16 +120,16 @@ class BlockParser {
       pathToCurrent.insert(0, index);
       node = parent;
     }
-    
+
     // Process pending text into the real tree (so block structure is recognized)
     if (_pending.isNotEmpty) {
       _processLine(_pending);
       _pending = '';
     }
-    
+
     // Clone the now-updated tree
     final clonedRoot = root.deepCopy();
-    
+
     // Restore the original tree by swapping children back
     while (root.firstChild != null) {
       root.firstChild!.unlink();
@@ -135,7 +141,7 @@ class BlockParser {
       root.appendChild(child);
       child = next;
     }
-    
+
     // Restore current pointer by following the saved path
     current = root;
     for (final index in pathToCurrent) {
@@ -149,7 +155,7 @@ class BlockParser {
         break; // Path is invalid, stay at current level
       }
     }
-    
+
     // Restore all other parser state
     _pending = savedPending;
     lineNumber = savedLineNumber;
@@ -157,7 +163,7 @@ class BlockParser {
     column = savedColumn;
     blank = savedBlank;
     partiallyConsumedTab = savedPartiallyConsumedTab;
-    
+
     // Finalize and return the clone (original state fully restored)
     return _finishInternal(clonedRoot);
   }
@@ -172,12 +178,16 @@ class BlockParser {
         _pending = '';
       }
     }
-    
+
     // Finalize all nodes in the tree (both for finish and finishClone)
     _finalizeTreeRecursive(rootToFinalize);
 
     // Process inlines with V2 parser
-    final inlineParser = InlineParser(referenceMap, footnoteMap: footnoteMap);
+    final inlineParser = InlineParser(
+      referenceMap,
+      parserOptions: options,
+      footnoteMap: footnoteMap,
+    );
     _processInlines(rootToFinalize, inlineParser);
 
     // Link footnote references to definitions and set indices
@@ -235,6 +245,12 @@ class BlockParser {
           literal = literal.substring(0, literal.length - 1);
         }
         node.codeData.literal = literal;
+      }
+      node.content.clear();
+    } else if (node.type == CmarkNodeType.mathBlock) {
+      if (node.mathData.literal.isEmpty) {
+        final content = node.content.toString();
+        node.mathData.literal = _normalizeMathLiteral(content);
       }
       node.content.clear();
     }
@@ -358,7 +374,7 @@ class BlockParser {
 
     while (_isOpen(container.lastChild)) {
       container = container.lastChild!;
-      
+
       _findFirstNonspace();
 
       final matched = _checkContinuation(container);
@@ -399,6 +415,8 @@ class BlockParser {
           return false;
         }
         return true;
+      case CmarkNodeType.mathBlock:
+        return _parseMathBlockContinuation(container);
       case CmarkNodeType.footnoteDefinition:
         return _parseFootnoteDefinitionPrefix();
       default:
@@ -479,6 +497,37 @@ class BlockParser {
       return true;
     }
     return false;
+  }
+
+  bool _parseMathBlockContinuation(CmarkNode container) {
+    // Check if this line closes the math block
+    final closing = container.mathData.closingDelimiter;
+    final line = _currentLine;
+
+    if (closing == r'$$') {
+      // Look for closing $$
+      if (firstNonspace < line.length) {
+        final trimmed = line.substring(firstNonspace).trim();
+        if (trimmed == r'$$') {
+          // Found closing delimiter on its own line
+          _advanceOffset(_currentLine.length - offset, false);
+          return false;
+        }
+      }
+    } else if (closing == r'\]') {
+      // Look for closing \]
+      if (firstNonspace < line.length) {
+        final trimmed = line.substring(firstNonspace).trim();
+        if (trimmed == r'\]') {
+          // Found closing delimiter on its own line
+          _advanceOffset(_currentLine.length - offset, false);
+          return false;
+        }
+      }
+    }
+
+    // Continue the math block
+    return true;
   }
 
   int _scanCloseFence(int pos, int fenceChar) {
@@ -649,6 +698,40 @@ class BlockParser {
         }
       }
 
+      // Try math block
+      if (options.enableMath && !indented) {
+        final mathStart = _scanMathBlockStart(firstNonspace);
+        if (mathStart != null) {
+          final mathNode = _addChild(container, CmarkNodeType.mathBlock);
+          final data = mathNode.mathData;
+          data
+            ..display = true
+            ..openingDelimiter = mathStart.opening
+            ..closingDelimiter = mathStart.closing;
+
+          CmarkNode newContainer;
+          if (mathStart.closed) {
+            if (mathStart.content.isNotEmpty) {
+              mathNode.content.write(mathStart.content);
+              mathNode.content.write('\n');
+            }
+            newContainer = _finalizeMathBlockNode(mathNode);
+          } else {
+            if (mathStart.content.isNotEmpty) {
+              mathNode.content.write(mathStart.content);
+              mathNode.content.write('\n');
+            }
+            newContainer = mathNode;
+          }
+
+          _advanceOffset(_currentLine.length - offset, false);
+          _skipAddText = true;
+          current = newContainer;
+          container = newContainer;
+          break;
+        }
+      }
+
       // Try list marker
       if ((!indented || container.type == CmarkNodeType.list) && indent < 4) {
         // Check if interrupting a paragraph
@@ -780,7 +863,9 @@ class BlockParser {
         current.type == CmarkNodeType.paragraph) {
       _addLine(current);
     } else {
-      if (container.type == CmarkNodeType.table) {
+      if (container.type == CmarkNodeType.mathBlock) {
+        _addLine(container);
+      } else if (container.type == CmarkNodeType.table) {
         // Add a table row
         _addTableRow(container);
       } else if (container.type == CmarkNodeType.codeBlock ||
@@ -819,6 +904,27 @@ class BlockParser {
     }
     // Add newline separator (like cmark's add_line does)
     node.content.writeCharCode(0x0A);
+  }
+
+  CmarkNode _finalizeMathBlockNode(CmarkNode node) {
+    var literal = node.content.toString();
+    node.content.clear();
+    literal = _normalizeMathLiteral(literal);
+    node.mathData
+      ..display = true
+      ..literal = literal;
+    return _finalize(node);
+  }
+
+  String _normalizeMathLiteral(String literal) {
+    var result = literal;
+    while (result.startsWith('\n') || result.startsWith('\r')) {
+      result = result.substring(1);
+    }
+    while (result.endsWith('\n') || result.endsWith('\r')) {
+      result = result.substring(0, result.length - 1);
+    }
+    return result.trimRight();
   }
 
   bool _acceptsLines(CmarkNodeType type) {
@@ -1219,6 +1325,65 @@ class BlockParser {
     return i - pos;
   }
 
+  _MathBlockStart? _scanMathBlockStart(int pos) {
+    final line = _currentLine.substring(pos);
+    if (line.isEmpty) {
+      return null;
+    }
+
+    if (mathOptions.allowBlockDoubleDollar && line.startsWith('\$\$')) {
+      final after = line.substring(2);
+      final closingIndex = after.indexOf('\$\$');
+      if (closingIndex != -1) {
+        final trailing = after.substring(closingIndex + 2);
+        if (trailing.trim().isEmpty) {
+          final content = after.substring(0, closingIndex);
+          return _MathBlockStart(
+            opening: r'$$',
+            closing: r'$$',
+            content: content,
+            closed: true,
+          );
+        }
+        return null;
+      }
+
+      return _MathBlockStart(
+        opening: r'$$',
+        closing: r'$$',
+        content: after,
+        closed: false,
+      );
+    }
+
+    if (mathOptions.allowBracketDelimiters && line.startsWith(r'\[')) {
+      final after = line.substring(2);
+      final closingIndex = after.indexOf(r'\]');
+      if (closingIndex != -1) {
+        final trailing = after.substring(closingIndex + 2);
+        if (trailing.trim().isEmpty) {
+          final content = after.substring(0, closingIndex);
+          return _MathBlockStart(
+            opening: r'\[',
+            closing: r'\]',
+            content: content,
+            closed: true,
+          );
+        }
+        return null;
+      }
+
+      return _MathBlockStart(
+        opening: r'\[',
+        closing: r'\]',
+        content: after,
+        closed: false,
+      );
+    }
+
+    return null;
+  }
+
   int _scanSetextHeadingLine(int pos) {
     final c = _charAt(pos);
     if (c != 0x3D && c != 0x2D) return 0; // = or -
@@ -1505,6 +1670,20 @@ class _CheckOpenBlocksResult {
   _CheckOpenBlocksResult(this.container, this.allMatched);
   final CmarkNode? container;
   final bool allMatched;
+}
+
+class _MathBlockStart {
+  _MathBlockStart({
+    required this.opening,
+    required this.closing,
+    required this.content,
+    required this.closed,
+  });
+
+  final String opening;
+  final String closing;
+  final String content;
+  final bool closed;
 }
 
 class _ListMarkerResult {

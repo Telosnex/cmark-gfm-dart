@@ -10,6 +10,12 @@ String getStringForTree(CmarkNode root) {
       final info = node.codeData.info.replaceAll('\n', '\\n');
       final literal = node.codeData.literal.replaceAll('\n', '\\n');
       buffer.writeln('$indent${node.type.name}: "$content" info="$info" literal="$literal"');
+    } else if (node.type == CmarkNodeType.mathBlock) {
+      final literal = node.mathData.literal.replaceAll('\n', '\\n');
+      buffer.writeln('$indent${node.type.name}: "$content" literal="$literal"');
+    } else if (node.type == CmarkNodeType.math) {
+      final literal = node.mathData.literal.replaceAll('\n', '\\n');
+      buffer.writeln('$indent${node.type.name}: "$content" literal="$literal"');
     } else {
       buffer.writeln('$indent${node.type.name}: "$content"');
     }

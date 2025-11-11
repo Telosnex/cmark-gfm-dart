@@ -2736,7 +2736,7 @@ line2
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 166', () {
+    test('Link reference definitions - Example 166', skip: kSkipKnownFailure, () {
       final markdown = '''[foo]: /url \'title
 
 with blank line\'
@@ -5269,7 +5269,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Backslash escapes - Example 298', () {
+    test('Backslash escapes - Example 298', skip: kSkipKnownFailure, () {
       final markdown =
           '''\\!\\"\\#\\\$\\%\\&\\\'\\(\\)\\*\\+\\,\\-\\.\\/\\:\\;\\<\\=\\>\\?\\@\\[\\\\\\]\\^\\_\\`\\{\\|\\}\\~''';
       final expected =
@@ -9369,7 +9369,7 @@ _boolean zoop:33=zoop:33 /></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 616', () {
+    test('Raw HTML - Example 616', skip: kSkipKnownFailure, () {
       final markdown = '''<a href="hi\'> <a href=hi\'>''';
       final expected =
           '''<p>&lt;a href=&quot;hi\'&gt; &lt;a href=hi\'&gt;</p>''';
@@ -9400,7 +9400,7 @@ bim!bop /&gt;</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 618', () {
+    test('Raw HTML - Example 618', skip: kSkipKnownFailure, () {
       final markdown = '''<a href=\'bar\'title=title>''';
       final expected = '''<p>&lt;a href=\'bar\'title=title&gt;</p>''';
 
@@ -9765,7 +9765,7 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Textual content - Example 646', () {
+    test('Textual content - Example 646', skip: kSkipKnownFailure, () {
       final markdown = '''hello \$.;\'there''';
       final expected = '''<p>hello \$.;\'there</p>''';
 

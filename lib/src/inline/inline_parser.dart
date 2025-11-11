@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import '../node.dart';
 import '../reference/reference_map.dart';
 import '../footnote/footnote_map.dart';
+import '../parser/parser_options.dart';
 import '../util/strbuf.dart';
 import '../houdini/html_unescape.dart' as houdini;
 import 'subject.dart';
@@ -13,18 +14,28 @@ import 'link_parsing.dart';
 /// Real port of cmark-gfm's inline parser with delimiter stack.
 /// From inlines.c
 class InlineParser {
-  InlineParser(this.refmap, {CmarkFootnoteMap? footnoteMap})
-      : footnoteMap = footnoteMap ?? CmarkFootnoteMap() {
+  InlineParser(
+    this.refmap, {
+    CmarkFootnoteMap? footnoteMap,
+    CmarkParserOptions parserOptions = const CmarkParserOptions(),
+  })  : options = parserOptions,
+        mathOptions = parserOptions.mathOptions,
+        footnoteMap = footnoteMap ?? CmarkFootnoteMap() {
     // Initialize special chars table (only need to do once)
     if (!_initialized) {
       Subject.initSpecialChars();
       _initialized = true;
+    }
+    if (parserOptions.enableMath) {
+      Subject.enableMathDelimiters();
     }
   }
 
   static bool _initialized = false;
 
   final CmarkReferenceMap refmap;
+  final CmarkParserOptions options;
+  final CmarkMathOptions mathOptions;
   final CmarkFootnoteMap footnoteMap;
 
   void parseInlines(CmarkNode block) {
@@ -99,64 +110,70 @@ class InlineParser {
 
     CmarkNode? newInl;
 
-    switch (c) {
-      case 0x0D: // \r
-      case 0x0A: // \n
-        newInl = _handleNewline(subj);
-        break;
-      case 0x60: // `
-        newInl = _handleBackticks(subj);
-        break;
-      case 0x5C: // \
-        newInl = _handleBackslash(subj);
-        break;
-      case 0x26: // &
-        newInl = _handleEntity(subj);
-        break;
-      case 0x3C: // <
-        newInl = _handlePointyBrace(subj);
-        break;
-      case 0x2A: // *
-      case 0x5F: // _
-        newInl = _handleDelim(subj, c);
-        break;
-      case 0x7E: // ~
-        newInl = _handleDelim(subj, c);
-        break;
-      case 0x5B: // [
-        subj.advance();
-        newInl = _makeStr(subj, subj.pos - 1, subj.pos - 1, '[');
-        _pushBracket(subj, false, newInl);
-        break;
-      case 0x5D: // ]
-        newInl = _handleCloseBracket(subj, parent);
-        break;
-      case 0x21: // !
-        subj.advance();
-        if (subj.peekChar() == 0x5B && subj.peekCharN(1) != 0x5E) {
+    if (options.enableMath && (c == 0x24 || c == 0x5C)) {
+      newInl = _tryParseMath(subj, c);
+    }
+
+    if (newInl == null) {
+      switch (c) {
+        case 0x0D: // \r
+        case 0x0A: // \n
+          newInl = _handleNewline(subj);
+          break;
+        case 0x60: // `
+          newInl = _handleBackticks(subj);
+          break;
+        case 0x5C: // \
+          newInl = _handleBackslash(subj);
+          break;
+        case 0x26: // &
+          newInl = _handleEntity(subj);
+          break;
+        case 0x3C: // <
+          newInl = _handlePointyBrace(subj);
+          break;
+        case 0x2A: // *
+        case 0x5F: // _
+          newInl = _handleDelim(subj, c);
+          break;
+        case 0x7E: // ~
+          newInl = _handleDelim(subj, c);
+          break;
+        case 0x5B: // [
           subj.advance();
-          newInl = _makeStr(subj, subj.pos - 2, subj.pos - 1, '![');
-          _pushBracket(subj, true, newInl);
-        } else {
-          newInl = _makeStr(subj, subj.pos - 1, subj.pos - 1, '!');
-        }
-        break;
-      default:
-        // Try extension matchers (would go here if we had extensions)
-        // For now, collect text until next special char
-        final startpos = subj.pos;
-        final endpos = subj.findSpecialChar();
-        var text = utf8.decode(subj.input.sublist(startpos, endpos));
-        subj.pos = endpos;
+          newInl = _makeStr(subj, subj.pos - 1, subj.pos - 1, '[');
+          _pushBracket(subj, false, newInl);
+          break;
+        case 0x5D: // ]
+          newInl = _handleCloseBracket(subj, parent);
+          break;
+        case 0x21: // !
+          subj.advance();
+          if (subj.peekChar() == 0x5B && subj.peekCharN(1) != 0x5E) {
+            subj.advance();
+            newInl = _makeStr(subj, subj.pos - 2, subj.pos - 1, '![');
+            _pushBracket(subj, true, newInl);
+          } else {
+            newInl = _makeStr(subj, subj.pos - 1, subj.pos - 1, '!');
+          }
+          break;
+        default:
+          // Try extension matchers (would go here if we had extensions)
+          // For now, collect text until next special char
+          final startpos = subj.pos;
+          final endpos = subj.findSpecialChar();
+          var text = utf8.decode(subj.input.sublist(startpos, endpos));
+          subj.pos = endpos;
 
-        // if we're at a newline, strip trailing spaces (like C version)
-        final nextChar = subj.peekChar();
-        if (nextChar == 0x0A || nextChar == 0x0D) {
-          text = text.trimRight();
-        }
+          // if we're at a newline, strip trailing spaces (like C version)
+          final nextChar = subj.peekChar();
+          if (nextChar == 0x0A || nextChar == 0x0D) {
+            text = text.trimRight();
+          }
 
-        newInl = _makeStr(subj, startpos, endpos - 1, text);
-        break;
+          newInl = _makeStr(subj, startpos, endpos - 1, text);
+          break;
+      }
     }
 
     if (newInl != null) {
@@ -164,6 +181,210 @@ class InlineParser {
     }
 
     return true;
+  }
+
+  CmarkNode? _tryParseMath(Subject subj, int leadingChar) {
+    if (leadingChar == 0x5C) {
+      final next = subj.peekCharN(1);
+      if (next == 0x28 || next == 0x5B) {
+        return _parseBracketMath(subj, display: next == 0x5B);
+      }
+      return null;
+    }
+
+    if (leadingChar == 0x24) {
+      if (mathOptions.allowBlockDoubleDollar && subj.peekCharN(1) == 0x24) {
+        return _parseDoubleDollarMath(subj);
+      }
+      if (mathOptions.allowInlineDollar) {
+        return _parseSingleDollarMath(subj);
+      }
+    }
+
+    return null;
+  }
+
+  CmarkNode? _parseBracketMath(Subject subj, {required bool display}) {
+    final start = subj.pos;
+    subj.advance(); // Consume '\'
+    subj.advance(); // Consume '(' or '['
+
+    final closingChar = display ? 0x5D : 0x29;
+    final literal = _scanToEscapedDelimiter(subj, closingChar);
+    if (literal == null) {
+      subj.pos = start;
+      return null;
+    }
+
+    final normalized = _normalizeInlineMathLiteral(literal);
+    if (normalized.isEmpty) {
+      subj.pos = start;
+      return null;
+    }
+
+    final end = subj.pos;
+    return _buildInlineMathNode(
+      subj: subj,
+      start: start,
+      end: end,
+      literal: normalized,
+      display: display,
+      opening: display ? r'\[' : r'\(',
+      closing: display ? r'\]' : r'\)',
+    );
+  }
+
+  CmarkNode? _parseDoubleDollarMath(Subject subj) {
+    final start = subj.pos;
+    subj.advance();
+    subj.advance();
+
+    final contentStart = subj.pos;
+    while (!subj.isEof()) {
+      final ch = subj.peekChar();
+      if (ch == 0x0A || ch == 0x0D) {
+        subj.pos = start;
+        return null;
+      }
+      if (ch == 0x24 && subj.peekCharN(1) == 0x24) {
+        final bytes = subj.input.sublist(contentStart, subj.pos);
+        final literal = utf8.decode(bytes, allowMalformed: true);
+        final normalized = _normalizeInlineMathLiteral(literal);
+        if (normalized.isEmpty) {
+          subj.pos = start;
+          return null;
+        }
+        subj.advance();
+        subj.advance();
+        return _buildInlineMathNode(
+          subj: subj,
+          start: start,
+          end: subj.pos,
+          literal: normalized,
+          display: true,
+          opening: r'$$',
+          closing: r'$$',
+        );
+      }
+      subj.advance();
+    }
+
+    subj.pos = start;
+    return null;
+  }
+
+  CmarkNode? _parseSingleDollarMath(Subject subj) {
+    final start = subj.pos;
+    subj.advance();
+    final contentStart = subj.pos;
+
+    while (!subj.isEof()) {
+      final ch = subj.peekChar();
+      if (ch == 0x0A || ch == 0x0D) {
+        subj.pos = start;
+        return null;
+      }
+      if (ch == 0x24) {
+        if (subj.pos == contentStart) {
+          subj.pos = start;
+          return null;
+        }
+
+        final firstByte = subj.input[contentStart];
+        final prevByte = subj.input[subj.pos - 1];
+        if (_isSpace(firstByte) || _isSpace(prevByte)) {
+          subj.pos = start;
+          return null;
+        }
+
+        final bytes = subj.input.sublist(contentStart, subj.pos);
+        final literal = utf8.decode(bytes, allowMalformed: true);
+        final normalized = _normalizeInlineMathLiteral(literal);
+        if (normalized.isEmpty || !_looksLikeMath(normalized)) {
+          subj.pos = start;
+          return null;
+        }
+
+        subj.advance();
+        return _buildInlineMathNode(
+          subj: subj,
+          start: start,
+          end: subj.pos,
+          literal: normalized,
+          display: false,
+          opening: r'$',
+          closing: r'$',
+        );
+      }
+      subj.advance();
+    }
+
+    subj.pos = start;
+    return null;
+  }
+
+  String? _scanToEscapedDelimiter(Subject subj, int closingChar) {
+    final start = subj.pos;
+    while (!subj.isEof()) {
+      final current = subj.peekChar();
+      if (current == 0x5C && subj.peekCharN(1) == closingChar) {
+        final bytes = subj.input.sublist(start, subj.pos);
+        final literal = utf8.decode(bytes, allowMalformed: true);
+        subj.advance();
+        subj.advance();
+        return literal;
+      }
+      if (current == 0x0A || current == 0x0D) {
+        subj.pos = start;
+        return null;
+      }
+      subj.advance();
+    }
+    subj.pos = start;
+    return null;
+  }
+
+  CmarkNode _buildInlineMathNode({
+    required Subject subj,
+    required int start,
+    required int end,
+    required String literal,
+    required bool display,
+    required String opening,
+    required String closing,
+  }) {
+    final raw = utf8.decode(
+      subj.input.sublist(start, end),
+      allowMalformed: true,
+    );
+    final node = CmarkNode(CmarkNodeType.math)
+      ..content.write(raw)
+      ..startLine = subj.line
+      ..endLine = subj.line
+      ..startColumn = start + 1 + subj.columnOffset + subj.blockOffset
+      ..endColumn = end + subj.columnOffset + subj.blockOffset;
+
+    node.mathData
+      ..literal = literal
+      ..display = display
+      ..openingDelimiter = opening
+      ..closingDelimiter = closing;
+    return node;
+  }
+
+  String _normalizeInlineMathLiteral(String literal) => literal.trim();
+
+  bool _looksLikeMath(String literal) {
+    if (literal.isEmpty) {
+      return false;
+    }
+    if (RegExp(r'[A-Za-z]').hasMatch(literal)) {
+      return true;
+    }
+    if (RegExp(r'[\\^_=+\-*/<>]').hasMatch(literal)) {
+      return true;
+    }
+    return false;
   }
 
   CmarkNode _makeStr(Subject subj, int startCol, int endCol, String text) {

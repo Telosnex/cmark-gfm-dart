@@ -61,6 +61,16 @@ class Subject {
       }
     }
   }
+
+  static bool _mathCharsEnabled = false;
+
+  static void enableMathDelimiters() {
+    if (_mathCharsEnabled) {
+      return;
+    }
+    addSpecialChar(0x24); // $
+    _mathCharsEnabled = true;
+  }
   
   int peekChar() {
     if (pos >= input.length) {

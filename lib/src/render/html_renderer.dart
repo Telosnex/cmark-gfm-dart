@@ -336,6 +336,26 @@ class HtmlRenderer {
           _output.write('" />');
         }
         break;
+      case CmarkNodeType.math:
+        if (entering) {
+          final literal = node.mathData.literal;
+          final escapedLiteral = _escapeHtml(literal);
+          final classes = node.mathData.display
+              ? 'math math-inline math-display'
+              : 'math math-inline';
+          _output.write(
+              '<span class="$classes" data-latex="$escapedLiteral">$escapedLiteral</span>');
+        }
+        break;
+      case CmarkNodeType.mathBlock:
+        if (entering) {
+          _renderCr();
+          final literal = node.mathData.literal;
+          final escapedLiteral = _escapeHtml(literal);
+          _output.write(
+              '<div class="math math-display" data-latex="$escapedLiteral">$escapedLiteral</div>\n');
+        }
+        break;
       default:
         // Unknown node types - do nothing
         break;
@@ -357,6 +377,7 @@ class HtmlRenderer {
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
   }
 }
