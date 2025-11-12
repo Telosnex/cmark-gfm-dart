@@ -156,7 +156,12 @@ class BlockParser {
       }
     }
 
-    // Restore all other parser state
+    // IMPORTANT: Finalize clone BEFORE restoring parser state!
+    // Otherwise _finalizeTreeRecursive will use wrong lineNumber for end
+    // positions
+    final finalizedClone = _finishInternal(clonedRoot);
+    
+    // NOW restore all other parser state
     _pending = savedPending;
     lineNumber = savedLineNumber;
     offset = savedOffset;
@@ -164,8 +169,7 @@ class BlockParser {
     blank = savedBlank;
     partiallyConsumedTab = savedPartiallyConsumedTab;
 
-    // Finalize and return the clone (original state fully restored)
-    return _finishInternal(clonedRoot);
+    return finalizedClone;
   }
 
   CmarkNode _finishInternal(CmarkNode rootToFinalize) {
