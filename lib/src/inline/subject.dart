@@ -45,6 +45,7 @@ class Subject {
       _maxBacktickLen = 0;
     }
   }
+
   void recordBacktickRun(int len, int position) {
     if (len <= maxBackticks) {
       backticks[len] = position;
@@ -53,7 +54,6 @@ class Subject {
       }
     }
   }
-
 
   void initialize({
     required Uint8List input,

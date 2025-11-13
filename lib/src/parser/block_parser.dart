@@ -1393,57 +1393,85 @@ class BlockParser {
   }
 
   _MathBlockStart? _scanMathBlockStart(int pos) {
-    final line = _currentLine.substring(pos);
-    if (line.isEmpty) {
+    final line = _currentLine;
+    final length = line.length;
+    if (pos >= length) {
       return null;
     }
 
-    if (mathOptions.allowBlockDoubleDollar && line.startsWith('\$\$')) {
-      final after = line.substring(2);
-      final closingIndex = after.indexOf('\$\$');
-      if (closingIndex != -1) {
-        final trailing = after.substring(closingIndex + 2);
-        if (trailing.trim().isEmpty) {
-          final content = after.substring(0, closingIndex);
-          return _MathBlockStart(
-            opening: r'$$',
-            closing: r'$$',
-            content: content,
-            closed: true,
-          );
+    bool isWhitespaceRange(int start, int end) {
+      for (var i = start; i < end; i++) {
+        final code = line.codeUnitAt(i);
+        if (code != 0x20 && code != 0x09) {
+          return false;
         }
-        return null;
+      }
+      return true;
+    }
+
+    String slice(int start, int end) =>
+        start >= end ? '' : line.substring(start, end);
+
+    if (mathOptions.allowBlockDoubleDollar &&
+        pos + 1 < length &&
+        line.codeUnitAt(pos) == 0x24 &&
+        line.codeUnitAt(pos + 1) == 0x24) {
+      final contentStart = pos + 2;
+      var i = contentStart;
+      while (i + 1 < length) {
+        if (line.codeUnitAt(i) == 0x24 && line.codeUnitAt(i + 1) == 0x24) {
+          final trailingStart = i + 2;
+          if (trailingStart >= length || isWhitespaceRange(trailingStart, length)) {
+            final content = slice(contentStart, i);
+            return _MathBlockStart(
+              opening: r'$$',
+              closing: r'$$',
+              content: content,
+              closed: true,
+            );
+          }
+          return null;
+        }
+        i++;
       }
 
+      final content = slice(contentStart, length);
       return _MathBlockStart(
         opening: r'$$',
         closing: r'$$',
-        content: after,
+        content: content,
         closed: false,
       );
     }
 
-    if (mathOptions.allowBracketDelimiters && line.startsWith(r'\[')) {
-      final after = line.substring(2);
-      final closingIndex = after.indexOf(r'\]');
-      if (closingIndex != -1) {
-        final trailing = after.substring(closingIndex + 2);
-        if (trailing.trim().isEmpty) {
-          final content = after.substring(0, closingIndex);
-          return _MathBlockStart(
-            opening: r'\[',
-            closing: r'\]',
-            content: content,
-            closed: true,
-          );
+    if (mathOptions.allowBracketDelimiters &&
+        pos + 1 < length &&
+        line.codeUnitAt(pos) == 0x5C &&
+        line.codeUnitAt(pos + 1) == 0x5B) {
+      final contentStart = pos + 2;
+      var i = contentStart;
+      while (i + 1 < length) {
+        if (line.codeUnitAt(i) == 0x5C && line.codeUnitAt(i + 1) == 0x5D) {
+          final trailingStart = i + 2;
+          if (trailingStart >= length || isWhitespaceRange(trailingStart, length)) {
+            final content = slice(contentStart, i);
+            return _MathBlockStart(
+              opening: r'\[',
+              closing: r'\]',
+              content: content,
+              closed: true,
+            );
+          }
+          return null;
         }
-        return null;
+        i++;
       }
 
+      final content = slice(contentStart, length);
       return _MathBlockStart(
         opening: r'\[',
         closing: r'\]',
-        content: after,
+        content: content,
         closed: false,
       );
     }
