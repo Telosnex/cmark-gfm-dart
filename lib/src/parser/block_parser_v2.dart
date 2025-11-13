@@ -1183,27 +1183,33 @@ class BlockParserV2 {
       content = content.substring(0, content.length - 1);
     }
 
-    final bytes = Uint8List.fromList(utf8.encode(content));
-    var pos = 0;
+    if (content.isEmpty || content.codeUnitAt(0) != 0x5B) {
+      para.content
+        ..clear()
+        ..write(content);
+      return content.trim().isNotEmpty;
+    }
 
-    // Keep parsing while we have '[' at current position
+    final bytes = utf8.encoder.convert(content);
+
+    var pos = 0;
     while (pos < bytes.length && bytes[pos] == 0x5B) {
       final consumed = parseReferenceInline(
         Uint8List.sublistView(bytes, pos),
         referenceMap,
       );
-
       if (consumed == 0) {
-        break; // No more references
+        break;
       }
-
       pos += consumed;
     }
 
-    // Update paragraph content with remaining (after stripping refs)
-    final remaining = bytes.sublist(pos);
     para.content.clear();
-    para.content.write(utf8.decode(remaining, allowMalformed: true));
+    if (pos < bytes.length) {
+      final remaining = utf8.decoder.convert(bytes, pos, bytes.length);
+      para.content.write(remaining);
+    }
+
 
     // Return true if content remains
     final remainingContent = para.content.toString().trim();
