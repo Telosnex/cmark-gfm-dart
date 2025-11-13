@@ -193,12 +193,11 @@ class InlineParser {
     }
 
     if (leadingChar == 0x24) {
+      // Only parse inline double-dollar math, NOT single-dollar
       if (mathOptions.allowBlockDoubleDollar && subj.peekCharN(1) == 0x24) {
         return _parseDoubleDollarMath(subj);
       }
-      if (mathOptions.allowInlineDollar) {
-        return _parseSingleDollarMath(subj);
-      }
+      // Single-dollar math removed - too ambiguous with regular text
     }
 
     return null;
@@ -273,56 +272,6 @@ class InlineParser {
     return null;
   }
 
-  CmarkNode? _parseSingleDollarMath(Subject subj) {
-    final start = subj.pos;
-    subj.advance();
-    final contentStart = subj.pos;
-
-    while (!subj.isEof()) {
-      final ch = subj.peekChar();
-      if (ch == 0x0A || ch == 0x0D) {
-        subj.pos = start;
-        return null;
-      }
-      if (ch == 0x24) {
-        if (subj.pos == contentStart) {
-          subj.pos = start;
-          return null;
-        }
-
-        final firstByte = subj.input[contentStart];
-        final prevByte = subj.input[subj.pos - 1];
-        if (_isSpace(firstByte) || _isSpace(prevByte)) {
-          subj.pos = start;
-          return null;
-        }
-
-        final bytes = subj.input.sublist(contentStart, subj.pos);
-        final literal = utf8.decode(bytes, allowMalformed: true);
-        final normalized = _normalizeInlineMathLiteral(literal);
-        if (normalized.isEmpty || !_looksLikeMath(normalized)) {
-          subj.pos = start;
-          return null;
-        }
-
-        subj.advance();
-        return _buildInlineMathNode(
-          subj: subj,
-          start: start,
-          end: subj.pos,
-          literal: normalized,
-          display: false,
-          opening: r'$',
-          closing: r'$',
-        );
-      }
-      subj.advance();
-    }
-
-    subj.pos = start;
-    return null;
-  }
-
   String? _scanToEscapedDelimiter(Subject subj, int closingChar) {
     final start = subj.pos;
     while (!subj.isEof()) {
@@ -373,19 +322,6 @@ class InlineParser {
   }
 
   String _normalizeInlineMathLiteral(String literal) => literal.trim();
-
-  bool _looksLikeMath(String literal) {
-    if (literal.isEmpty) {
-      return false;
-    }
-    if (RegExp(r'[A-Za-z]').hasMatch(literal)) {
-      return true;
-    }
-    if (RegExp(r'[\\^_=+\-*/<>]').hasMatch(literal)) {
-      return true;
-    }
-    return false;
-  }
 
   CmarkNode _makeStr(Subject subj, int startCol, int endCol, String text) {
     final node = CmarkNode(CmarkNodeType.text)
