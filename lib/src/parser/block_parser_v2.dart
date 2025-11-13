@@ -1591,14 +1591,99 @@ class BlockParserV2 {
   }
 
   bool _scanTableStart(int pos) {
-    // Table delimiter must have at least one pipe and dashes/colons
-    final line = _currentLine.substring(pos);
-    if (!line.contains('|')) {
+    final length = _currentLine.length;
+    var index = pos;
+    var sawPipe = false;
+    var sawDash = false;
+    var hasCell = false;
+
+    if (index >= length) {
       return false;
     }
 
-    final pattern = RegExp(r'^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|?\s*$');
-    return pattern.hasMatch(line);
+    // Optional leading pipe
+    if (_charAt(index) == 0x7C) {
+      sawPipe = true;
+      index++;
+    }
+
+    while (true) {
+      // Skip leading spaces in cell
+      while (index < length && _charAt(index) == 0x20) {
+        index++;
+      }
+
+      if (index >= length) {
+        break;
+      }
+
+      // Optional leading colon for alignment
+      if (_charAt(index) == 0x3A) {
+        index++;
+        while (index < length && _charAt(index) == 0x20) {
+          index++;
+        }
+      }
+
+      final dashStart = index;
+      while (index < length && _charAt(index) == 0x2D) {
+        sawDash = true;
+        index++;
+      }
+
+      if (index == dashStart) {
+        return false; // cell must contain at least one '-'
+      }
+
+      // Skip spaces after dashes
+      while (index < length && _charAt(index) == 0x20) {
+        index++;
+      }
+
+      // Optional trailing colon
+      if (index < length && _charAt(index) == 0x3A) {
+        index++;
+        while (index < length && _charAt(index) == 0x20) {
+          index++;
+        }
+      }
+
+      hasCell = true;
+
+      if (index >= length) {
+        break;
+      }
+
+      if (_charAt(index) == 0x7C) {
+        sawPipe = true;
+        index++;
+        continue;
+      }
+
+      // Allow trailing spaces after last cell
+      while (index < length && _charAt(index) == 0x20) {
+        index++;
+      }
+
+      if (index >= length) {
+        break;
+      }
+
+      if (_charAt(index) == 0x7C) {
+        sawPipe = true;
+        index++;
+        continue;
+      }
+
+      return false; // unexpected character
+    }
+
+    // Trailing spaces allowed
+    while (index < length && _charAt(index) == 0x20) {
+      index++;
+    }
+
+    return hasCell && sawPipe && sawDash && index >= length;
   }
 
   List<CmarkTableAlign> _parseTableDelimiterRow(String line) {
