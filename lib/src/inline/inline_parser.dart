@@ -21,6 +21,7 @@ class InlineParser {
   })  : options = parserOptions,
         mathOptions = parserOptions.mathOptions,
         footnoteMap = footnoteMap ?? CmarkFootnoteMap() {
+    _subject = Subject(refmap: refmap, footnoteMap: this.footnoteMap);
     // Initialize special chars table (only need to do once)
     if (!_initialized) {
       Subject.initSpecialChars();
@@ -37,6 +38,12 @@ class InlineParser {
   final CmarkParserOptions options;
   final CmarkMathOptions mathOptions;
   final CmarkFootnoteMap footnoteMap;
+
+  late final Subject _subject;
+
+  void reset() {
+    _subject.reset();
+  }
 
   void parseInlines(CmarkNode block) {
     if (block.type.isInline) {
@@ -55,14 +62,6 @@ class InlineParser {
       return;
     }
 
-    final subj = Subject(
-      input: Uint8List.fromList(content),
-      refmap: refmap,
-      footnoteMap: footnoteMap,
-      line: block.startLine,
-      blockOffset: block.startColumn - 1,
-    );
-
     // Trim trailing whitespace
     var trimmedLen = content.length;
     while (trimmedLen > 0 &&
@@ -75,7 +74,12 @@ class InlineParser {
 
     final trimmedInput = Uint8List(trimmedLen);
     trimmedInput.setAll(0, content.sublist(0, trimmedLen));
-    subj.input = trimmedInput;
+    final subj = _subject;
+    subj.initialize(
+      input: trimmedInput,
+      line: block.startLine,
+      blockOffset: block.startColumn - 1,
+    );
 
     var iterations = 0;
     while (!subj.isEof()) {

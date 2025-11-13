@@ -28,6 +28,7 @@ class BlockParser {
   final CmarkNode root = CmarkNode(CmarkNodeType.document);
   late CmarkNode current;
   bool _initialized = false;
+  InlineParser? _inlineParser;
 
   // Parser state per line
   int offset = 0;
@@ -235,12 +236,13 @@ class BlockParser {
     _finalizeTreeRecursive(rootToFinalize);
 
     // Process inlines with V2 parser
-    final inlineParser = InlineParser(
+    _inlineParser ??= InlineParser(
       referenceMap,
       parserOptions: options,
       footnoteMap: footnoteMap,
     );
-    _processInlines(rootToFinalize, inlineParser);
+    _inlineParser!.reset();
+    _processInlines(rootToFinalize, _inlineParser!);
 
     // Link footnote references to definitions and set indices
     _linkFootnotes(rootToFinalize);
