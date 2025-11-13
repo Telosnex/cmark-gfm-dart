@@ -1559,22 +1559,30 @@ class BlockParserV2 {
   bool _isDigit(int c) => c >= 0x30 && c <= 0x39;
 
   void _processInlines(CmarkNode node, InlineParser inlineParser) {
-    var childCount = node.children.length;
-    if (childCount > 1000000) {
-      throw StateError(
-          'SAFETY: Node ${node.type.name} has $childCount children');
+    var count = 0;
+    var child = node.firstChild;
+    while (child != null) {
+      count++;
+      if (count > 1000000) {
+        throw StateError(
+            'SAFETY: Node ${node.type.name} has $count children');
+      }
+      child = child.next;
     }
 
     inlineParser.parseInlines(node);
 
-    var processed = 0;
-    for (final child in node.children) {
-      processed++;
-      if (processed > 1000000) {
+    child = node.firstChild;
+    count = 0;
+    while (child != null) {
+      count++;
+      if (count > 1000000) {
         throw StateError(
-            'SAFETY: Processed $processed children of ${node.type.name}');
+            'SAFETY: Processed $count children of ${node.type.name}');
       }
+      final next = child.next;
       _processInlines(child, inlineParser);
+      child = next;
     }
   }
 
