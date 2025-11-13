@@ -71,7 +71,7 @@ Future<void> runBlockParserPerfTest() async {
   );
 
   await tester.run(
-    warmupRuns: 10,
-    benchmarkRuns: 50,
+    warmupRuns: 30,
+    benchmarkRuns: 250,
   );
 }
