@@ -4,7 +4,52 @@ import 'package:test/test.dart';
 import '../helpers.dart';
 
 void main() {
-  test('nested list - positions should include all items', () {
+  test('nested list - incremental streaming', () {
+    // Simulate how Telosnex actually uses the parser:
+    // - Feed text incrementally as AI generates it
+    // - Call finishClone() after each chunk
+    
+    final parser = CmarkParser();
+    
+    print('=== INCREMENTAL STREAMING TEST ===');
+    
+    // Feed line by line like streaming AI
+    print('Step 1: Feed "- A\n"');
+    parser.feed('- A\n');
+    var doc = parser.finishClone();
+    print('After step 1: ${doc.firstChild?.endLine}:${doc.firstChild?.endColumn}');
+    
+    print('Step 2: Feed "  - B\n"');
+    parser.feed('  - B\n');
+    doc = parser.finishClone();
+    print('After step 2: ${doc.firstChild?.endLine}:${doc.firstChild?.endColumn}');
+    
+    print('Step 3: Feed "  - C"');
+    parser.feed('  - C');
+    doc = parser.finishClone();
+    
+    print('\nFinal tree:');
+    print(getStringForTree(doc));
+    
+    final root = doc.firstChild!;
+    print('\nRoot list: line ${root.startLine}:${root.startColumn} to ${root.endLine}:${root.endColumn}');
+    
+    // Find item C
+    final firstItem = root.children.first;
+    final nestedList = firstItem.children.firstWhere((c) => c.type == CmarkNodeType.list);
+    final itemC = nestedList.children.toList()[1];
+    
+    print('Item C: line ${itemC.startLine}:${itemC.startColumn} to ${itemC.endLine}:${itemC.endColumn}');
+    
+    if (itemC.endLine < itemC.startLine) {
+      print('\n❌ BUG: Item C ends BEFORE it starts! (${itemC.startLine} → ${itemC.endLine})');
+      fail('Incremental finishClone() corrupts positions');
+    } else {
+      print('\n✅ PASS: Incremental streaming works!');
+    }
+  });
+  
+  test('nested list - one-shot parsing (baseline)', () {
     const markdown = '- A\n  - B\n  - C';
     
     // The issue: parent list reports wrong end position
