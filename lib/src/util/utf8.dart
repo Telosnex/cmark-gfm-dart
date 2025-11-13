@@ -38,7 +38,7 @@ class CmarkUtf8 {
       }
 
       if (i > org) {
-        dest.putBytes(line.sublist(org, i));
+        dest.putBytesRange(line, org, i);
       }
 
       if (i >= size) {

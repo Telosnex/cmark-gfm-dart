@@ -27,6 +27,12 @@ class CmarkStrbuf {
       ..addAll(bytes.map((value) => value & 0xFF));
   }
 
+  void putBytesRange(List<int> bytes, int start, int end) {
+    for (var i = start; i < end; i++) {
+      _data.add(bytes[i] & 0xFF);
+    }
+  }
+
   void setString(String string) {
     setBytes(utf8.encode(string));
   }
