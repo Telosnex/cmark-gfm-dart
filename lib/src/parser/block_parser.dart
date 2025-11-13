@@ -41,10 +41,24 @@ class BlockParser {
   int lastLineLength = 0;
 
   String _pending = '';
+  int _pendingStart = 0;
   String _currentLine = '';
 
   List<CmarkTableAlign>? _currentTableAlignments;
   bool _skipAddText = false;
+
+  bool get _hasPending => _pendingStart < _pending.length;
+
+  String _pendingRemaining() {
+    if (!_hasPending) return '';
+    if (_pendingStart == 0) return _pending;
+    return _pending.substring(_pendingStart);
+  }
+
+  void _clearPending() {
+    _pending = '';
+    _pendingStart = 0;
+  }
 
   void feed(String text) {
     _initialize();
@@ -53,7 +67,20 @@ class BlockParser {
       return;
     }
 
-    _pending += text;
+    if (!_hasPending) {
+      _pending = text;
+      _pendingStart = 0;
+    } else {
+      if (_pendingStart > 0) {
+        if (_pendingStart >= _pending.length) {
+          _clearPending();
+        } else {
+          _pending = _pending.substring(_pendingStart);
+          _pendingStart = 0;
+        }
+      }
+      _pending += text;
+    }
 
     // Process complete lines
     var iterations = 0;
@@ -64,20 +91,33 @@ class BlockParser {
             'SAFETY: feed() loop iterations=$iterations pending=${_pending.length}');
       }
 
-      final newlineIndex = _findNewline(_pending);
+      final newlineIndex = _findNewlineFrom(_pendingStart);
       if (newlineIndex == -1) {
         break;
       }
 
-      final line = _pending.substring(0, newlineIndex);
-      final newlineLen = _pending[newlineIndex] == '\r' &&
-              newlineIndex + 1 < _pending.length &&
-              _pending[newlineIndex + 1] == '\n'
-          ? 2
-          : 1;
-      _pending = _pending.substring(newlineIndex + newlineLen);
+      final line = _pending.substring(_pendingStart, newlineIndex);
+      final newlineChar = _pending.codeUnitAt(newlineIndex);
+      var newlineLen = 1;
+      if (newlineChar == 0x0D) {
+        final nextIndex = newlineIndex + 1;
+        if (nextIndex < _pending.length &&
+            _pending.codeUnitAt(nextIndex) == 0x0A) {
+          newlineLen = 2;
+        }
+      }
+      _pendingStart = newlineIndex + newlineLen;
 
       _processLine(line);
+    }
+
+    if (_pendingStart > 0) {
+      if (_pendingStart >= _pending.length) {
+        _clearPending();
+      } else if (_pendingStart > 4096) {
+        _pending = _pending.substring(_pendingStart);
+        _pendingStart = 0;
+      }
     }
   }
 
@@ -97,6 +137,7 @@ class BlockParser {
     // Save complete parser state
     final savedTreeClone = root.deepCopy();
     final savedPending = _pending;
+    final savedPendingStart = _pendingStart;
     final savedLineNumber = lineNumber;
     final savedOffset = offset;
     final savedColumn = column;
@@ -122,9 +163,12 @@ class BlockParser {
     }
 
     // Process pending text into the real tree (so block structure is recognized)
-    if (_pending.isNotEmpty) {
-      _processLine(_pending);
-      _pending = '';
+    if (_hasPending) {
+      final remaining = _pendingRemaining();
+      if (remaining.isNotEmpty) {
+        _processLine(remaining);
+      }
+      _clearPending();
     }
 
     // Clone the now-updated tree
@@ -160,9 +204,10 @@ class BlockParser {
     // Otherwise _finalizeTreeRecursive will use wrong lineNumber for end
     // positions
     final finalizedClone = _finishInternal(clonedRoot);
-    
+
     // NOW restore all other parser state
     _pending = savedPending;
+    _pendingStart = savedPendingStart;
     lineNumber = savedLineNumber;
     offset = savedOffset;
     column = savedColumn;
@@ -177,9 +222,12 @@ class BlockParser {
 
     if (!isClone) {
       // For real finish, process pending and close all containers
-      if (_pending.isNotEmpty) {
-        _processLine(_pending);
-        _pending = '';
+      if (_hasPending) {
+        final remaining = _pendingRemaining();
+        if (remaining.isNotEmpty) {
+          _processLine(remaining);
+        }
+        _clearPending();
       }
     }
 
@@ -322,9 +370,9 @@ class BlockParser {
     _initialized = true;
   }
 
-  int _findNewline(String text) {
-    for (var i = 0; i < text.length; i++) {
-      final ch = text.codeUnitAt(i);
+  int _findNewlineFrom(int start) {
+    for (var i = start; i < _pending.length; i++) {
+      final ch = _pending.codeUnitAt(i);
       if (ch == 0x0A || ch == 0x0D) {
         return i;
       }
@@ -1467,6 +1515,7 @@ class BlockParser {
         _charAt(firstNonspace) == 0;
   }
 
+  @pragma('vm:prefer-inline')
   void _advanceOffset(int count, bool columns) {
     while (count > 0) {
       final c = _charAt(offset);
@@ -1495,6 +1544,7 @@ class BlockParser {
     }
   }
 
+  @pragma('vm:prefer-inline')
   int _charAt(int pos) {
     if (pos < 0 || pos >= _currentLine.length) {
       return 0;
@@ -1502,6 +1552,7 @@ class BlockParser {
     return _currentLine.codeUnitAt(pos);
   }
 
+  @pragma('vm:prefer-inline')
   bool _isSpaceOrTab(int c) => c == 0x20 || c == 0x09;
   bool _isDigit(int c) => c >= 0x30 && c <= 0x39;
 
