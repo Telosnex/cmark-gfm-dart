@@ -29,6 +29,8 @@ class BlockParserV2 {
   late CmarkNode current;
   bool _initialized = false;
   InlineParser? _inlineParser;
+  bool _sawFootnoteDefinition = false;
+  bool _sawFootnoteReference = false;
 
   // Parser state per line
   int offset = 0;
@@ -242,13 +244,17 @@ class BlockParserV2 {
       footnoteMap: footnoteMap,
     );
     _inlineParser!.reset();
+    _sawFootnoteReference = false;
     _processInlines(rootToFinalize, _inlineParser!);
 
     // Link footnote references to definitions and set indices
-    _linkFootnotes(rootToFinalize);
-
-    // Append footnotes
-    _appendFootnotes(rootToFinalize);
+    final bool hasFootnoteDefs = footnoteMap.size > 0 || _sawFootnoteDefinition;
+    if (hasFootnoteDefs || _sawFootnoteReference) {
+      _linkFootnotes(rootToFinalize);
+      if (hasFootnoteDefs) {
+        _appendFootnotes(rootToFinalize);
+      }
+    }
 
     return rootToFinalize;
   }
@@ -1126,6 +1132,7 @@ class BlockParserV2 {
         final label = node.content.toString();
         if (label.isNotEmpty) {
           footnoteMap.add(label, node);
+          _sawFootnoteDefinition = true;
         }
         break;
 
@@ -1575,6 +1582,9 @@ class BlockParserV2 {
             'SAFETY: Processed $count children of ${node.type.name}');
       }
       final next = child.next;
+      if (child.type == CmarkNodeType.footnoteReference) {
+        _sawFootnoteReference = true;
+      }
       _processInlines(child, inlineParser);
       child = next;
     }
