@@ -1559,21 +1559,9 @@ class BlockParserV2 {
   bool _isDigit(int c) => c >= 0x30 && c <= 0x39;
 
   void _processInlines(CmarkNode node, InlineParser inlineParser) {
-    var count = 0;
-    var child = node.firstChild;
-    while (child != null) {
-      count++;
-      if (count > 1000000) {
-        throw StateError(
-            'SAFETY: Node ${node.type.name} has $count children');
-      }
-      child = child.next;
-    }
-
     inlineParser.parseInlines(node);
-
-    child = node.firstChild;
-    count = 0;
+    var child = node.firstChild;
+    var count = 0;
     while (child != null) {
       count++;
       if (count > 1000000) {
