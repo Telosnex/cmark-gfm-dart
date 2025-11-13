@@ -428,7 +428,7 @@ class InlineParser {
       }
 
       if (numticks <= maxBackticks) {
-        subj.backticks[numticks] = subj.pos - numticks;
+        subj.recordBacktickRun(numticks, subj.pos - numticks);
       }
 
       if (numticks == openLen) {

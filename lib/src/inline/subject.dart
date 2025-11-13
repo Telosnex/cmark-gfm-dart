@@ -31,6 +31,7 @@ class Subject {
   final List<int> backticks = List.filled(maxBackticks + 1, 0);
   bool scannedForBackticks = false;
   bool noLinkOpeners = true;
+  int _maxBacktickLen = 0;
 
   void reset() {
     pos = 0;
@@ -39,8 +40,20 @@ class Subject {
     lastBracket = null;
     scannedForBackticks = false;
     noLinkOpeners = true;
-    backticks.fillRange(0, backticks.length, 0);
+    if (_maxBacktickLen > 0) {
+      backticks.fillRange(0, _maxBacktickLen + 1, 0);
+      _maxBacktickLen = 0;
+    }
   }
+  void recordBacktickRun(int len, int position) {
+    if (len <= maxBackticks) {
+      backticks[len] = position;
+      if (len > _maxBacktickLen) {
+        _maxBacktickLen = len;
+      }
+    }
+  }
+
 
   void initialize({
     required Uint8List input,
