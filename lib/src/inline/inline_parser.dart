@@ -72,8 +72,7 @@ class InlineParser {
       trimmedLen--;
     }
 
-    final trimmedInput = Uint8List(trimmedLen);
-    trimmedInput.setAll(0, content.sublist(0, trimmedLen));
+    final trimmedInput = Uint8List.sublistView(content, 0, trimmedLen);
     final subj = _subject;
     subj.initialize(
       input: trimmedInput,
