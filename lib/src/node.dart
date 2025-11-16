@@ -311,6 +311,8 @@ class CmarkNode {
   int endLine;
   int endColumn;
   int internalOffset;
+  int htmlBlockType = 0;
+  String? htmlBlockEndTag;
 
   /// Flag bits used by the parser and renderer.
   int flags = 0;
@@ -408,7 +410,7 @@ class CmarkNode {
     newNode.parent = this;
     newNode.previous = reference;
     newNode.next = reference.next;
-    
+
     if (reference.next != null) {
       reference.next!.previous = newNode;
     } else {
@@ -511,14 +513,14 @@ class CmarkNode {
       throw StateError('Node of type $type does not carry $kind data.');
     }
   }
-  
+
   /// Initialize heading data when converting from another type.
   void initializeHeadingData() {
     if (_headingData == null) {
       _headingData = CmarkHeadingData();
     }
   }
-  
+
   /// Initialize table row data.
   void initializeTableRowData() {
     if (_tableRowData == null) {
@@ -541,6 +543,8 @@ class CmarkNode {
       ..endLine = endLine
       ..endColumn = endColumn
       ..internalOffset = internalOffset
+      ..htmlBlockType = htmlBlockType
+      ..htmlBlockEndTag = htmlBlockEndTag
       ..flags = flags
       ..footnoteReferenceIndex = footnoteReferenceIndex
       ..footnoteDefCount = footnoteDefCount

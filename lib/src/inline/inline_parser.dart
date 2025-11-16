@@ -470,6 +470,7 @@ class InlineParser {
 
   CmarkNode _handlePointyBrace(Subject subj) {
     subj.advance(); // past <
+    final tagStart = subj.pos - 1;
 
     // Try URL autolink <http://...>
     final urlMatch = _scanAutolinkUri(subj.input, subj.pos);
@@ -501,7 +502,25 @@ class InlineParser {
       }
     }
 
-    // Not an autolink - return literal <
+    // Try HTML tag, comment, declaration, etc.
+    final htmlLen = _scanHtmlTag(subj.input, tagStart);
+    if (htmlLen > 0) {
+      final end = tagStart + htmlLen;
+      final raw = utf8.decode(
+        subj.input.sublist(tagStart, end),
+        allowMalformed: true,
+      );
+      subj.pos = end;
+      final node = CmarkNode(CmarkNodeType.htmlInline)
+        ..content.write(raw)
+        ..startLine = subj.line
+        ..endLine = subj.line
+        ..startColumn = tagStart + 1 + subj.columnOffset + subj.blockOffset
+        ..endColumn = end + subj.columnOffset + subj.blockOffset;
+      return node;
+    }
+
+    // Not an autolink or HTML tag - return literal <
     return _makeStr(subj, subj.pos - 1, subj.pos - 1, '<');
   }
 
@@ -1118,3 +1137,166 @@ class InlineParser {
         (ch >= 0x7B && ch <= 0x7E);
   }
 }
+
+int _scanHtmlTag(Uint8List data, int offset) {
+  final len = data.length;
+  if (offset >= len || data[offset] != 0x3C) return 0;
+  var i = offset + 1;
+  if (i >= len) return 0;
+  final ch = data[i];
+
+  if (ch == 0x21) {
+    if (i + 2 < len && data[i + 1] == 0x2D && data[i + 2] == 0x2D) {
+      var j = i + 3;
+      while (j + 2 < len) {
+        if (data[j] == 0x2D && data[j + 1] == 0x2D && data[j + 2] == 0x3E) {
+          return j + 3 - offset;
+        }
+        j++;
+      }
+      return 0;
+    }
+    if (i + 7 < len &&
+        data[i + 1] == 0x5B &&
+        data[i + 2] == 0x43 &&
+        data[i + 3] == 0x44 &&
+        data[i + 4] == 0x41 &&
+        data[i + 5] == 0x54 &&
+        data[i + 6] == 0x41 &&
+        data[i + 7] == 0x5B) {
+      var j = i + 8;
+      while (j + 2 < len) {
+        if (data[j] == 0x5D && data[j + 1] == 0x5D && data[j + 2] == 0x3E) {
+          return j + 3 - offset;
+        }
+        j++;
+      }
+      return 0;
+    }
+    var j = i + 1;
+    while (j < len && data[j] != 0x3E) {
+      j++;
+    }
+    if (j == len) return 0;
+    return j + 1 - offset;
+  } else if (ch == 0x3F) {
+    var j = i + 1;
+    while (j + 1 < len) {
+      if (data[j] == 0x3F && data[j + 1] == 0x3E) {
+        return j + 2 - offset;
+      }
+      j++;
+    }
+    return 0;
+  } else {
+    var j = i;
+    var isClosing = false;
+    if (data[j] == 0x2F) {
+      isClosing = true;
+      j++;
+      if (j >= len) return 0;
+    }
+    if (!_isAlphaByte(data[j])) return 0;
+    j++;
+    while (j < len && _isAlnumHyphenByte(data[j])) {
+      j++;
+    }
+
+    if (isClosing) {
+      while (j < len && _isHtmlSpace(data[j])) {
+        j++;
+      }
+      if (j < len && data[j] == 0x3E) {
+        return j + 1 - offset;
+      }
+      return 0;
+    }
+
+    while (j < len) {
+      var sawWhitespace = false;
+      while (j < len && _isHtmlSpace(data[j])) {
+        sawWhitespace = true;
+        j++;
+      }
+      if (j >= len) return 0;
+      final current = data[j];
+      if (current == 0x3E) {
+        return j + 1 - offset;
+      }
+      if (current == 0x2F) {
+        j++;
+        if (j < len && data[j] == 0x3E) {
+          return j + 1 - offset;
+        }
+        return 0;
+      }
+      if (!sawWhitespace) {
+        return 0;
+      }
+      if (!_isAttrNameStart(current)) return 0;
+      j++;
+      while (j < len && _isAttrNameChar(data[j])) {
+        j++;
+      }
+      while (j < len && _isHtmlSpace(data[j])) {
+        j++;
+      }
+      if (j < len && data[j] == 0x3D) {
+        j++;
+        while (j < len && _isHtmlSpace(data[j])) {
+          j++;
+        }
+        if (j >= len) return 0;
+        final quote = data[j];
+        if (quote == 0x22 || quote == 0x27) {
+          j++;
+          while (j < len && data[j] != quote) {
+            j++;
+          }
+          if (j == len) return 0;
+          j++;
+        } else {
+          var hasValue = false;
+          while (j < len) {
+            final valueChar = data[j];
+            if (_isHtmlSpace(valueChar) || valueChar == 0x3E) {
+              break;
+            }
+            if (valueChar == 0x22 ||
+                valueChar == 0x27 ||
+                valueChar == 0x3C ||
+                valueChar == 0x3D ||
+                valueChar == 0x60) {
+              return 0;
+            }
+            hasValue = true;
+            j++;
+          }
+          if (!hasValue) {
+            return 0;
+          }
+        }
+      }
+    }
+  }
+  return 0;
+}
+
+bool _isAlphaByte(int byte) =>
+    (byte >= 0x41 && byte <= 0x5A) || (byte >= 0x61 && byte <= 0x7A);
+
+bool _isAlnumHyphenByte(int byte) =>
+    _isAlphaByte(byte) || (byte >= 0x30 && byte <= 0x39) || byte == 0x2D;
+
+bool _isHtmlSpace(int byte) =>
+    byte == 0x20 ||
+    byte == 0x09 ||
+    byte == 0x0A ||
+    byte == 0x0D ||
+    byte == 0x0C;
+
+bool _isAttrNameStart(int byte) =>
+    _isAlphaByte(byte) || byte == 0x5F || byte == 0x3A || byte == 0x2D;
+
+bool _isAttrNameChar(int byte) =>
+    _isAttrNameStart(byte) || (byte >= 0x30 && byte <= 0x39) || byte == 0x2E;

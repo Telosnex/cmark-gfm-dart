@@ -3,7 +3,7 @@
 import 'dart:io';
 
 import 'package:cmark_gfm/cmark_gfm.dart';
-import 'package:cmark_gfm/src/parser/block_parser_v2.dart';
+import 'forked/block_parser_v2.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
