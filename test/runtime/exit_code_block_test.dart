@@ -28,7 +28,6 @@ D''';
       options: const CmarkParserOptions(
         enableMath: true,
         mathOptions: CmarkMathOptions(
-          allowInlineDollar: true,
           allowBlockDoubleDollar: true,
           allowBracketDelimiters: true,
         ),

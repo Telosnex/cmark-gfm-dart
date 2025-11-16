@@ -1,12 +1,10 @@
 /// Options controlling math parsing behaviour.
 class CmarkMathOptions {
   const CmarkMathOptions({
-    this.allowInlineDollar = false,
     this.allowBlockDoubleDollar = true,
     this.allowBracketDelimiters = true,
   });
 
-  final bool allowInlineDollar;
   final bool allowBlockDoubleDollar;
   final bool allowBracketDelimiters;
 }

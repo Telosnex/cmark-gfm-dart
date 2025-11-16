@@ -28,7 +28,6 @@ which solves \(ax^2 + bx + c = 0\).''';
       options: const CmarkParserOptions(
         enableMath: true,
         mathOptions: CmarkMathOptions(
-          allowInlineDollar: true,
           allowBlockDoubleDollar: true,
           allowBracketDelimiters: true,
         ),
@@ -56,7 +55,6 @@ which solves \(ax^2 + bx + c = 0\).''';
       options: const CmarkParserOptions(
         enableMath: true,
         mathOptions: CmarkMathOptions(
-          allowInlineDollar: true,
           allowBlockDoubleDollar: true,
           allowBracketDelimiters: true,
         ),
