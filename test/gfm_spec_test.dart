@@ -14,6 +14,8 @@ void _expectHtml(String actual, String expected) {
   expect(actual.trim(), expected.trim());
 }
 
+String _renderGfmHtml(CmarkNode doc) => HtmlRenderer(filterHtml: true).render(doc);
+
 // Generated from cmark-gfm/test/extensions.txt
 // DO NOT EDIT - regenerate with tool/generate_spec_tests.dart
 
@@ -46,7 +48,7 @@ void main() {
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -84,7 +86,7 @@ Hi!''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -135,7 +137,7 @@ Hi!''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -162,7 +164,7 @@ xyz | ghi''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -200,7 +202,7 @@ Hi!''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -233,7 +235,7 @@ fff | ggg | hhh | iii | jjj''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -250,7 +252,7 @@ fff | ggg | hhh | iii | jjj''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -291,7 +293,7 @@ fff | ggg | hhh | iii | jjj''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -333,7 +335,7 @@ fff | ggg | hhh | iii | jjj''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -352,7 +354,7 @@ fff | ggg | hhh | iii | jjj''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -414,7 +416,7 @@ fff | ggg | hhh | iii | jjj''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -443,7 +445,7 @@ fff | ggg | hhh | iii | jjj''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -474,7 +476,7 @@ fff | ggg | hhh | iii | jjj''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -503,7 +505,7 @@ fff | ggg | hhh | iii | jjj''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -530,7 +532,7 @@ fff | ggg | hhh | iii | jjj''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -563,7 +565,7 @@ d | e''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -575,7 +577,7 @@ d | e''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -602,7 +604,7 @@ No ~mismatch~~''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -708,7 +710,7 @@ http://🍄.ga/ http://x🍄.ga/''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -720,7 +722,7 @@ http://🍄.ga/ http://x🍄.ga/''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -739,7 +741,7 @@ http://🍄.ga/ http://x🍄.ga/''';
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -787,7 +789,7 @@ Even with {"x":"y"} or 1 > 2 or whatever. Even **markdown**.
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -852,7 +854,7 @@ Hi!
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -879,7 +881,7 @@ This footnote is referenced[^a-footnote] multiple times, in lots of different pl
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -902,7 +904,7 @@ This footnote is referenced[^a-footnote] multiple times, in lots of different pl
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -918,7 +920,7 @@ This footnote is referenced[^a-footnote] multiple times, in lots of different pl
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -945,7 +947,7 @@ This footnote is referenced[^a-footnote] multiple times, in lots of different pl
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -961,7 +963,7 @@ This footnote is referenced[^a-footnote] multiple times, in lots of different pl
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -1000,7 +1002,7 @@ Show a regular (non task) list to show that it has the same structure
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });
@@ -1039,7 +1041,7 @@ Show a regular (non task) list to show that it has the same structure
       final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
-      final html = HtmlRenderer().render(doc);
+      final html = _renderGfmHtml(doc);
 
       _expectHtml(html, expected);
     });

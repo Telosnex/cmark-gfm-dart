@@ -4,12 +4,9 @@ import 'package:test/test.dart';
 // Generated from cmark-gfm/test/spec.txt
 // DO NOT EDIT - regenerate with tool/generate_spec_tests.dart
 
-const kSkipNongoal_MdToHtml =
-    'Skipping because the test verifies HTML is left undisturbed while Markdown becomes HTML. It is a non-goal for us to pass these tests: instead, the markdown is preserved.';
-const kSkipNongoal_MdNotToHtml =
-    'Skipping because the test verifies text that is *almost* correct HTML is left undisturbed and Markdown does not become HTML. It is a non-goal for us to pass these tests: instead, HTML isn\'t recognized, we leave the markdown as-is.';
-const kSkipNongoal_HtmlGeneral =
-    'Skipping because the test verifies general HTML behavior which is a non-goal for us to pass these tests.';
+const kSkipNongoal_MdToHtml = false;
+const kSkipNongoal_MdNotToHtml = false;
+const kSkipNongoal_HtmlGeneral = false;
 const kSkipKnownFailure = false;
 void main() {
   group('CommonMark Spec Tests', () {

@@ -3,9 +3,10 @@ import '../util/node_iterator.dart';
 import '../houdini/href_escape.dart';
 
 class HtmlRenderer {
-  HtmlRenderer({this.safe = false});
+  HtmlRenderer({this.safe = false, this.filterHtml = false});
 
   final bool safe;
+  final bool filterHtml;
   final StringBuffer _output = StringBuffer();
   bool _inTableHeader = false;
   bool _needClosingTableBody = false;
@@ -165,8 +166,14 @@ class HtmlRenderer {
       case CmarkNodeType.htmlBlock:
         if (entering) {
           _renderCr();
-          if (!safe) {
-            _output.write(node.content.toString());
+          final literal = node.content.toString();
+          if (filterHtml) {
+            final filtered = _filterHtmlBlock(literal);
+            if (filtered.isNotEmpty) {
+              _output.write(filtered);
+            }
+          } else if (!safe) {
+            _output.write(literal);
           }
           _renderCr();
         }
@@ -273,8 +280,15 @@ class HtmlRenderer {
         }
         break;
       case CmarkNodeType.htmlInline:
-        if (entering && !safe) {
-          _output.write(node.content.toString());
+        if (entering) {
+          if (filterHtml) {
+            final filtered = _filterHtmlInline(node.content.toString());
+            if (filtered.isNotEmpty) {
+              _output.write(filtered);
+            }
+          } else if (!safe) {
+            _output.write(node.content.toString());
+          }
         }
         break;
       case CmarkNodeType.emph:
@@ -409,6 +423,54 @@ class HtmlRenderer {
     }
   }
   
+  String _filterHtmlInline(String literal) => _filterHtmlContent(literal);
+
+  String _filterHtmlBlock(String literal) => _filterHtmlContent(literal);
+
+  String _filterHtmlContent(String literal) {
+    return literal.replaceAllMapped(_htmlTagPattern, (match) {
+      final text = match.group(0)!;
+      final trimmed = text.trimLeft();
+      if (trimmed.startsWith('<!--')) {
+        return text; // allow comments
+      }
+      if (trimmed.startsWith('<!')) {
+        return _escapeAngleBrackets(text);
+      }
+      final tagMatch = _tagNamePattern.firstMatch(trimmed);
+      if (tagMatch == null) {
+        return text;
+      }
+      final name = tagMatch.group(1)!.toLowerCase();
+      if (_bannedHtmlTags.contains(name)) {
+        return _escapeOpeningBracket(text);
+      }
+      return text;
+    });
+  }
+
+  static final RegExp _htmlTagPattern = RegExp(r'<[^>]*>');
+  static final RegExp _tagNamePattern = RegExp(r'^</?\s*([A-Za-z0-9]+)');
+  static const Set<String> _bannedHtmlTags = {
+    'title',
+    'textarea',
+    'style',
+    'xmp',
+    'iframe',
+    'noembed',
+    'noframes',
+    'script',
+    'plaintext',
+  };
+
+  String _escapeOpeningBracket(String text) {
+    return text.replaceAll('<', '&lt;');
+  }
+
+  String _escapeAngleBrackets(String text) {
+    return _escapeOpeningBracket(text).replaceAll('>', '&gt;');
+  }
+
   
 
   String _escapeHtml(String text) {

@@ -1170,7 +1170,7 @@ int _scanHtmlTag(Uint8List data, int offset) {
 
   if (ch == 0x21) {
     if (i + 2 < len && data[i + 1] == 0x2D && data[i + 2] == 0x2D) {
-      var j = i + 3;
+      var j = i + 1;
       while (j + 2 < len) {
         if (data[j] == 0x2D && data[j + 1] == 0x2D && data[j + 2] == 0x3E) {
           return j + 3 - offset;
@@ -1261,11 +1261,13 @@ int _scanHtmlTag(Uint8List data, int offset) {
       while (j < len && _isAttrNameChar(data[j])) {
         j++;
       }
-      while (j < len && _isHtmlSpace(data[j])) {
-        j++;
+      final whitespaceStart = j;
+      var afterWhitespace = j;
+      while (afterWhitespace < len && _isHtmlSpace(data[afterWhitespace])) {
+        afterWhitespace++;
       }
-      if (j < len && data[j] == 0x3D) {
-        j++;
+      if (afterWhitespace < len && data[afterWhitespace] == 0x3D) {
+        j = afterWhitespace + 1;
         while (j < len && _isHtmlSpace(data[j])) {
           j++;
         }
@@ -1299,6 +1301,8 @@ int _scanHtmlTag(Uint8List data, int offset) {
             return 0;
           }
         }
+      } else {
+        j = whitespaceStart;
       }
     }
   }
