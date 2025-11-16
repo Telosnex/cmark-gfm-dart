@@ -84,14 +84,7 @@ class BlockParserV2 {
     }
 
     // Process complete lines
-    var iterations = 0;
     while (true) {
-      iterations++;
-      if (iterations > 1000000000) {
-        throw StateError(
-            'SAFETY: feed() loop iterations=$iterations pending=${_pending.length}');
-      }
-
       final newlineIndex = _findNewlineFrom(_pendingStart);
       if (newlineIndex == -1) {
         break;
@@ -386,14 +379,7 @@ class BlockParserV2 {
     return -1;
   }
 
-  int _processLineCount = 0;
-
   void _processLine(String line) {
-    _processLineCount++;
-    if (_processLineCount > 10000) {
-      throw StateError('SAFETY: _processLine called $_processLineCount times');
-    }
-
     lineNumber++;
     _currentLine = line;
     offset = 0;
@@ -1025,13 +1011,8 @@ class BlockParserV2 {
 
   CmarkNode _addChild(CmarkNode parent, CmarkNodeType type) {
     // Find appropriate parent
-    var finalizeCount = 0;
     while (!parent.canContain(type)) {
-      finalizeCount++;
       parent = _finalize(parent);
-      if (finalizeCount > 10) {
-        throw StateError('SAFETY: _addChild finalized $finalizeCount times');
-      }
     }
 
     final child = CmarkNode(type);
