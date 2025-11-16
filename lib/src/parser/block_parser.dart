@@ -676,13 +676,24 @@ class BlockParser {
   }
 
   int _scanCloseFence(int pos, int fenceChar) {
-    var count = 0;
+    final start = pos;
     while (_charAt(pos) == fenceChar) {
-      count++;
       pos++;
     }
+    final count = pos - start;
+    if (count < 3) {
+      return 0;
+    }
+    while (true) {
+      final ch = _charAt(pos);
+      if (ch == 0x20 || ch == 0x09 || ch == 0xA0) {
+        pos++;
+        continue;
+      }
+      break;
+    }
     final next = _charAt(pos);
-    if (next == 0x0A || next == 0x0D || next == 0) {
+    if (next == 0 || next == 0x0A || next == 0x0D) {
       return count;
     }
     return 0;
