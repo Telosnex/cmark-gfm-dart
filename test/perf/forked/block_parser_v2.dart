@@ -1619,7 +1619,7 @@ class BlockParserV2 {
 
   void _appendFootnotes(CmarkNode root) {
     // Move footnote definitions to end of document (C's create_footnote_list)
-    final footnotes = footnoteMap.getAllSorted();
+    final footnotes = footnoteMap.getReferencedInOrder();
     for (final footnote in footnotes) {
       // Unlink from current position and append to root
       footnote.node.unlink();

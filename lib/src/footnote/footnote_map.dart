@@ -8,19 +8,16 @@ class CmarkFootnote {
   CmarkFootnote({
     required this.label,
     required this.node,
-    required this.index,
   });
 
   final String label;
   final CmarkNode node;
-  final int index;
 }
 
 class CmarkFootnoteMap {
   CmarkFootnoteMap();
 
   final Map<String, CmarkFootnote> _entries = <String, CmarkFootnote>{};
-  int _nextIndex = 1;
 
   int get size => _entries.length;
 
@@ -33,12 +30,10 @@ class CmarkFootnoteMap {
       return;
     }
 
-    final index = _nextIndex++;
-    node.footnoteReferenceIndex = index;
+    node.footnoteReferenceIndex = 0;
     final footnote = CmarkFootnote(
       label: normalized,
       node: node,
-      index: index,
     );
     _entries[normalized] = footnote;
   }
@@ -51,10 +46,15 @@ class CmarkFootnoteMap {
     return _entries[normalized];
   }
 
-  List<CmarkFootnote> getAllSorted() {
-    final footnotes = _entries.values.toList();
-    footnotes.sort((a, b) => a.index.compareTo(b.index));
-    return footnotes;
+  Iterable<CmarkFootnote> get entries => _entries.values;
+
+  List<CmarkFootnote> getReferencedInOrder() {
+    final referenced = _entries.values
+        .where((entry) => entry.node.footnoteReferenceIndex > 0)
+        .toList();
+    referenced.sort((a, b) =>
+        a.node.footnoteReferenceIndex.compareTo(b.node.footnoteReferenceIndex));
+    return referenced;
   }
 
   static String? _normalizeLabel(String label) {

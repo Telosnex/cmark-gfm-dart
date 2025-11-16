@@ -593,6 +593,26 @@ class InlineParser {
     return inlText;
   }
 
+  int _codePointAt(Uint8List data, int pos) {
+    final first = data[pos];
+    if (first < 0x80) {
+      return first;
+    } else if ((first & 0xE0) == 0xC0 && pos + 1 < data.length) {
+      final second = data[pos + 1] & 0x3F;
+      return ((first & 0x1F) << 6) | second;
+    } else if ((first & 0xF0) == 0xE0 && pos + 2 < data.length) {
+      final second = data[pos + 1] & 0x3F;
+      final third = data[pos + 2] & 0x3F;
+      return ((first & 0x0F) << 12) | (second << 6) | third;
+    } else if ((first & 0xF8) == 0xF0 && pos + 3 < data.length) {
+      final second = data[pos + 1] & 0x3F;
+      final third = data[pos + 2] & 0x3F;
+      final fourth = data[pos + 3] & 0x3F;
+      return ((first & 0x07) << 18) | (second << 12) | (third << 6) | fourth;
+    }
+    return first;
+  }
+
   int _scanDelims(
       Subject subj, int c, List<bool> canOpen, List<bool> canClose) {
     var numDelims = 0;
@@ -601,14 +621,12 @@ class InlineParser {
 
     final startPos = subj.pos;
 
-    // Get character before this run (at current position before advancing)
     if (startPos > 0) {
       var beforePos = startPos - 1;
-      // Walk back to UTF-8 start
       while (beforePos > 0 && (subj.input[beforePos] >> 6) == 2) {
         beforePos--;
       }
-      beforeChar = subj.input[beforePos];
+      beforeChar = _codePointAt(subj.input, beforePos);
     }
 
     // Count delimiters
@@ -617,9 +635,8 @@ class InlineParser {
       subj.advance();
     }
 
-    // Get character after this run (at current position after advancing)
     if (subj.pos < subj.input.length) {
-      afterChar = subj.input[subj.pos];
+      afterChar = _codePointAt(subj.input, subj.pos);
     }
 
     final leftFlanking = numDelims > 0 &&
@@ -950,11 +967,10 @@ class InlineParser {
         final fnrefEndColumn = subj.pos + subj.columnOffset + subj.blockOffset;
         final fnrefStartColumn = opener.inlText.startColumn;
 
-        // Copy text after ^ as footnote label
-        if (fnrefStartColumn + 2 <= fnrefEndColumn) {
-          final labelLen = fnrefEndColumn - fnrefStartColumn - 2;
-          fnref.content.write(
-              literal.substring(1, 1 + labelLen.clamp(0, literal.length - 1)));
+        if (refLabel.length > 1) {
+          fnref.content.write(refLabel.substring(1));
+        } else if (literal.length > 1) {
+          fnref.content.write(literal.substring(1));
         }
 
         fnref.startLine = fnref.endLine = subj.line;
@@ -1129,7 +1145,14 @@ class InlineParser {
     return scanLinkTitle(input, offset, result);
   }
 
-  bool _isSpace(int ch) => ch == 0x20 || ch == 0x09 || ch == 0x0A || ch == 0x0D;
+  bool _isSpace(int ch) =>
+      ch == 0x20 ||
+      ch == 0x09 ||
+      ch == 0x0A ||
+      ch == 0x0B ||
+      ch == 0x0C ||
+      ch == 0x0D ||
+      ch == 0xA0;
   bool _isPunct(int ch) {
     return (ch >= 0x21 && ch <= 0x2F) ||
         (ch >= 0x3A && ch <= 0x40) ||

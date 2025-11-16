@@ -4,8 +4,11 @@ import '../node.dart';
 import '../reference/reference_map.dart';
 import '../reference/reference_parser.dart';
 import '../inline/inline_parser.dart';
+import '../inline/autolink_postprocess.dart';
 import '../util/node_iterator.dart';
 import '../footnote/footnote_map.dart';
+import '../houdini/html_unescape.dart' as houdini;
+import '../util/strbuf.dart';
 import 'parser_options.dart';
 
 const int kCodeIndent = 4;
@@ -312,6 +315,9 @@ class BlockParser {
     _inlineParser!.reset();
     _sawFootnoteReference = false;
     _processInlines(rootToFinalize, _inlineParser!);
+    if (options.enableAutolinkExtension) {
+      applyAutolinks(rootToFinalize);
+    }
 
     // Link footnote references to definitions and set indices
     final bool hasFootnoteDefs = footnoteMap.size > 0 || _sawFootnoteDefinition;
@@ -357,16 +363,19 @@ class BlockParser {
           pos++;
         }
         if (pos < content.length) {
-          node.codeData.info = content.substring(0, pos).trim();
-          pos++;
-          if (pos < content.length &&
-              content.codeUnitAt(pos - 1) == 0x0D &&
-              content.codeUnitAt(pos) == 0x0A) {
+          final infoLine = content.substring(0, pos);
+          node.codeData.info = _normalizeInfoString(infoLine);
+
+          if (pos < content.length && content.codeUnitAt(pos) == 0x0D) {
             pos++;
           }
+          if (pos < content.length && content.codeUnitAt(pos) == 0x0A) {
+            pos++;
+          }
+
           node.codeData.literal = content.substring(pos);
         } else {
-          node.codeData.info = content.trim();
+          node.codeData.info = _normalizeInfoString(content);
           node.codeData.literal = '';
         }
       } else {
@@ -433,6 +442,8 @@ class BlockParser {
 
           // For rendering, we need to access the definition's label
           node.footnoteDefLabel = label;
+        } else {
+          _convertFootnoteReferenceToText(node, label);
         }
       }
       evType = iter2.next();
@@ -502,22 +513,26 @@ class BlockParser {
   _CheckOpenBlocksResult _checkOpenBlocks() {
     var container = root;
     var allMatched = true;
+    var lastMatched = root;
 
     while (_isOpen(container.lastChild)) {
-      container = container.lastChild!;
+      final child = container.lastChild!;
+      container = child;
 
       _findFirstNonspace();
 
       final matched = _checkContinuation(container);
       if (!matched) {
         allMatched = false;
-        // Finalize the unmatched container before returning parent
-        container = _finalize(container);
-        return _CheckOpenBlocksResult(container, allMatched);
+        container = child.parent ?? root;
+        break;
+      } else {
+        lastMatched = container;
       }
     }
 
-    return _CheckOpenBlocksResult(container, allMatched);
+    final resultContainer = allMatched ? lastMatched : container;
+    return _CheckOpenBlocksResult(resultContainer, allMatched);
   }
 
   bool _isOpen(CmarkNode? node) {
@@ -798,9 +813,16 @@ class BlockParser {
           // This is a delimiter row - convert paragraph to table
           final paraContent = container.content.toString();
           // Strip trailing newline from para content
-          final headerText = paraContent.endsWith('\n')
+          var headerText = paraContent.endsWith('\n')
               ? paraContent.substring(0, paraContent.length - 1)
               : paraContent;
+
+          String? leadingText;
+          final lastNewline = headerText.lastIndexOf('\n');
+          if (lastNewline >= 0) {
+            leadingText = headerText.substring(0, lastNewline).trimRight();
+            headerText = headerText.substring(lastNewline + 1);
+          }
 
           final headerCells = _parseTableRow(headerText);
           final alignments =
@@ -808,6 +830,17 @@ class BlockParser {
 
           if (headerCells.length == alignments.length &&
               headerCells.isNotEmpty) {
+            if (leadingText != null && leadingText.isNotEmpty) {
+              final paragraphNode = CmarkNode(CmarkNodeType.paragraph)
+                ..flags |= 1
+                ..startLine = container.startLine
+                ..startColumn = container.startColumn
+                ..content.write(leadingText)
+                ..content.write('\n');
+              _insertNodeBefore(container, paragraphNode);
+              _finalize(paragraphNode);
+            }
+
             // Valid table - convert paragraph to table
             container.type = CmarkNodeType.table;
             container.content.clear();
@@ -848,6 +881,10 @@ class BlockParser {
           if (_charAt(labelEnd) == 0x5D) {
             final label = _currentLine.substring(firstNonspace + 2, labelEnd);
             _advanceOffset(firstNonspace + footnoteMatch - offset, false);
+            final spacesAfterColon = _countSpacesFromPosition(offset);
+            if (spacesAfterColon > 0) {
+              _advanceOffset(spacesAfterColon, true);
+            }
             container = _addChild(container, CmarkNodeType.footnoteDefinition);
             container.content.write(label);
             continue;
@@ -976,6 +1013,25 @@ class BlockParser {
     return container;
   }
 
+  void _insertNodeBefore(CmarkNode target, CmarkNode newNode) {
+    final parent = target.parent;
+    if (parent == null) {
+      return;
+    }
+
+    newNode.parent = parent;
+    newNode.previous = target.previous;
+    newNode.next = target;
+
+    if (target.previous != null) {
+      target.previous!.next = newNode;
+    } else {
+      parent.firstChild = newNode;
+    }
+
+    target.previous = newNode;
+  }
+
   void _addTextToContainer(
       CmarkNode container, CmarkNode lastMatchedContainer) {
     _findFirstNonspace();
@@ -984,10 +1040,9 @@ class BlockParser {
     final trailingChildIsOpen =
         trailingChild != null && (trailingChild.flags & 1) != 0;
     if (blank && trailingChild != null) {
-      final isFencedCodeBlock =
-          trailingChild.type == CmarkNodeType.codeBlock &&
-              trailingChild.codeData.isFenced &&
-              trailingChildIsOpen;
+      final isFencedCodeBlock = trailingChild.type == CmarkNodeType.codeBlock &&
+          trailingChild.codeData.isFenced &&
+          trailingChildIsOpen;
       if (!isFencedCodeBlock) {
         trailingChild.flags |= 2; // LAST_LINE_BLANK
       }
@@ -1035,6 +1090,14 @@ class BlockParser {
         current.type == CmarkNodeType.paragraph) {
       _addLine(current);
     } else {
+      while (current != lastMatchedContainer) {
+        final parent = _finalize(current);
+        if (parent == current) {
+          break;
+        }
+        current = parent;
+      }
+
       if (container.type == CmarkNodeType.mathBlock) {
         _addLine(container);
       } else if (container.type == CmarkNodeType.table) {
@@ -1243,19 +1306,18 @@ class BlockParser {
 
           if (pos < content.length) {
             final infoLine = content.substring(0, pos);
-            node.codeData.info = infoLine.trim();
+            node.codeData.info = _normalizeInfoString(infoLine);
 
-            // Skip past newline
-            pos++;
-            if (pos < content.length &&
-                content.codeUnitAt(pos - 1) == 0x0D &&
-                content.codeUnitAt(pos) == 0x0A) {
+            if (pos < content.length && content.codeUnitAt(pos) == 0x0D) {
+              pos++;
+            }
+            if (pos < content.length && content.codeUnitAt(pos) == 0x0A) {
               pos++;
             }
 
             node.codeData.literal = content.substring(pos);
           } else {
-            node.codeData.info = content.trim();
+            node.codeData.info = _normalizeInfoString(content);
             node.codeData.literal = '';
           }
         } else {
@@ -1897,6 +1959,43 @@ class BlockParser {
   bool _isTagNameChar(int code) =>
       _isAsciiAlpha(code) || (code >= 0x30 && code <= 0x39) || code == 0x2D;
 
+  String _normalizeInfoString(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) {
+      return '';
+    }
+
+    final buf = CmarkStrbuf();
+    final bytes = utf8.encode(trimmed);
+    houdini.HoudiniHtmlUnescape.unescape(buf, bytes);
+    final unescaped = utf8.decode(buf.detach(), allowMalformed: true);
+    return _unescapeBackslashPunctuation(unescaped);
+  }
+
+  String _unescapeBackslashPunctuation(String input) {
+    if (input.isEmpty) return '';
+    final result = StringBuffer();
+    for (var i = 0; i < input.length; i++) {
+      final code = input.codeUnitAt(i);
+      if (code == 0x5C &&
+          i + 1 < input.length &&
+          _isAsciiPunctuation(input.codeUnitAt(i + 1))) {
+        i++;
+        result.writeCharCode(input.codeUnitAt(i));
+      } else {
+        result.writeCharCode(code);
+      }
+    }
+    return result.toString();
+  }
+
+  bool _isAsciiPunctuation(int code) {
+    return (code >= 0x21 && code <= 0x2F) ||
+        (code >= 0x3A && code <= 0x40) ||
+        (code >= 0x5B && code <= 0x60) ||
+        (code >= 0x7B && code <= 0x7E);
+  }
+
   bool _isAttrNameStart(int code) =>
       _isAsciiAlpha(code) || code == 0x5F || code == 0x3A;
 
@@ -2022,6 +2121,19 @@ class BlockParser {
     return _currentLine.codeUnitAt(pos);
   }
 
+  int _countSpacesFromPosition(int pos) {
+    var count = 0;
+    while (true) {
+      final ch = _charAt(pos + count);
+      if (ch == 0x20 || ch == 0x09) {
+        count++;
+      } else {
+        break;
+      }
+    }
+    return count;
+  }
+
   @pragma('vm:prefer-inline')
   bool _isSpaceOrTab(int c) => c == 0x20 || c == 0x09;
   bool _isWhitespaceChar(int c) =>
@@ -2049,12 +2161,34 @@ class BlockParser {
 
   void _appendFootnotes(CmarkNode root) {
     // Move footnote definitions to end of document (C's create_footnote_list)
-    final footnotes = footnoteMap.getAllSorted();
-    for (final footnote in footnotes) {
-      // Unlink from current position and append to root
-      footnote.node.unlink();
-      root.appendChild(footnote.node);
+    final referenced = <CmarkNode>[];
+    for (final entry in footnoteMap.entries) {
+      final node = entry.node;
+      node.unlink();
+      if (node.footnoteReferenceIndex > 0) {
+        referenced.add(node);
+      }
     }
+
+    referenced.sort(
+      (a, b) => a.footnoteReferenceIndex.compareTo(b.footnoteReferenceIndex),
+    );
+
+    for (final node in referenced) {
+      root.appendChild(node);
+    }
+  }
+
+  void _convertFootnoteReferenceToText(CmarkNode node, String label) {
+    node.type = CmarkNodeType.text;
+    node.content
+      ..clear()
+      ..write('[^$label]');
+    node.firstChild = null;
+    node.lastChild = null;
+    node.footnoteReferenceIndex = 0;
+    node.footnoteRefIndex = 0;
+    node.footnoteDefLabel = '';
   }
 
   bool _scanTableStart(int pos) {

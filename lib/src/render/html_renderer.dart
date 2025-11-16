@@ -9,30 +9,30 @@ class HtmlRenderer {
   final StringBuffer _output = StringBuffer();
   bool _inTableHeader = false;
   bool _needClosingTableBody = false;
-  CmarkNode? _plainTextMode; // When set, render children as plain text (for image alt)
-  int _footnoteIndex = 0;
+  CmarkNode?
+      _plainTextMode; // When set, render children as plain text (for image alt)
   bool _inFootnoteSection = false;
+  final Set<CmarkNode> _footnotesWithInlineBackrefs = <CmarkNode>{};
 
   String render(CmarkNode root) {
     _output.clear();
     _inTableHeader = false;
     _needClosingTableBody = false;
     _plainTextMode = null;
-    _footnoteIndex = 0;
     _inFootnoteSection = false;
-    
+
     // Use iterator like C's cmark_iter
     final iter = CmarkIter(root);
     CmarkEventType evType;
-    
+
     while ((evType = iter.next()) != CmarkEventType.done) {
       final node = iter.node;
-      
+
       // Check if we're exiting plain text mode
       if (_plainTextMode == node && evType == CmarkEventType.exit) {
         _plainTextMode = null;
       }
-      
+
       // If in plain text mode, only output text content
       if (_plainTextMode != null && _plainTextMode != node) {
         if (evType == CmarkEventType.enter) {
@@ -84,6 +84,14 @@ class HtmlRenderer {
             _renderCr();
             _output.write('<p>');
           } else {
+            final parentFootnote = node.parent;
+            final isFootnoteParagraph = parentFootnote != null &&
+                parentFootnote.type == CmarkNodeType.footnoteDefinition &&
+                node.next == null;
+            if (isFootnoteParagraph) {
+              _renderFootnoteBackrefs(parentFootnote, inline: true);
+              _footnotesWithInlineBackrefs.add(parentFootnote);
+            }
             _output.write('</p>\n');
           }
         }
@@ -174,44 +182,29 @@ class HtmlRenderer {
             _output.write('<section class="footnotes" data-footnotes>\n<ol>\n');
             _inFootnoteSection = true;
           }
-          _footnoteIndex++;
           
           final label = escapeHref(node.content.toString());
           _output.write('<li id="fn-$label">\n');
         } else {
-          // Add backref(s)
-          final defCount = node.footnoteDefCount;
-          if (defCount > 0) {
-            final label = escapeHref(node.content.toString());
-            
-            if (defCount == 1) {
-              _output.write('<a href="#fnref-$label" class="footnote-backref" data-footnote-backref data-footnote-backref-idx="1" aria-label="Back to reference 1">↩</a>');
-            } else {
-              for (var i = 1; i <= defCount; i++) {
-                final suffix = i == 1 ? '' : '-$i';
-                _output.write('<a href="#fnref-$label$suffix" class="footnote-backref" data-footnote-backref data-footnote-backref-idx="1');
-                if (i > 1) _output.write('-$i');
-                _output.write('" aria-label="Back to reference 1');
-                if (i > 1) _output.write('-$i');
-                _output.write('">↩');
-                if (i > 1) _output.write('<sup class="footnote-ref">$i</sup>');
-                _output.write('</a>');
-                if (i < defCount) _output.write(' ');
-              }
-            }
+          if (!_footnotesWithInlineBackrefs.remove(node)) {
+            _renderFootnoteBackrefs(node, inline: false);
+            _output.write('\n');
           }
-          
-          _output.write('\n</li>\n');
+
+          _output.write('</li>\n');
         }
         break;
       case CmarkNodeType.footnoteReference:
         if (entering) {
           final label = escapeHref(node.content.toString());
-          final defIndex = node.footnoteReferenceIndex; // The footnote's global index (1, 2, 3...)
-          final refNum = node.footnoteRefIndex; // Which reference to this footnote (1st, 2nd, 3rd...)
+          final defIndex = node
+              .footnoteReferenceIndex; // The footnote's global index (1, 2, 3...)
+          final refNum = node
+              .footnoteRefIndex; // Which reference to this footnote (1st, 2nd, 3rd...)
           final suffix = refNum > 1 ? '-$refNum' : '';
-          
-          _output.write('<sup class="footnote-ref"><a href="#fn-$label" id="fnref-$label$suffix" data-footnote-ref>$defIndex</a></sup>');
+
+          _output.write(
+              '<sup class="footnote-ref"><a href="#fn-$label" id="fnref-$label$suffix" data-footnote-ref>$defIndex</a></sup>');
         }
         break;
       case CmarkNodeType.table:
@@ -248,9 +241,8 @@ class HtmlRenderer {
         if (entering) {
           final align = node.tableCellData.align;
           final tag = _inTableHeader ? 'th' : 'td';
-          final alignAttr = align != CmarkTableAlign.none
-              ? ' align="${align.name}"'
-              : '';
+          final alignAttr =
+              align != CmarkTableAlign.none ? ' align="${align.name}"' : '';
           _output.write('<$tag$alignAttr>');
         } else {
           final tag = _inTableHeader ? 'th' : 'td';
@@ -310,7 +302,8 @@ class HtmlRenderer {
         break;
       case CmarkNodeType.link:
         if (entering) {
-          final url = escapeHref(node.linkData.url); // Use href escaping, not HTML
+          final url =
+              escapeHref(node.linkData.url); // Use href escaping, not HTML
           final title = node.linkData.title;
           _output.write('<a href="$url"');
           if (title.isNotEmpty) {
@@ -324,7 +317,8 @@ class HtmlRenderer {
         break;
       case CmarkNodeType.image:
         if (entering) {
-          final url = escapeHref(node.linkData.url); // Use href escaping, not HTML
+          final url =
+              escapeHref(node.linkData.url); // Use href escaping, not HTML
           _output.write('<img src="$url" alt="');
           _plainTextMode = node; // Enter plain text mode for children
         } else {
@@ -359,6 +353,50 @@ class HtmlRenderer {
       default:
         // Unknown node types - do nothing
         break;
+    }
+  }
+
+  void _renderFootnoteBackrefs(CmarkNode node, {required bool inline}) {
+    final defCount = node.footnoteDefCount;
+    if (defCount <= 0) {
+      return;
+    }
+
+    final label = escapeHref(node.content.toString());
+    final displayIndex = node.footnoteReferenceIndex;
+
+    if (inline) {
+      _output.write(' ');
+    }
+
+    if (defCount == 1) {
+      _output.write(
+          '<a href="#fnref-$label" class="footnote-backref" data-footnote-backref data-footnote-backref-idx="$displayIndex" aria-label="Back to reference $displayIndex">↩</a>');
+    } else {
+      for (var i = 1; i <= defCount; i++) {
+        final suffix = i == 1 ? '' : '-$i';
+        _output.write(
+            '<a href="#fnref-$label$suffix" class="footnote-backref" data-footnote-backref data-footnote-backref-idx="$displayIndex');
+        if (i > 1) {
+          _output.write('-$i');
+        }
+        _output.write('" aria-label="Back to reference $displayIndex');
+        if (i > 1) {
+          _output.write('-$i');
+        }
+        _output.write('">↩');
+        if (i > 1) {
+          _output.write('<sup class="footnote-ref">$i</sup>');
+        }
+        _output.write('</a>');
+        if (i < defCount) {
+          _output.write(' ');
+        }
+      }
+    }
+
+    if (!inline) {
+      // Caller handles surrounding newlines.
     }
   }
 

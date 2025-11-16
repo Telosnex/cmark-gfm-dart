@@ -3,6 +3,17 @@ import 'package:test/test.dart';
 
 import 'commonmark_spec_test.dart';
 
+CmarkParser _createGfmParser() => CmarkParser(
+      options: const CmarkParserOptions(enableAutolinkExtension: true),
+    );
+
+void _expectHtml(String actual, String expected) {
+  if (expected.trim() == '<IGNORE>') {
+    return;
+  }
+  expect(actual.trim(), expected.trim());
+}
+
 // Generated from cmark-gfm/test/extensions.txt
 // DO NOT EDIT - regenerate with tool/generate_spec_tests.dart
 
@@ -32,12 +43,12 @@ void main() {
 </tbody>
 </table>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Tables - Example 2', skip: kSkipKnownFailure, () {
@@ -70,12 +81,12 @@ Hi!''';
 </table>
 <p>Hi!</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Tables - Example 3', skip: kSkipKnownFailure, () {
@@ -121,12 +132,12 @@ Hi!''';
 </thead>
 </table>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Tables - Example 4', () {
@@ -148,12 +159,12 @@ xyz | ghi''';
 </tbody>
 </table>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Tables - Example 5', () {
@@ -186,12 +197,12 @@ Hi!''';
 </table>
 <p>Hi!</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Tables - Example 6', () {
@@ -219,15 +230,16 @@ fff | ggg | hhh | iii | jjj''';
 </tbody>
 </table>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
-    test('Table cell count mismatches - Example 7',  skip: kSkipKnownFailure, () {
+    test('Table cell count mismatches - Example 7', skip: kSkipKnownFailure,
+        () {
       final markdown = '''| a | b | c |
 | --- | --- |
 | this | isn\'t | okay |''';
@@ -235,12 +247,12 @@ fff | ggg | hhh | iii | jjj''';
 | --- | --- |
 | this | isn\'t | okay |</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Table cell count mismatches - Example 8', () {
@@ -276,12 +288,12 @@ fff | ggg | hhh | iii | jjj''';
 </tbody>
 </table>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Embedded pipes - Example 9', skip: kSkipKnownFailure, () {
@@ -318,12 +330,12 @@ fff | ggg | hhh | iii | jjj''';
 </tbody>
 </table>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Oddly-formatted markers - Example 10', skip: kSkipKnownFailure, () {
@@ -337,12 +349,12 @@ fff | ggg | hhh | iii | jjj''';
 </thead>
 </table>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Escaping - Example 11', () {
@@ -399,12 +411,12 @@ fff | ggg | hhh | iii | jjj''';
 <p>| <code>\\|</code></p>
 <p>\\a <code>\\a</code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Embedded HTML - Example 12', skip: kSkipKnownFailure, () {
@@ -428,12 +440,12 @@ fff | ggg | hhh | iii | jjj''';
 </tbody>
 </table>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Reference-style links - Example 13', skip: kSkipKnownFailure, () {
@@ -444,7 +456,8 @@ fff | ggg | hhh | iii | jjj''';
 | Here\'s a link to [Freedom Planet 2][] in a table row. |
 
 [Freedom Planet 2]: http://www.freedomplanet2.com/''';
-      final expected = '''<p>Here\'s a link to <a href="http://www.freedomplanet2.com/">Freedom Planet 2</a>.</p>
+      final expected =
+          '''<p>Here\'s a link to <a href="http://www.freedomplanet2.com/">Freedom Planet 2</a>.</p>
 <table>
 <thead>
 <tr>
@@ -458,12 +471,12 @@ fff | ggg | hhh | iii | jjj''';
 </tbody>
 </table>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Sequential cells - Example 14', () {
@@ -487,12 +500,12 @@ fff | ggg | hhh | iii | jjj''';
 </tbody>
 </table>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Interaction with emphasis - Example 15', () {
@@ -514,15 +527,17 @@ fff | ggg | hhh | iii | jjj''';
 </tbody>
 </table>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
-    test('a table can be recognised when separated from a paragraph of text without an empty line - Example 16', skip: kSkipKnownFailure, () {
+    test(
+        'a table can be recognised when separated from a paragraph of text without an empty line - Example 16',
+        skip: kSkipKnownFailure, () {
       final markdown = '''123
 456
 | a | b |
@@ -545,27 +560,27 @@ d | e''';
 </tbody>
 </table>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Strikethroughs - Example 17', () {
       final markdown = '''A proper ~strikethrough~.''';
       final expected = '''<p>A proper <del>strikethrough</del>.</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
-    test('Strikethroughs - Example 18',  skip: kSkipKnownFailure, () {
+    test('Strikethroughs - Example 18', skip: kSkipKnownFailure, () {
       final markdown = '''These are ~not strikethroughs.
 
 No, they are not~
@@ -584,12 +599,12 @@ No ~mismatch~~''';
 <p><del>one</del> <del>two</del> ~~~three~~~</p>
 <p>No ~mismatch~~</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Autolinks - Example 19', skip: kSkipKnownFailure, () {
@@ -656,7 +671,8 @@ Full stop outside parens shouldn\'t be included http://google.com/ok.
 \'http://google.com\'
 
 http://🍄.ga/ http://x🍄.ga/''';
-      final expected = '''<p>: <a href="http://google.com">http://google.com</a> <a href="https://google.com">https://google.com</a></p>
+      final expected =
+          '''<p>: <a href="http://google.com">http://google.com</a> <a href="https://google.com">https://google.com</a></p>
 <p><a href="http://google.com/%C3%A5">http://google.com/å</a> <a href="http://google.com/%C3%A5">http://google.com/å</a></p>
 <p><a href="mailto:scyther@pokemon.com">scyther@pokemon.com</a></p>
 <p><a href="mailto:scy.the_rbe-edr+ill@pokemon.com">scy.the_rbe-edr+ill@pokemon.com</a></p>
@@ -689,24 +705,24 @@ http://🍄.ga/ http://x🍄.ga/''';
 <p>\'<a href="http://google.com">http://google.com</a>\'</p>
 <p><a href="http://%F0%9F%8D%84.ga/">http://🍄.ga/</a> <a href="http://x%F0%9F%8D%84.ga/">http://x🍄.ga/</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Autolinks - Example 20', skip: kSkipKnownFailure, () {
       final markdown = '''This shouldn\'t crash everything: (_A_@_.A''';
       final expected = '''<IGNORE>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Autolinks - Example 21', () {
@@ -720,16 +736,17 @@ http://🍄.ga/ http://x🍄.ga/''';
 <li>n@.  b</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('HTML tag filter - Example 22', skip: kSkipNongoal_HtmlGeneral, () {
-      final markdown = '''This is <xmp> not okay, but **this** <strong>is</strong>.
+      final markdown =
+          '''This is <xmp> not okay, but **this** <strong>is</strong>.
 
 <p>This is <xmp> not okay, but **this** <strong>is</strong>.</p>
 
@@ -750,7 +767,8 @@ Even with {"x":"y"} or 1 > 2 or whatever. Even **markdown**.
 <!--- Support everything CommonMark\'s parser does. -->
 <!---->
 <!--thistoo-->''';
-      final expected = '''<p>This is &lt;xmp> not okay, but <strong>this</strong> <strong>is</strong>.</p>
+      final expected =
+          '''<p>This is &lt;xmp> not okay, but <strong>this</strong> <strong>is</strong>.</p>
 <p>This is &lt;xmp> not okay, but **this** <strong>is</strong>.</p>
 <p>Nope, I won\'t have &lt;textarea>.</p>
 <p>No &lt;textarea> here either.</p>
@@ -766,12 +784,12 @@ Even with {"x":"y"} or 1 > 2 or whatever. Even **markdown**.
 <!---->
 <!--thistoo-->''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Footnotes - Example 23', skip: kSkipKnownFailure, () {
@@ -801,7 +819,8 @@ Hi!
     or, naturally, simple paragraphs.
 
 [^unused]: This is unused.''';
-      final expected = '''<p>This is some text!<sup class="footnote-ref"><a href="#fn-1" id="fnref-1" data-footnote-ref>1</a></sup>. Other text.<sup class="footnote-ref"><a href="#fn-footnote" id="fnref-footnote" data-footnote-ref>2</a></sup>.</p>
+      final expected =
+          '''<p>This is some text!<sup class="footnote-ref"><a href="#fn-1" id="fnref-1" data-footnote-ref>1</a></sup>. Other text.<sup class="footnote-ref"><a href="#fn-footnote" id="fnref-footnote" data-footnote-ref>2</a></sup>.</p>
 <p>Here\'s a thing<sup class="footnote-ref"><a href="#fn-other-note" id="fnref-other-note" data-footnote-ref>3</a></sup>.</p>
 <p>And another thing<sup class="footnote-ref"><a href="#fn-codeblock-note" id="fnref-codeblock-note" data-footnote-ref>4</a></sup>.</p>
 <p>This doesn\'t have a referent[^nope].</p>
@@ -830,21 +849,24 @@ Hi!
 </ol>
 </section>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
-    test('When a footnote is used multiple times, we insert multiple backrefs. - Example 24', skip: kSkipKnownFailure, () {
+    test(
+        'When a footnote is used multiple times, we insert multiple backrefs. - Example 24',
+        skip: kSkipKnownFailure, () {
       final markdown = '''This is some text. It has a footnote[^a-footnote].
 
 This footnote is referenced[^a-footnote] multiple times, in lots of different places.[^a-footnote]
 
 [^a-footnote]: This footnote definition should have three backrefs.''';
-      final expected = '''<p>This is some text. It has a footnote<sup class="footnote-ref"><a href="#fn-a-footnote" id="fnref-a-footnote" data-footnote-ref>1</a></sup>.</p>
+      final expected =
+          '''<p>This is some text. It has a footnote<sup class="footnote-ref"><a href="#fn-a-footnote" id="fnref-a-footnote" data-footnote-ref>1</a></sup>.</p>
 <p>This footnote is referenced<sup class="footnote-ref"><a href="#fn-a-footnote" id="fnref-a-footnote-2" data-footnote-ref>1</a></sup> multiple times, in lots of different places.<sup class="footnote-ref"><a href="#fn-a-footnote" id="fnref-a-footnote-3" data-footnote-ref>1</a></sup></p>
 <section class="footnotes" data-footnotes>
 <ol>
@@ -854,19 +876,21 @@ This footnote is referenced[^a-footnote] multiple times, in lots of different pl
 </ol>
 </section>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
-    test('Footnote reference labels are href escaped - Example 25', skip: kSkipKnownFailure, () {
+    test('Footnote reference labels are href escaped - Example 25',
+        skip: kSkipKnownFailure, () {
       final markdown = '''Hello[^"><script>alert(1)</script>]
 
 [^"><script>alert(1)</script>]: pwned''';
-      final expected = '''<p>Hello<sup class="footnote-ref"><a href="#fn-%22%3E%3Cscript%3Ealert(1)%3C/script%3E" id="fnref-%22%3E%3Cscript%3Ealert(1)%3C/script%3E" data-footnote-ref>1</a></sup></p>
+      final expected =
+          '''<p>Hello<sup class="footnote-ref"><a href="#fn-%22%3E%3Cscript%3Ealert(1)%3C/script%3E" id="fnref-%22%3E%3Cscript%3Ealert(1)%3C/script%3E" data-footnote-ref>1</a></sup></p>
 <section class="footnotes" data-footnotes>
 <ol>
 <li id="fn-%22%3E%3Cscript%3Ealert(1)%3C/script%3E">
@@ -875,27 +899,28 @@ This footnote is referenced[^a-footnote] multiple times, in lots of different pl
 </ol>
 </section>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Interop - Example 26', skip: kSkipKnownFailure, () {
       final markdown = '''~~www.google.com~~
 
 ~~http://google.com~~''';
-      final expected = '''<p><del><a href="http://www.google.com">www.google.com</a></del></p>
+      final expected =
+          '''<p><del><a href="http://www.google.com">www.google.com</a></del></p>
 <p><del><a href="http://google.com">http://google.com</a></del></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Interop - Example 27', skip: kSkipKnownFailure, () {
@@ -917,12 +942,12 @@ This footnote is referenced[^a-footnote] multiple times, in lots of different pl
 </tbody>
 </table>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Task lists - Example 28', () {
@@ -933,12 +958,12 @@ This footnote is referenced[^a-footnote] multiple times, in lots of different pl
 <li><input type="checkbox" checked="" disabled="" /> bar</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Task lists - Example 29', () {
@@ -972,12 +997,12 @@ Show a regular (non task) list to show that it has the same structure
 <li>[@] bim</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
 
     test('Task lists - Example 30', () {
@@ -1011,13 +1036,12 @@ Show a regular (non task) list to show that it has the same structure
 <li>[@] bim</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createGfmParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
 
-      expect(html.trim(), expected.trim());
+      _expectHtml(html, expected);
     });
-
   });
 }

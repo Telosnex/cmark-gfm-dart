@@ -100,30 +100,42 @@ int _scanLinkUrlBare(Uint8List input, int offset, LinkUrlResult result) {
   
   while (pos < input.length) {
     final c = input[pos];
-    
+
     if (c == 0x5C && pos + 1 < input.length && _isPunct(input[pos + 1])) {
-      // Escaped punct
       pos += 2;
-    } else if (c == 0x28) { // (
+      continue;
+    }
+
+    if (c == 0x28) {
       parenCount++;
       pos++;
       if (parenCount > 32) {
-        return -1; // Too many nested parens
+        return -1;
       }
-    } else if (c == 0x29) { // )
+      continue;
+    }
+
+    if (c == 0x29) {
       if (parenCount == 0) {
-        break; // Unmatched ) - end of URL (could be empty)
+        break;
       }
       parenCount--;
       pos++;
-    } else if (_isSpace(c)) {
-      if (pos == offset) {
-        return -1; // URL can't start with space
-      }
-      break; // End of URL
-    } else {
-      pos++;
+      continue;
     }
+
+    final decoded = _decodeCodePoint(input, pos);
+    final codePoint = decoded.value;
+    final length = decoded.length;
+
+    if (_isSpace(codePoint)) {
+      if (pos == offset) {
+        return -1;
+      }
+      break;
+    }
+
+    pos += length;
   }
   
   // EOF without closing paren is invalid
@@ -170,30 +182,42 @@ int scanLinkUrlForReference(Uint8List input, int offset, LinkUrlResult result) {
   // Bare URL form - scan until whitespace or EOF
   while (pos < input.length) {
     final c = input[pos];
-    
+
     if (c == 0x5C && pos + 1 < input.length && _isPunct(input[pos + 1])) {
-      // Escaped punct
       pos += 2;
-    } else if (c == 0x28) { // (
+      continue;
+    }
+
+    if (c == 0x28) {
       parenCount++;
       pos++;
       if (parenCount > 32) {
-        return -1; // Too many nested parens
+        return -1;
       }
-    } else if (c == 0x29) { // )
+      continue;
+    }
+
+    if (c == 0x29) {
       if (parenCount == 0) {
-        break; // Unmatched ) - end of URL
+        break;
       }
       parenCount--;
       pos++;
-    } else if (_isSpace(c)) {
-      if (pos == offset) {
-        return -1; // URL can't start with space
-      }
-      break; // End of URL
-    } else {
-      pos++;
+      continue;
     }
+
+    final decoded = _decodeCodePoint(input, pos);
+    final codePoint = decoded.value;
+    final length = decoded.length;
+
+    if (_isSpace(codePoint)) {
+      if (pos == offset) {
+        return -1;
+      }
+      break;
+    }
+
+    pos += length;
   }
   
   // Empty or whitespace is valid for reference definitions
@@ -201,7 +225,11 @@ int scanLinkUrlForReference(Uint8List input, int offset, LinkUrlResult result) {
   return pos - offset;
 }
 
-bool _isSpace(int c) => c == 0x20 || c == 0x09 || c == 0x0A || c == 0x0D;
+bool _isSpace(int c) =>
+    c == 0x20 ||
+    c == 0x09 ||
+    c == 0x0A ||
+    c == 0x0D;
 bool _isPunct(int c) {
   return (c >= 0x21 && c <= 0x2F) ||
          (c >= 0x3A && c <= 0x40) ||
@@ -323,4 +351,35 @@ String _strbufUnescape(String s) {
     }
   }
   return result.toString();
+}
+
+_CodepointResult _decodeCodePoint(Uint8List data, int pos) {
+  final first = data[pos];
+  if (first < 0x80) {
+    return _CodepointResult(first, 1);
+  } else if ((first & 0xE0) == 0xC0 && pos + 1 < data.length) {
+    final second = data[pos + 1] & 0x3F;
+    final value = ((first & 0x1F) << 6) | second;
+    return _CodepointResult(value, 2);
+  } else if ((first & 0xF0) == 0xE0 && pos + 2 < data.length) {
+    final second = data[pos + 1] & 0x3F;
+    final third = data[pos + 2] & 0x3F;
+    final value = ((first & 0x0F) << 12) | (second << 6) | third;
+    return _CodepointResult(value, 3);
+  } else if ((first & 0xF8) == 0xF0 && pos + 3 < data.length) {
+    final second = data[pos + 1] & 0x3F;
+    final third = data[pos + 2] & 0x3F;
+    final fourth = data[pos + 3] & 0x3F;
+    final value =
+        ((first & 0x07) << 18) | (second << 12) | (third << 6) | fourth;
+    return _CodepointResult(value, 4);
+  }
+  return _CodepointResult(first, 1);
+}
+
+class _CodepointResult {
+  _CodepointResult(this.value, this.length);
+
+  final int value;
+  final int length;
 }

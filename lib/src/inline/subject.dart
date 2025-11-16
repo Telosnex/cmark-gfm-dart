@@ -134,9 +134,19 @@ class Subject {
 
   int scanSpacechars() {
     var count = 0;
-    while (peekChar() == 0x20 || peekChar() == 0x09) {
-      advance();
-      count++;
+    while (true) {
+      final ch = peekChar();
+      if (ch == 0x20 ||
+          ch == 0x09 ||
+          ch == 0x0A ||
+          ch == 0x0B ||
+          ch == 0x0C ||
+          ch == 0x0D) {
+        advance();
+        count++;
+      } else {
+        break;
+      }
     }
     return count;
   }
@@ -144,9 +154,19 @@ class Subject {
   int scanSpacecharsAt(int position) {
     var count = 0;
     var p = position;
-    while (p < input.length && (input[p] == 0x20 || input[p] == 0x09)) {
-      count++;
-      p++;
+    while (p < input.length) {
+      final ch = input[p];
+      if (ch == 0x20 ||
+          ch == 0x09 ||
+          ch == 0x0A ||
+          ch == 0x0B ||
+          ch == 0x0C ||
+          ch == 0x0D) {
+        count++;
+        p++;
+      } else {
+        break;
+      }
     }
     return count;
   }

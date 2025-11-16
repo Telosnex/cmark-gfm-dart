@@ -17,9 +17,11 @@ class CmarkParserOptions {
     this.enableMath = false,
     this.mathOptions = const CmarkMathOptions(),
     this.maxReferenceSize,
+    this.enableAutolinkExtension = false,
   });
 
   final bool enableMath;
   final CmarkMathOptions mathOptions;
   final int? maxReferenceSize;
+  final bool enableAutolinkExtension;
 }

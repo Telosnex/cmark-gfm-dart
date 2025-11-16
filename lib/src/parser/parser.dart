@@ -16,6 +16,7 @@ class CmarkParser {
                   enableMath: options.enableMath,
                   mathOptions: options.mathOptions,
                   maxReferenceSize: maxReferenceSize,
+                  enableAutolinkExtension: options.enableAutolinkExtension,
                 )
               : options,
         );

@@ -10,8 +10,7 @@ const kSkipNongoal_MdNotToHtml =
     'Skipping because the test verifies text that is *almost* correct HTML is left undisturbed and Markdown does not become HTML. It is a non-goal for us to pass these tests: instead, HTML isn\'t recognized, we leave the markdown as-is.';
 const kSkipNongoal_HtmlGeneral =
     'Skipping because the test verifies general HTML behavior which is a non-goal for us to pass these tests.';
-const kSkipKnownFailure =
-    'Skipping because known failure; avoid noise when checking for regressions, thus enabling checking for regressions.';
+const kSkipKnownFailure = false;
 void main() {
   group('CommonMark Spec Tests', () {
     test('Tabs - Example 1', () {
@@ -2736,7 +2735,8 @@ line2
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 166', skip: kSkipKnownFailure, () {
+    test('Link reference definitions - Example 166', skip: kSkipKnownFailure,
+        () {
       final markdown = '''[foo]: /url \'title
 
 with blank line\'
@@ -5537,7 +5537,8 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 317', skip: kSkipKnownFailure, () {
+    test('Entity and numeric character references - Example 317',
+        skip: kSkipKnownFailure, () {
       final markdown = '''<a href="&ouml;&ouml;.html">''';
       final expected = '''<a href="&ouml;&ouml;.html">''';
 
@@ -5562,7 +5563,8 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 319', skip: kSkipKnownFailure, () {
+    test('Entity and numeric character references - Example 319',
+        skip: kSkipKnownFailure, () {
       final markdown = '''[foo]
 
 [foo]: /f&ouml;&ouml; "f&ouml;&ouml;"''';
@@ -5577,7 +5579,8 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 320', skip: kSkipKnownFailure, () {
+    test('Entity and numeric character references - Example 320',
+        skip: kSkipKnownFailure, () {
       final markdown = '''``` f&ouml;&ouml;
 foo
 ```''';
@@ -5996,7 +5999,8 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 353', skip: kSkipKnownFailure, () {
+    test('Emphasis and strong emphasis - Example 353', skip: kSkipKnownFailure,
+        () {
       final markdown = '''* a *''';
       final expected = '''<p>* a *</p>''';
 
@@ -7466,7 +7470,8 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 474', skip: kSkipKnownFailure, () {
+    test('Emphasis and strong emphasis - Example 474', skip: kSkipKnownFailure,
+        () {
       final markdown = '''*<img src="foo" title="*"/>''';
       final expected = '''<p>*<img src="foo" title="*"/></p>''';
 
@@ -7478,7 +7483,8 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 475',  skip: kSkipKnownFailure, () {
+    test('Emphasis and strong emphasis - Example 475', skip: kSkipKnownFailure,
+        () {
       final markdown = '''**<a href="**">''';
       final expected = '''<p>**<a href="**"></p>''';
 
@@ -7490,7 +7496,8 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 476', skip: kSkipKnownFailure, () {
+    test('Emphasis and strong emphasis - Example 476', skip: kSkipKnownFailure,
+        () {
       final markdown = '''__<a href="__">''';
       final expected = '''<p>__<a href="__"></p>''';
 
@@ -8509,7 +8516,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 552',skip: kSkipKnownFailure, () {
+    test('Links - Example 552', skip: kSkipKnownFailure, () {
       final markdown = '''[foo] 
 []
 
@@ -8654,7 +8661,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 562',skip: kSkipKnownFailure, () {
+    test('Links - Example 562', skip: kSkipKnownFailure, () {
       final markdown = '''[foo][]
 
 [foo]: /url1''';
@@ -8682,7 +8689,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 564',skip: kSkipKnownFailure,  () {
+    test('Links - Example 564', skip: kSkipKnownFailure, () {
       final markdown = '''[foo](not a link)
 
 [foo]: /url1''';
@@ -8792,7 +8799,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 572',skip: kSkipKnownFailure, () {
+    test('Images - Example 572', skip: kSkipKnownFailure, () {
       final markdown = '''![foo *bar*][]
 
 [foo *bar*]: train.jpg "train & tracks"''';
@@ -8885,7 +8892,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 579',skip: kSkipKnownFailure, () {
+    test('Images - Example 579', skip: kSkipKnownFailure, () {
       final markdown = '''![foo][bar]
 
 [BAR]: /url''';
@@ -9319,7 +9326,7 @@ data="foo" ></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 612',skip: kSkipNongoal_MdToHtml, () {
+    test('Raw HTML - Example 612', skip: kSkipNongoal_MdToHtml, () {
       final markdown = '''<a foo="bar" bam = \'baz <em>"</em>\'
 _boolean zoop:33=zoop:33 />''';
       final expected = '''<p><a foo="bar" bam = \'baz <em>"</em>\'
