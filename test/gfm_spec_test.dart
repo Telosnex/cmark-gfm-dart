@@ -1,23 +1,22 @@
 import 'package:cmark_gfm/cmark_gfm.dart';
 import 'package:test/test.dart';
 
-import 'commonmark_spec_test.dart';
+// Generated from cmark-gfm/test/extensions.txt
+// DO NOT EDIT - regenerate with tool/generate_spec_tests.dart
 
 CmarkParser _createGfmParser() => CmarkParser(
-      options: const CmarkParserOptions(enableAutolinkExtension: true),
+      options: const CmarkParserOptions(
+        enableAutolinkExtension: true,
+      ),
     );
 
 void _expectHtml(String actual, String expected) {
-  if (expected.trim() == '<IGNORE>') {
-    return;
-  }
+  if (expected.trim() == '<IGNORE>') return;
   expect(actual.trim(), expected.trim());
 }
 
-String _renderGfmHtml(CmarkNode doc) => HtmlRenderer(filterHtml: true).render(doc);
-
-// Generated from cmark-gfm/test/extensions.txt
-// DO NOT EDIT - regenerate with tool/generate_spec_tests.dart
+String _renderGfmHtml(CmarkNode doc) =>
+    HtmlRenderer(filterHtml: true).render(doc);
 
 void main() {
   group('GFM Extensions Spec Tests', () {
@@ -53,12 +52,12 @@ void main() {
       _expectHtml(html, expected);
     });
 
-    test('Tables - Example 2', skip: kSkipKnownFailure, () {
+    test('Tables - Example 2', () {
       final markdown = '''Hello!
 
 | _abc_ | セン |
 | ----- | ---- |
-| 1. Block elements inside cells don\'t work. | |
+| 1. Block elements inside cells don't work. | |
 | But _**inline elements do**_. | x |
 
 Hi!''';
@@ -72,7 +71,7 @@ Hi!''';
 </thead>
 <tbody>
 <tr>
-<td>1. Block elements inside cells don\'t work.</td>
+<td>1. Block elements inside cells don't work.</td>
 <td></td>
 </tr>
 <tr>
@@ -91,7 +90,7 @@ Hi!''';
       _expectHtml(html, expected);
     });
 
-    test('Tables - Example 3', skip: kSkipKnownFailure, () {
+    test('Tables - Example 3', () {
       final markdown = '''| Not enough table | to be considered table |
 
 | Not enough table | to be considered table |
@@ -240,14 +239,13 @@ fff | ggg | hhh | iii | jjj''';
       _expectHtml(html, expected);
     });
 
-    test('Table cell count mismatches - Example 7', skip: kSkipKnownFailure,
-        () {
+    test('Tables - Example 7', () {
       final markdown = '''| a | b | c |
 | --- | --- |
-| this | isn\'t | okay |''';
+| this | isn't | okay |''';
       final expected = '''<p>| a | b | c |
 | --- | --- |
-| this | isn\'t | okay |</p>''';
+| this | isn't | okay |</p>''';
 
       final parser = _createGfmParser();
       parser.feed(markdown);
@@ -257,7 +255,7 @@ fff | ggg | hhh | iii | jjj''';
       _expectHtml(html, expected);
     });
 
-    test('Table cell count mismatches - Example 8', () {
+    test('Tables - Example 8', () {
       final markdown = '''| a | b | c |
 | --- | --- | ---
 | x
@@ -298,13 +296,13 @@ fff | ggg | hhh | iii | jjj''';
       _expectHtml(html, expected);
     });
 
-    test('Embedded pipes - Example 9', skip: kSkipKnownFailure, () {
+    test('Tables - Example 9', () {
       final markdown = '''| a | b |
 | --- | --- |
 | Escaped pipes are \\|okay\\|. | Like \\| this. |
 | Within `\\|code\\| is okay` too. |
 | _**`c\\|`**_ \\| complex
-| don\'t **\\_reparse\\_**''';
+| don't **\\_reparse\\_**''';
       final expected = '''<table>
 <thead>
 <tr>
@@ -326,7 +324,7 @@ fff | ggg | hhh | iii | jjj''';
 <td></td>
 </tr>
 <tr>
-<td>don\'t <strong>_reparse_</strong></td>
+<td>don't <strong>_reparse_</strong></td>
 <td></td>
 </tr>
 </tbody>
@@ -340,7 +338,7 @@ fff | ggg | hhh | iii | jjj''';
       _expectHtml(html, expected);
     });
 
-    test('Oddly-formatted markers - Example 10', skip: kSkipKnownFailure, () {
+    test('Tables - Example 10', () {
       final markdown = '''| a |
 --- |''';
       final expected = '''<table>
@@ -359,7 +357,7 @@ fff | ggg | hhh | iii | jjj''';
       _expectHtml(html, expected);
     });
 
-    test('Escaping - Example 11', () {
+    test('Tables - Example 11', () {
       final markdown = '''| a | b |
 | --- | --- |
 | \\\\ | `\\\\` |
@@ -421,7 +419,7 @@ fff | ggg | hhh | iii | jjj''';
       _expectHtml(html, expected);
     });
 
-    test('Embedded HTML - Example 12', skip: kSkipKnownFailure, () {
+    test('Tables - Example 12', () {
       final markdown = '''| a |
 | --- |
 | <strong>hello</strong> |
@@ -450,25 +448,24 @@ fff | ggg | hhh | iii | jjj''';
       _expectHtml(html, expected);
     });
 
-    test('Reference-style links - Example 13', skip: kSkipKnownFailure, () {
-      final markdown = '''Here\'s a link to [Freedom Planet 2][].
+    test('Tables - Example 13', () {
+      final markdown = '''Here's a link to [Freedom Planet 2][].
 
-| Here\'s a link to [Freedom Planet 2][] in a table header. |
+| Here's a link to [Freedom Planet 2][] in a table header. |
 | --- |
-| Here\'s a link to [Freedom Planet 2][] in a table row. |
+| Here's a link to [Freedom Planet 2][] in a table row. |
 
 [Freedom Planet 2]: http://www.freedomplanet2.com/''';
-      final expected =
-          '''<p>Here\'s a link to <a href="http://www.freedomplanet2.com/">Freedom Planet 2</a>.</p>
+      final expected = '''<p>Here's a link to <a href="http://www.freedomplanet2.com/">Freedom Planet 2</a>.</p>
 <table>
 <thead>
 <tr>
-<th>Here\'s a link to <a href="http://www.freedomplanet2.com/">Freedom Planet 2</a> in a table header.</th>
+<th>Here's a link to <a href="http://www.freedomplanet2.com/">Freedom Planet 2</a> in a table header.</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Here\'s a link to <a href="http://www.freedomplanet2.com/">Freedom Planet 2</a> in a table row.</td>
+<td>Here's a link to <a href="http://www.freedomplanet2.com/">Freedom Planet 2</a> in a table row.</td>
 </tr>
 </tbody>
 </table>''';
@@ -481,7 +478,7 @@ fff | ggg | hhh | iii | jjj''';
       _expectHtml(html, expected);
     });
 
-    test('Sequential cells - Example 14', () {
+    test('Tables - Example 14', () {
       final markdown = '''| a | b | c |
 | --- | --- | --- |
 | d || e |''';
@@ -510,7 +507,7 @@ fff | ggg | hhh | iii | jjj''';
       _expectHtml(html, expected);
     });
 
-    test('Interaction with emphasis - Example 15', () {
+    test('Tables - Example 15', () {
       final markdown = '''| a | b |
 | --- | --- |
 |***(a)***|''';
@@ -537,9 +534,7 @@ fff | ggg | hhh | iii | jjj''';
       _expectHtml(html, expected);
     });
 
-    test(
-        'a table can be recognised when separated from a paragraph of text without an empty line - Example 16',
-        skip: kSkipKnownFailure, () {
+    test('Tables - Example 16', () {
       final markdown = '''123
 456
 | a | b |
@@ -570,7 +565,7 @@ d | e''';
       _expectHtml(html, expected);
     });
 
-    test('Strikethroughs - Example 17', () {
+    test('Strikethroughs - Example 1', () {
       final markdown = '''A proper ~strikethrough~.''';
       final expected = '''<p>A proper <del>strikethrough</del>.</p>''';
 
@@ -582,12 +577,12 @@ d | e''';
       _expectHtml(html, expected);
     });
 
-    test('Strikethroughs - Example 18', skip: kSkipKnownFailure, () {
+    test('Strikethroughs - Example 2', () {
       final markdown = '''These are ~not strikethroughs.
 
 No, they are not~
 
-This ~is ~ legit~ isn\'t ~ legit.
+This ~is ~ legit~ isn't ~ legit.
 
 This is not ~~~~~one~~~~~ huge strikethrough.
 
@@ -596,7 +591,7 @@ This is not ~~~~~one~~~~~ huge strikethrough.
 No ~mismatch~~''';
       final expected = '''<p>These are ~not strikethroughs.</p>
 <p>No, they are not~</p>
-<p>This <del>is ~ legit</del> isn\'t ~ legit.</p>
+<p>This <del>is ~ legit</del> isn't ~ legit.</p>
 <p>This is not ~~~~~one~~~~~ huge strikethrough.</p>
 <p><del>one</del> <del>two</del> ~~~three~~~</p>
 <p>No ~mismatch~~</p>''';
@@ -609,7 +604,7 @@ No ~mismatch~~''';
       _expectHtml(html, expected);
     });
 
-    test('Autolinks - Example 19', skip: kSkipKnownFailure, () {
+    test('Autolinks - Example 1', () {
       final markdown = ''': http://google.com https://google.com
 
 <http://google.com/å> http://google.com/å
@@ -664,17 +659,16 @@ Underscores allowed in domain name www._xxx.yyy.zzz
 
 a.w@b.c
 
-Full stop outside parens shouldn\'t be included http://google.com/ok.
+Full stop outside parens shouldn't be included http://google.com/ok.
 
-(Full stop inside parens shouldn\'t be included http://google.com/ok.)
+(Full stop inside parens shouldn't be included http://google.com/ok.)
 
 "http://google.com"
 
-\'http://google.com\'
+'http://google.com'
 
 http://🍄.ga/ http://x🍄.ga/''';
-      final expected =
-          '''<p>: <a href="http://google.com">http://google.com</a> <a href="https://google.com">https://google.com</a></p>
+      final expected = '''<p>: <a href="http://google.com">http://google.com</a> <a href="https://google.com">https://google.com</a></p>
 <p><a href="http://google.com/%C3%A5">http://google.com/å</a> <a href="http://google.com/%C3%A5">http://google.com/å</a></p>
 <p><a href="mailto:scyther@pokemon.com">scyther@pokemon.com</a></p>
 <p><a href="mailto:scy.the_rbe-edr+ill@pokemon.com">scy.the_rbe-edr+ill@pokemon.com</a></p>
@@ -701,10 +695,10 @@ http://🍄.ga/ http://x🍄.ga/''';
 <p><strong>Autolink and <a href="http://inlines">http://inlines</a></strong></p>
 <p><img src="http://inline.com/image" alt="http://inline.com/image" /></p>
 <p><a href="mailto:a.w@b.c">a.w@b.c</a></p>
-<p>Full stop outside parens shouldn\'t be included <a href="http://google.com/ok">http://google.com/ok</a>.</p>
-<p>(Full stop inside parens shouldn\'t be included <a href="http://google.com/ok">http://google.com/ok</a>.)</p>
+<p>Full stop outside parens shouldn't be included <a href="http://google.com/ok">http://google.com/ok</a>.</p>
+<p>(Full stop inside parens shouldn't be included <a href="http://google.com/ok">http://google.com/ok</a>.)</p>
 <p>&quot;<a href="http://google.com">http://google.com</a>&quot;</p>
-<p>\'<a href="http://google.com">http://google.com</a>\'</p>
+<p>'<a href="http://google.com">http://google.com</a>'</p>
 <p><a href="http://%F0%9F%8D%84.ga/">http://🍄.ga/</a> <a href="http://x%F0%9F%8D%84.ga/">http://x🍄.ga/</a></p>''';
 
       final parser = _createGfmParser();
@@ -715,8 +709,8 @@ http://🍄.ga/ http://x🍄.ga/''';
       _expectHtml(html, expected);
     });
 
-    test('Autolinks - Example 20', skip: kSkipKnownFailure, () {
-      final markdown = '''This shouldn\'t crash everything: (_A_@_.A''';
+    test('Autolinks - Example 2', () {
+      final markdown = '''This shouldn't crash everything: (_A_@_.A''';
       final expected = '''<IGNORE>''';
 
       final parser = _createGfmParser();
@@ -727,7 +721,7 @@ http://🍄.ga/ http://x🍄.ga/''';
       _expectHtml(html, expected);
     });
 
-    test('Autolinks - Example 21', () {
+    test('Autolinks - Example 3', () {
       final markdown = '''These should not link:
 
 * @a.b.c@. x
@@ -746,13 +740,12 @@ http://🍄.ga/ http://x🍄.ga/''';
       _expectHtml(html, expected);
     });
 
-    test('HTML tag filter - Example 22', skip: kSkipNongoal_HtmlGeneral, () {
-      final markdown =
-          '''This is <xmp> not okay, but **this** <strong>is</strong>.
+    test('HTML tag filter - Example 1', () {
+      final markdown = '''This is <xmp> not okay, but **this** <strong>is</strong>.
 
 <p>This is <xmp> not okay, but **this** <strong>is</strong>.</p>
 
-Nope, I won\'t have <textarea>.
+Nope, I won't have <textarea>.
 
 <p>No <textarea> here either.</p>
 
@@ -761,28 +754,27 @@ Nope, I won\'t have <textarea>.
 Yep, <totally>okay</totally>.
 
 <!-- HTML comments are okay, though. -->
-<!- But we\'re strict. ->
+<!- But we're strict. ->
 <! No nonsense. >
 <!-- Leave multiline comments the heck alone, though, okay?
 Even with {"x":"y"} or 1 > 2 or whatever. Even **markdown**.
 -->
-<!--- Support everything CommonMark\'s parser does. -->
+<!--- Support everything CommonMark's parser does. -->
 <!---->
 <!--thistoo-->''';
-      final expected =
-          '''<p>This is &lt;xmp> not okay, but <strong>this</strong> <strong>is</strong>.</p>
+      final expected = '''<p>This is &lt;xmp> not okay, but <strong>this</strong> <strong>is</strong>.</p>
 <p>This is &lt;xmp> not okay, but **this** <strong>is</strong>.</p>
-<p>Nope, I won\'t have &lt;textarea>.</p>
+<p>Nope, I won't have &lt;textarea>.</p>
 <p>No &lt;textarea> here either.</p>
 <p>This <random /> <thing> is okay</thing> though.</p>
 <p>Yep, <totally>okay</totally>.</p>
 <!-- HTML comments are okay, though. -->
-<p>&lt;!- But we\'re strict. -&gt;
+<p>&lt;!- But we're strict. -&gt;
 &lt;! No nonsense. &gt;</p>
 <!-- Leave multiline comments the heck alone, though, okay?
 Even with {"x":"y"} or 1 > 2 or whatever. Even **markdown**.
 -->
-<!--- Support everything CommonMark\'s parser does. -->
+<!--- Support everything CommonMark's parser does. -->
 <!---->
 <!--thistoo-->''';
 
@@ -794,14 +786,14 @@ Even with {"x":"y"} or 1 > 2 or whatever. Even **markdown**.
       _expectHtml(html, expected);
     });
 
-    test('Footnotes - Example 23', skip: kSkipKnownFailure, () {
+    test('Footnotes - Example 1', () {
       final markdown = '''This is some text![^1]. Other text.[^footnote].
 
-Here\'s a thing[^other-note].
+Here's a thing[^other-note].
 
 And another thing[^codeblock-note].
 
-This doesn\'t have a referent[^nope].
+This doesn't have a referent[^nope].
 
 
 [^other-note]:       no code block here (spaces are stripped away)
@@ -821,11 +813,10 @@ Hi!
     or, naturally, simple paragraphs.
 
 [^unused]: This is unused.''';
-      final expected =
-          '''<p>This is some text!<sup class="footnote-ref"><a href="#fn-1" id="fnref-1" data-footnote-ref>1</a></sup>. Other text.<sup class="footnote-ref"><a href="#fn-footnote" id="fnref-footnote" data-footnote-ref>2</a></sup>.</p>
-<p>Here\'s a thing<sup class="footnote-ref"><a href="#fn-other-note" id="fnref-other-note" data-footnote-ref>3</a></sup>.</p>
+      final expected = '''<p>This is some text!<sup class="footnote-ref"><a href="#fn-1" id="fnref-1" data-footnote-ref>1</a></sup>. Other text.<sup class="footnote-ref"><a href="#fn-footnote" id="fnref-footnote" data-footnote-ref>2</a></sup>.</p>
+<p>Here's a thing<sup class="footnote-ref"><a href="#fn-other-note" id="fnref-other-note" data-footnote-ref>3</a></sup>.</p>
 <p>And another thing<sup class="footnote-ref"><a href="#fn-codeblock-note" id="fnref-codeblock-note" data-footnote-ref>4</a></sup>.</p>
-<p>This doesn\'t have a referent[^nope].</p>
+<p>This doesn't have a referent[^nope].</p>
 <p>Hi!</p>
 <section class="footnotes" data-footnotes>
 <ol>
@@ -859,16 +850,13 @@ Hi!
       _expectHtml(html, expected);
     });
 
-    test(
-        'When a footnote is used multiple times, we insert multiple backrefs. - Example 24',
-        skip: kSkipKnownFailure, () {
+    test('When a footnote is used multiple times, we insert multiple backrefs. - Example 1', () {
       final markdown = '''This is some text. It has a footnote[^a-footnote].
 
 This footnote is referenced[^a-footnote] multiple times, in lots of different places.[^a-footnote]
 
 [^a-footnote]: This footnote definition should have three backrefs.''';
-      final expected =
-          '''<p>This is some text. It has a footnote<sup class="footnote-ref"><a href="#fn-a-footnote" id="fnref-a-footnote" data-footnote-ref>1</a></sup>.</p>
+      final expected = '''<p>This is some text. It has a footnote<sup class="footnote-ref"><a href="#fn-a-footnote" id="fnref-a-footnote" data-footnote-ref>1</a></sup>.</p>
 <p>This footnote is referenced<sup class="footnote-ref"><a href="#fn-a-footnote" id="fnref-a-footnote-2" data-footnote-ref>1</a></sup> multiple times, in lots of different places.<sup class="footnote-ref"><a href="#fn-a-footnote" id="fnref-a-footnote-3" data-footnote-ref>1</a></sup></p>
 <section class="footnotes" data-footnotes>
 <ol>
@@ -886,13 +874,11 @@ This footnote is referenced[^a-footnote] multiple times, in lots of different pl
       _expectHtml(html, expected);
     });
 
-    test('Footnote reference labels are href escaped - Example 25',
-        skip: kSkipKnownFailure, () {
+    test('Footnote reference labels are href escaped - Example 1', () {
       final markdown = '''Hello[^"><script>alert(1)</script>]
 
 [^"><script>alert(1)</script>]: pwned''';
-      final expected =
-          '''<p>Hello<sup class="footnote-ref"><a href="#fn-%22%3E%3Cscript%3Ealert(1)%3C/script%3E" id="fnref-%22%3E%3Cscript%3Ealert(1)%3C/script%3E" data-footnote-ref>1</a></sup></p>
+      final expected = '''<p>Hello<sup class="footnote-ref"><a href="#fn-%22%3E%3Cscript%3Ealert(1)%3C/script%3E" id="fnref-%22%3E%3Cscript%3Ealert(1)%3C/script%3E" data-footnote-ref>1</a></sup></p>
 <section class="footnotes" data-footnotes>
 <ol>
 <li id="fn-%22%3E%3Cscript%3Ealert(1)%3C/script%3E">
@@ -909,12 +895,11 @@ This footnote is referenced[^a-footnote] multiple times, in lots of different pl
       _expectHtml(html, expected);
     });
 
-    test('Interop - Example 26', skip: kSkipKnownFailure, () {
+    test('Interop - Example 1', () {
       final markdown = '''~~www.google.com~~
 
 ~~http://google.com~~''';
-      final expected =
-          '''<p><del><a href="http://www.google.com">www.google.com</a></del></p>
+      final expected = '''<p><del><a href="http://www.google.com">www.google.com</a></del></p>
 <p><del><a href="http://google.com">http://google.com</a></del></p>''';
 
       final parser = _createGfmParser();
@@ -925,7 +910,7 @@ This footnote is referenced[^a-footnote] multiple times, in lots of different pl
       _expectHtml(html, expected);
     });
 
-    test('Interop - Example 27', skip: kSkipKnownFailure, () {
+    test('Interop - Example 2', () {
       final markdown = '''| a | b |
 | --- | --- |
 | https://github.com www.github.com | http://pokemon.com |''';
@@ -952,7 +937,7 @@ This footnote is referenced[^a-footnote] multiple times, in lots of different pl
       _expectHtml(html, expected);
     });
 
-    test('Task lists - Example 28', () {
+    test('Task lists - Example 1', () {
       final markdown = '''- [ ] foo
 - [x] bar''';
       final expected = '''<ul>
@@ -968,7 +953,7 @@ This footnote is referenced[^a-footnote] multiple times, in lots of different pl
       _expectHtml(html, expected);
     });
 
-    test('Task lists - Example 29', () {
+    test('Task lists - Example 2', () {
       final markdown = '''- [x] foo
   - [ ] bar
   - [x] baz
@@ -1007,7 +992,7 @@ Show a regular (non task) list to show that it has the same structure
       _expectHtml(html, expected);
     });
 
-    test('Task lists - Example 30', () {
+    test('Task lists - Example 3', () {
       final markdown = '''- [x] foo
     - [ ] bar
     - [x] baz
@@ -1045,5 +1030,6 @@ Show a regular (non task) list to show that it has the same structure
 
       _expectHtml(html, expected);
     });
+
   });
 }

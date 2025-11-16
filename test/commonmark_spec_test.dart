@@ -4,10 +4,6 @@ import 'package:test/test.dart';
 // Generated from cmark-gfm/test/spec.txt
 // DO NOT EDIT - regenerate with tool/generate_spec_tests.dart
 
-const kSkipNongoal_MdToHtml = false;
-const kSkipNongoal_MdNotToHtml = false;
-const kSkipNongoal_HtmlGeneral = false;
-const kSkipKnownFailure = false;
 void main() {
   group('CommonMark Spec Tests', () {
     test('Tabs - Example 1', () {
@@ -185,7 +181,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('Precedence - Example 12', () {
+    test('Precedence - Example 1', () {
       final markdown = '''- `one
 - two`''';
       final expected = '''<ul>
@@ -201,7 +197,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 13', () {
+    test('Thematic breaks - Example 1', () {
       final markdown = '''***
 ---
 ___''';
@@ -217,7 +213,7 @@ ___''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 14', () {
+    test('Thematic breaks - Example 2', () {
       final markdown = '''+++''';
       final expected = '''<p>+++</p>''';
 
@@ -229,7 +225,7 @@ ___''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 15', () {
+    test('Thematic breaks - Example 3', () {
       final markdown = '''===''';
       final expected = '''<p>===</p>''';
 
@@ -241,7 +237,7 @@ ___''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 16', () {
+    test('Thematic breaks - Example 4', () {
       final markdown = '''--
 **
 __''';
@@ -257,7 +253,7 @@ __</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 17', () {
+    test('Thematic breaks - Example 5', () {
       final markdown = ''' ***
   ***
    ***''';
@@ -273,7 +269,7 @@ __</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 18', () {
+    test('Thematic breaks - Example 6', () {
       final markdown = '''    ***''';
       final expected = '''<pre><code>***
 </code></pre>''';
@@ -286,7 +282,7 @@ __</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 19', () {
+    test('Thematic breaks - Example 7', () {
       final markdown = '''Foo
     ***''';
       final expected = '''<p>Foo
@@ -300,7 +296,7 @@ __</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 20', () {
+    test('Thematic breaks - Example 8', () {
       final markdown = '''_____________________________________''';
       final expected = '''<hr />''';
 
@@ -312,7 +308,7 @@ __</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 21', () {
+    test('Thematic breaks - Example 9', () {
       final markdown = ''' - - -''';
       final expected = '''<hr />''';
 
@@ -324,7 +320,7 @@ __</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 22', () {
+    test('Thematic breaks - Example 10', () {
       final markdown = ''' **  * ** * ** * **''';
       final expected = '''<hr />''';
 
@@ -336,7 +332,7 @@ __</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 23', () {
+    test('Thematic breaks - Example 11', () {
       final markdown = '''-     -      -      -''';
       final expected = '''<hr />''';
 
@@ -348,7 +344,7 @@ __</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 24', () {
+    test('Thematic breaks - Example 12', () {
       final markdown = '''- - - -    ''';
       final expected = '''<hr />''';
 
@@ -360,7 +356,7 @@ __</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 25', () {
+    test('Thematic breaks - Example 13', () {
       final markdown = '''_ _ _ _ a
 
 a------
@@ -378,7 +374,7 @@ a------
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 26', () {
+    test('Thematic breaks - Example 14', () {
       final markdown = ''' *-*''';
       final expected = '''<p><em>-</em></p>''';
 
@@ -390,7 +386,7 @@ a------
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 27', () {
+    test('Thematic breaks - Example 15', () {
       final markdown = '''- foo
 ***
 - bar''';
@@ -410,7 +406,7 @@ a------
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 28', () {
+    test('Thematic breaks - Example 16', () {
       final markdown = '''Foo
 ***
 bar''';
@@ -426,7 +422,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 29', () {
+    test('Thematic breaks - Example 17', () {
       final markdown = '''Foo
 ---
 bar''';
@@ -441,7 +437,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 30', () {
+    test('Thematic breaks - Example 18', () {
       final markdown = '''* Foo
 * * *
 * Bar''';
@@ -461,7 +457,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Thematic breaks - Example 31', () {
+    test('Thematic breaks - Example 19', () {
       final markdown = '''- Foo
 - * * *''';
       final expected = '''<ul>
@@ -479,7 +475,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('ATX headings - Example 32', () {
+    test('ATX headings - Example 1', () {
       final markdown = '''# foo
 ## foo
 ### foo
@@ -501,7 +497,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('ATX headings - Example 33', () {
+    test('ATX headings - Example 2', () {
       final markdown = '''####### foo''';
       final expected = '''<p>####### foo</p>''';
 
@@ -513,7 +509,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('ATX headings - Example 34', () {
+    test('ATX headings - Example 3', () {
       final markdown = '''#5 bolt
 
 #hashtag''';
@@ -528,7 +524,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('ATX headings - Example 35', () {
+    test('ATX headings - Example 4', () {
       final markdown = '''\\## foo''';
       final expected = '''<p>## foo</p>''';
 
@@ -540,7 +536,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('ATX headings - Example 36', () {
+    test('ATX headings - Example 5', () {
       final markdown = '''# foo *bar* \\*baz\\*''';
       final expected = '''<h1>foo <em>bar</em> *baz*</h1>''';
 
@@ -552,7 +548,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('ATX headings - Example 37', () {
+    test('ATX headings - Example 6', () {
       final markdown = '''#                  foo                     ''';
       final expected = '''<h1>foo</h1>''';
 
@@ -564,7 +560,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('ATX headings - Example 38', () {
+    test('ATX headings - Example 7', () {
       final markdown = ''' ### foo
   ## foo
    # foo''';
@@ -580,7 +576,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('ATX headings - Example 39', () {
+    test('ATX headings - Example 8', () {
       final markdown = '''    # foo''';
       final expected = '''<pre><code># foo
 </code></pre>''';
@@ -593,7 +589,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('ATX headings - Example 40', () {
+    test('ATX headings - Example 9', () {
       final markdown = '''foo
     # bar''';
       final expected = '''<p>foo
@@ -607,7 +603,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('ATX headings - Example 41', () {
+    test('ATX headings - Example 10', () {
       final markdown = '''## foo ##
   ###   bar    ###''';
       final expected = '''<h2>foo</h2>
@@ -621,7 +617,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('ATX headings - Example 42', () {
+    test('ATX headings - Example 11', () {
       final markdown = '''# foo ##################################
 ##### foo ##''';
       final expected = '''<h1>foo</h1>
@@ -635,7 +631,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('ATX headings - Example 43', () {
+    test('ATX headings - Example 12', () {
       final markdown = '''### foo ###     ''';
       final expected = '''<h3>foo</h3>''';
 
@@ -647,7 +643,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('ATX headings - Example 44', () {
+    test('ATX headings - Example 13', () {
       final markdown = '''### foo ### b''';
       final expected = '''<h3>foo ### b</h3>''';
 
@@ -659,7 +655,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('ATX headings - Example 45', () {
+    test('ATX headings - Example 14', () {
       final markdown = '''# foo#''';
       final expected = '''<h1>foo#</h1>''';
 
@@ -671,7 +667,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('ATX headings - Example 46', () {
+    test('ATX headings - Example 15', () {
       final markdown = '''### foo \\###
 ## foo #\\##
 # foo \\#''';
@@ -687,7 +683,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('ATX headings - Example 47', () {
+    test('ATX headings - Example 16', () {
       final markdown = '''****
 ## foo
 ****''';
@@ -703,7 +699,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('ATX headings - Example 48', () {
+    test('ATX headings - Example 17', () {
       final markdown = '''Foo bar
 # baz
 Bar foo''';
@@ -719,7 +715,7 @@ Bar foo''';
       expect(html.trim(), expected.trim());
     });
 
-    test('ATX headings - Example 49', () {
+    test('ATX headings - Example 18', () {
       final markdown = '''## 
 #
 ### ###''';
@@ -735,7 +731,7 @@ Bar foo''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 50', () {
+    test('Setext headings - Example 1', () {
       final markdown = '''Foo *bar*
 =========
 
@@ -752,7 +748,7 @@ Foo *bar*
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 51', () {
+    test('Setext headings - Example 2', () {
       final markdown = '''Foo *bar
 baz*
 ====''';
@@ -767,7 +763,7 @@ baz</em></h1>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 52', () {
+    test('Setext headings - Example 3', () {
       final markdown = '''  Foo *bar
 baz*	
 ====''';
@@ -782,7 +778,7 @@ baz</em></h1>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 53', () {
+    test('Setext headings - Example 4', () {
       final markdown = '''Foo
 -------------------------
 
@@ -799,7 +795,7 @@ Foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 54', () {
+    test('Setext headings - Example 5', () {
       final markdown = '''   Foo
 ---
 
@@ -820,7 +816,7 @@ Foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 55', () {
+    test('Setext headings - Example 6', () {
       final markdown = '''    Foo
     ---
 
@@ -841,7 +837,7 @@ Foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 56', () {
+    test('Setext headings - Example 7', () {
       final markdown = '''Foo
    ----      ''';
       final expected = '''<h2>Foo</h2>''';
@@ -854,7 +850,7 @@ Foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 57', () {
+    test('Setext headings - Example 8', () {
       final markdown = '''Foo
     ---''';
       final expected = '''<p>Foo
@@ -868,7 +864,7 @@ Foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 58', () {
+    test('Setext headings - Example 9', () {
       final markdown = '''Foo
 = =
 
@@ -887,7 +883,7 @@ Foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 59', () {
+    test('Setext headings - Example 10', () {
       final markdown = '''Foo  
 -----''';
       final expected = '''<h2>Foo</h2>''';
@@ -900,7 +896,7 @@ Foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 60', () {
+    test('Setext headings - Example 11', () {
       final markdown = '''Foo\\
 ----''';
       final expected = '''<h2>Foo\\</h2>''';
@@ -913,7 +909,7 @@ Foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 61', () {
+    test('Setext headings - Example 12', () {
       final markdown = '''`Foo
 ----
 `
@@ -934,7 +930,7 @@ of dashes"/>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 62', () {
+    test('Setext headings - Example 13', () {
       final markdown = '''> Foo
 ---''';
       final expected = '''<blockquote>
@@ -950,7 +946,7 @@ of dashes"/>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 63', () {
+    test('Setext headings - Example 14', () {
       final markdown = '''> foo
 bar
 ===''';
@@ -968,7 +964,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 64', () {
+    test('Setext headings - Example 15', () {
       final markdown = '''- Foo
 ---''';
       final expected = '''<ul>
@@ -984,7 +980,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 65', () {
+    test('Setext headings - Example 16', () {
       final markdown = '''Foo
 Bar
 ---''';
@@ -999,7 +995,7 @@ Bar</h2>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 66', () {
+    test('Setext headings - Example 17', () {
       final markdown = '''---
 Foo
 ---
@@ -1019,7 +1015,7 @@ Baz''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 67', () {
+    test('Setext headings - Example 18', () {
       final markdown = '''
 ====''';
       final expected = '''<p>====</p>''';
@@ -1032,7 +1028,7 @@ Baz''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 68', () {
+    test('Setext headings - Example 19', () {
       final markdown = '''---
 ---''';
       final expected = '''<hr />
@@ -1046,7 +1042,7 @@ Baz''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 69', () {
+    test('Setext headings - Example 20', () {
       final markdown = '''- foo
 -----''';
       final expected = '''<ul>
@@ -1062,7 +1058,7 @@ Baz''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 70', () {
+    test('Setext headings - Example 21', () {
       final markdown = '''    foo
 ---''';
       final expected = '''<pre><code>foo
@@ -1077,7 +1073,7 @@ Baz''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 71', () {
+    test('Setext headings - Example 22', () {
       final markdown = '''> foo
 -----''';
       final expected = '''<blockquote>
@@ -1093,7 +1089,7 @@ Baz''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 72', () {
+    test('Setext headings - Example 23', () {
       final markdown = '''\\> foo
 ------''';
       final expected = '''<h2>&gt; foo</h2>''';
@@ -1106,7 +1102,7 @@ Baz''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 73', () {
+    test('Setext headings - Example 24', () {
       final markdown = '''Foo
 
 bar
@@ -1124,7 +1120,7 @@ baz''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 74', () {
+    test('Setext headings - Example 25', () {
       final markdown = '''Foo
 bar
 
@@ -1144,7 +1140,7 @@ bar</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 75', () {
+    test('Setext headings - Example 26', () {
       final markdown = '''Foo
 bar
 * * *
@@ -1162,7 +1158,7 @@ bar</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('Setext headings - Example 76', () {
+    test('Setext headings - Example 27', () {
       final markdown = '''Foo
 bar
 \\---
@@ -1180,7 +1176,7 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Indented code blocks - Example 77', () {
+    test('Indented code blocks - Example 1', () {
       final markdown = '''    a simple
       indented code block''';
       final expected = '''<pre><code>a simple
@@ -1195,7 +1191,7 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Indented code blocks - Example 78', () {
+    test('Indented code blocks - Example 2', () {
       final markdown = '''  - foo
 
     bar''';
@@ -1214,7 +1210,7 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Indented code blocks - Example 79', () {
+    test('Indented code blocks - Example 3', () {
       final markdown = '''1.  foo
 
     - bar''';
@@ -1235,7 +1231,7 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Indented code blocks - Example 80', () {
+    test('Indented code blocks - Example 4', () {
       final markdown = '''    <a/>
     *hi*
 
@@ -1254,7 +1250,7 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Indented code blocks - Example 81', () {
+    test('Indented code blocks - Example 5', () {
       final markdown = '''    chunk1
 
     chunk2
@@ -1279,7 +1275,7 @@ chunk3
       expect(html.trim(), expected.trim());
     });
 
-    test('Indented code blocks - Example 82', () {
+    test('Indented code blocks - Example 6', () {
       final markdown = '''    chunk1
       
       chunk2''';
@@ -1296,7 +1292,7 @@ chunk3
       expect(html.trim(), expected.trim());
     });
 
-    test('Indented code blocks - Example 83', () {
+    test('Indented code blocks - Example 7', () {
       final markdown = '''Foo
     bar
 ''';
@@ -1311,7 +1307,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Indented code blocks - Example 84', () {
+    test('Indented code blocks - Example 8', () {
       final markdown = '''    foo
 bar''';
       final expected = '''<pre><code>foo
@@ -1326,7 +1322,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Indented code blocks - Example 85', () {
+    test('Indented code blocks - Example 9', () {
       final markdown = '''# Heading
     foo
 Heading
@@ -1349,7 +1345,7 @@ Heading
       expect(html.trim(), expected.trim());
     });
 
-    test('Indented code blocks - Example 86', () {
+    test('Indented code blocks - Example 10', () {
       final markdown = '''        foo
     bar''';
       final expected = '''<pre><code>    foo
@@ -1364,7 +1360,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('Indented code blocks - Example 87', () {
+    test('Indented code blocks - Example 11', () {
       final markdown = '''
     
     foo
@@ -1381,7 +1377,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('Indented code blocks - Example 88', () {
+    test('Indented code blocks - Example 12', () {
       final markdown = '''    foo  ''';
       final expected = '''<pre><code>foo  
 </code></pre>''';
@@ -1394,7 +1390,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 89', () {
+    test('Fenced code blocks - Example 1', () {
       final markdown = '''```
 <
  >
@@ -1411,7 +1407,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 90', () {
+    test('Fenced code blocks - Example 2', () {
       final markdown = '''~~~
 <
  >
@@ -1428,7 +1424,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 91', () {
+    test('Fenced code blocks - Example 3', () {
       final markdown = '''``
 foo
 ``''';
@@ -1442,7 +1438,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 92', () {
+    test('Fenced code blocks - Example 4', () {
       final markdown = '''```
 aaa
 ~~~
@@ -1459,7 +1455,7 @@ aaa
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 93', () {
+    test('Fenced code blocks - Example 5', () {
       final markdown = '''~~~
 aaa
 ```
@@ -1476,7 +1472,7 @@ aaa
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 94', () {
+    test('Fenced code blocks - Example 6', () {
       final markdown = '''````
 aaa
 ```
@@ -1493,7 +1489,7 @@ aaa
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 95', () {
+    test('Fenced code blocks - Example 7', () {
       final markdown = '''~~~~
 aaa
 ~~~
@@ -1510,7 +1506,7 @@ aaa
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 96', () {
+    test('Fenced code blocks - Example 8', () {
       final markdown = '''```''';
       final expected = '''<pre><code></code></pre>''';
 
@@ -1522,7 +1518,7 @@ aaa
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 97', () {
+    test('Fenced code blocks - Example 9', () {
       final markdown = '''`````
 
 ```
@@ -1540,7 +1536,7 @@ aaa
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 98', () {
+    test('Fenced code blocks - Example 10', () {
       final markdown = '''> ```
 > aaa
 
@@ -1559,7 +1555,7 @@ bbb''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 99', () {
+    test('Fenced code blocks - Example 11', () {
       final markdown = '''```
 
   
@@ -1576,7 +1572,7 @@ bbb''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 100', () {
+    test('Fenced code blocks - Example 12', () {
       final markdown = '''```
 ```''';
       final expected = '''<pre><code></code></pre>''';
@@ -1589,7 +1585,7 @@ bbb''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 101', () {
+    test('Fenced code blocks - Example 13', () {
       final markdown = ''' ```
  aaa
 aaa
@@ -1606,7 +1602,7 @@ aaa
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 102', () {
+    test('Fenced code blocks - Example 14', () {
       final markdown = '''  ```
 aaa
   aaa
@@ -1625,7 +1621,7 @@ aaa
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 103', () {
+    test('Fenced code blocks - Example 15', () {
       final markdown = '''   ```
    aaa
     aaa
@@ -1644,7 +1640,7 @@ aaa
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 104', () {
+    test('Fenced code blocks - Example 16', () {
       final markdown = '''    ```
     aaa
     ```''';
@@ -1661,7 +1657,7 @@ aaa
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 105', () {
+    test('Fenced code blocks - Example 17', () {
       final markdown = '''```
 aaa
   ```''';
@@ -1676,7 +1672,7 @@ aaa
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 106', () {
+    test('Fenced code blocks - Example 18', () {
       final markdown = '''   ```
 aaa
   ```''';
@@ -1691,7 +1687,7 @@ aaa
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 107', () {
+    test('Fenced code blocks - Example 19', () {
       final markdown = '''```
 aaa
     ```''';
@@ -1707,7 +1703,7 @@ aaa
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 108', () {
+    test('Fenced code blocks - Example 20', () {
       final markdown = '''``` ```
 aaa''';
       final expected = '''<p><code> </code>
@@ -1721,7 +1717,7 @@ aaa</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 109', () {
+    test('Fenced code blocks - Example 21', () {
       final markdown = '''~~~~~~
 aaa
 ~~~ ~~''';
@@ -1737,7 +1733,7 @@ aaa
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 110', () {
+    test('Fenced code blocks - Example 22', () {
       final markdown = '''foo
 ```
 bar
@@ -1756,7 +1752,7 @@ baz''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 111', () {
+    test('Fenced code blocks - Example 23', () {
       final markdown = '''foo
 ---
 ~~~
@@ -1776,7 +1772,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 112', () {
+    test('Fenced code blocks - Example 24', () {
       final markdown = '''```ruby
 def foo(x)
   return 3
@@ -1795,7 +1791,7 @@ end
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 113', () {
+    test('Fenced code blocks - Example 25', () {
       final markdown = '''~~~~    ruby startline=3 \$%@#\$
 def foo(x)
   return 3
@@ -1814,7 +1810,7 @@ end
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 114', () {
+    test('Fenced code blocks - Example 26', () {
       final markdown = '''````;
 ````''';
       final expected = '''<pre><code class="language-;"></code></pre>''';
@@ -1827,7 +1823,7 @@ end
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 115', () {
+    test('Fenced code blocks - Example 27', () {
       final markdown = '''``` aa ```
 foo''';
       final expected = '''<p><code>aa</code>
@@ -1841,7 +1837,7 @@ foo</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 116', () {
+    test('Fenced code blocks - Example 28', () {
       final markdown = '''~~~ aa ``` ~~~
 foo
 ~~~''';
@@ -1856,7 +1852,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Fenced code blocks - Example 117', () {
+    test('Fenced code blocks - Example 29', () {
       final markdown = '''```
 ``` aaa
 ```''';
@@ -1871,7 +1867,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 118', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 1', () {
       final markdown = '''<table><tr><td>
 <pre>
 **Hello**,
@@ -1894,7 +1890,7 @@ _world_.
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 119', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 2', () {
       final markdown = '''<table>
   <tr>
     <td>
@@ -1921,7 +1917,7 @@ okay.''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 120', skip: kSkipNongoal_MdNotToHtml, () {
+    test('HTML blocks - Example 3', () {
       final markdown = ''' <div>
   *hello*
          <foo><a>''';
@@ -1937,7 +1933,7 @@ okay.''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 121', skip: kSkipNongoal_MdNotToHtml, () {
+    test('HTML blocks - Example 4', () {
       final markdown = '''</div>
 *foo*''';
       final expected = '''</div>
@@ -1951,7 +1947,7 @@ okay.''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 122', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 5', () {
       final markdown = '''<DIV CLASS="foo">
 
 *Markdown*
@@ -1969,7 +1965,7 @@ okay.''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 123', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 6', () {
       final markdown = '''<div id="foo"
   class="bar">
 </div>''';
@@ -1985,7 +1981,7 @@ okay.''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 124', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 7', () {
       final markdown = '''<div id="foo" class="bar
   baz">
 </div>''';
@@ -2001,7 +1997,7 @@ okay.''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 125', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 8', () {
       final markdown = '''<div>
 *foo*
 
@@ -2018,7 +2014,7 @@ okay.''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 126', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 9', () {
       final markdown = '''<div id="foo"
 *hi*''';
       final expected = '''<div id="foo"
@@ -2032,7 +2028,7 @@ okay.''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 127', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 10', () {
       final markdown = '''<div class
 foo''';
       final expected = '''<div class
@@ -2046,7 +2042,7 @@ foo''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 128', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 11', () {
       final markdown = '''<div *???-&&&-<---
 *foo*''';
       final expected = '''<div *???-&&&-<---
@@ -2060,7 +2056,7 @@ foo''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 129', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 12', () {
       final markdown = '''<div><a href="bar">*foo*</a></div>''';
       final expected = '''<div><a href="bar">*foo*</a></div>''';
 
@@ -2072,7 +2068,7 @@ foo''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 130', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 13', () {
       final markdown = '''<table><tr><td>
 foo
 </td></tr></table>''';
@@ -2088,7 +2084,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 131', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 14', () {
       final markdown = '''<div></div>
 ``` c
 int x = 33;
@@ -2106,7 +2102,7 @@ int x = 33;
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 132', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 15', () {
       final markdown = '''<a href="foo">
 *bar*
 </a>''';
@@ -2122,7 +2118,7 @@ int x = 33;
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 133', skip: kSkipNongoal_MdNotToHtml, () {
+    test('HTML blocks - Example 16', () {
       final markdown = '''<Warning>
 *bar*
 </Warning>''';
@@ -2138,7 +2134,7 @@ int x = 33;
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 134', skip: kSkipNongoal_MdNotToHtml, () {
+    test('HTML blocks - Example 17', () {
       final markdown = '''<i class="foo">
 *bar*
 </i>''';
@@ -2154,7 +2150,7 @@ int x = 33;
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 135', skip: kSkipNongoal_MdNotToHtml, () {
+    test('HTML blocks - Example 18', () {
       final markdown = '''</ins>
 *bar*''';
       final expected = '''</ins>
@@ -2168,7 +2164,7 @@ int x = 33;
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 136', skip: kSkipNongoal_MdNotToHtml, () {
+    test('HTML blocks - Example 19', () {
       final markdown = '''<del>
 *foo*
 </del>''';
@@ -2184,7 +2180,7 @@ int x = 33;
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 137', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 20', () {
       final markdown = '''<del>
 
 *foo*
@@ -2202,7 +2198,7 @@ int x = 33;
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 138', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 21', () {
       final markdown = '''<del>*foo*</del>''';
       final expected = '''<p><del><em>foo</em></del></p>''';
 
@@ -2214,7 +2210,7 @@ int x = 33;
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 139', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 22', () {
       final markdown = '''<pre language="haskell"><code>
 import Text.HTML.TagSoup
 
@@ -2238,7 +2234,7 @@ main = print \$ parseTags tags
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 140', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 23', () {
       final markdown = '''<script type="text/javascript">
 // JavaScript example
 
@@ -2260,7 +2256,7 @@ document.getElementById("demo").innerHTML = "Hello JavaScript!";
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 141', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 24', () {
       final markdown = '''<style
   type="text/css">
 h1 {color:red;}
@@ -2284,7 +2280,7 @@ p {color:blue;}
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 142', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 25', () {
       final markdown = '''<style
   type="text/css">
 
@@ -2302,7 +2298,7 @@ foo''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 143', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 26', () {
       final markdown = '''> <div>
 > foo
 
@@ -2321,7 +2317,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 144', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 27', () {
       final markdown = '''- <div>
 - foo''';
       final expected = '''<ul>
@@ -2339,7 +2335,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 145', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 28', () {
       final markdown = '''<style>p{color:red;}</style>
 *foo*''';
       final expected = '''<style>p{color:red;}</style>
@@ -2353,7 +2349,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 146', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 29', () {
       final markdown = '''<!-- foo -->*bar*
 *baz*''';
       final expected = '''<!-- foo -->*bar*
@@ -2367,7 +2363,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 147', skip: kSkipNongoal_MdNotToHtml, () {
+    test('HTML blocks - Example 30', () {
       final markdown = '''<script>
 foo
 </script>1. *bar*''';
@@ -2383,7 +2379,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 148', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 31', () {
       final markdown = '''<!-- Foo
 
 bar
@@ -2403,16 +2399,16 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 149', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 32', () {
       final markdown = '''<?php
 
-  echo \'>\';
+  echo '>';
 
 ?>
 okay''';
       final expected = '''<?php
 
-  echo \'>\';
+  echo '>';
 
 ?>
 <p>okay</p>''';
@@ -2425,7 +2421,7 @@ okay''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 150', skip: kSkipNongoal_MdNotToHtml, () {
+    test('HTML blocks - Example 33', () {
       final markdown = '''<!DOCTYPE html>''';
       final expected = '''<!DOCTYPE html>''';
 
@@ -2437,7 +2433,7 @@ okay''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 151', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 34', () {
       final markdown = '''<![CDATA[
 function matchwo(a,b)
 {
@@ -2473,7 +2469,7 @@ function matchwo(a,b)
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 152', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 35', () {
       final markdown = '''  <!-- foo -->
 
     <!-- foo -->''';
@@ -2489,7 +2485,7 @@ function matchwo(a,b)
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 153', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 36', () {
       final markdown = '''  <div>
 
     <div>''';
@@ -2505,7 +2501,7 @@ function matchwo(a,b)
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 154', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 37', () {
       final markdown = '''Foo
 <div>
 bar
@@ -2523,7 +2519,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 155', skip: kSkipNongoal_MdNotToHtml, () {
+    test('HTML blocks - Example 38', () {
       final markdown = '''<div>
 bar
 </div>
@@ -2541,7 +2537,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 156', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 39', () {
       final markdown = '''Foo
 <a href="bar">
 baz''';
@@ -2557,7 +2553,7 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 157', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 40', () {
       final markdown = '''<div>
 
 *Emphasized* text.
@@ -2575,7 +2571,7 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 158', skip: kSkipNongoal_MdNotToHtml, () {
+    test('HTML blocks - Example 41', () {
       final markdown = '''<div>
 *Emphasized* text.
 </div>''';
@@ -2591,7 +2587,7 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 159', skip: kSkipNongoal_MdNotToHtml, () {
+    test('HTML blocks - Example 42', () {
       final markdown = '''<table>
 
 <tr>
@@ -2619,7 +2615,7 @@ Hi
       expect(html.trim(), expected.trim());
     });
 
-    test('HTML blocks - Example 160', skip: kSkipNongoal_MdToHtml, () {
+    test('HTML blocks - Example 43', () {
       final markdown = '''<table>
 
   <tr>
@@ -2648,7 +2644,7 @@ Hi
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 161', () {
+    test('Link reference definitions - Example 1', () {
       final markdown = '''[foo]: /url "title"
 
 [foo]''';
@@ -2662,10 +2658,10 @@ Hi
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 162', () {
+    test('Link reference definitions - Example 2', () {
       final markdown = '''   [foo]: 
       /url  
-           \'the title\'  
+           'the title'  
 
 [foo]''';
       final expected = '''<p><a href="/url" title="the title">foo</a></p>''';
@@ -2678,12 +2674,11 @@ Hi
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 163', () {
-      final markdown = '''[Foo*bar\\]]:my_(url) \'title (with parens)\'
+    test('Link reference definitions - Example 3', () {
+      final markdown = '''[Foo*bar\\]]:my_(url) 'title (with parens)'
 
 [Foo*bar\\]]''';
-      final expected =
-          '''<p><a href="my_(url)" title="title (with parens)">Foo*bar]</a></p>''';
+      final expected = '''<p><a href="my_(url)" title="title (with parens)">Foo*bar]</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -2693,14 +2688,13 @@ Hi
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 164', () {
+    test('Link reference definitions - Example 4', () {
       final markdown = '''[Foo bar]:
 <my url>
-\'title\'
+'title'
 
 [Foo bar]''';
-      final expected =
-          '''<p><a href="my%20url" title="title">Foo bar</a></p>''';
+      final expected = '''<p><a href="my%20url" title="title">Foo bar</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -2710,12 +2704,12 @@ Hi
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 165', () {
-      final markdown = '''[foo]: /url \'
+    test('Link reference definitions - Example 5', () {
+      final markdown = '''[foo]: /url '
 title
 line1
 line2
-\'
+'
 
 [foo]''';
       final expected = '''<p><a href="/url" title="
@@ -2732,15 +2726,14 @@ line2
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 166', skip: kSkipKnownFailure,
-        () {
-      final markdown = '''[foo]: /url \'title
+    test('Link reference definitions - Example 6', () {
+      final markdown = '''[foo]: /url 'title
 
-with blank line\'
+with blank line'
 
 [foo]''';
-      final expected = '''<p>[foo]: /url \'title</p>
-<p>with blank line\'</p>
+      final expected = '''<p>[foo]: /url 'title</p>
+<p>with blank line'</p>
 <p>[foo]</p>''';
 
       final parser = CmarkParser();
@@ -2751,7 +2744,7 @@ with blank line\'
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 167', () {
+    test('Link reference definitions - Example 7', () {
       final markdown = '''[foo]:
 /url
 
@@ -2766,7 +2759,7 @@ with blank line\'
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 168', () {
+    test('Link reference definitions - Example 8', () {
       final markdown = '''[foo]:
 
 [foo]''';
@@ -2781,7 +2774,7 @@ with blank line\'
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 169', () {
+    test('Link reference definitions - Example 9', () {
       final markdown = '''[foo]: <>
 
 [foo]''';
@@ -2795,8 +2788,7 @@ with blank line\'
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 170',
-        skip: kSkipNongoal_MdNotToHtml, () {
+    test('Link reference definitions - Example 10', () {
       final markdown = '''[foo]: <bar>(baz)
 
 [foo]''';
@@ -2811,12 +2803,11 @@ with blank line\'
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 171', () {
+    test('Link reference definitions - Example 11', () {
       final markdown = '''[foo]: /url\\bar\\*baz "foo\\"bar\\baz"
 
 [foo]''';
-      final expected =
-          '''<p><a href="/url%5Cbar*baz" title="foo&quot;bar\\baz">foo</a></p>''';
+      final expected = '''<p><a href="/url%5Cbar*baz" title="foo&quot;bar\\baz">foo</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -2826,8 +2817,7 @@ with blank line\'
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 172', skip: kSkipKnownFailure,
-        () {
+    test('Link reference definitions - Example 12', () {
       final markdown = '''[foo]
 
 [foo]: url''';
@@ -2841,8 +2831,7 @@ with blank line\'
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 173', skip: kSkipKnownFailure,
-        () {
+    test('Link reference definitions - Example 13', () {
       final markdown = '''[foo]
 
 [foo]: first
@@ -2857,7 +2846,7 @@ with blank line\'
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 174', () {
+    test('Link reference definitions - Example 14', () {
       final markdown = '''[FOO]: /url
 
 [Foo]''';
@@ -2871,7 +2860,7 @@ with blank line\'
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 175', () {
+    test('Link reference definitions - Example 15', () {
       final markdown = '''[ΑΓΩ]: /φου
 
 [αγω]''';
@@ -2885,8 +2874,7 @@ with blank line\'
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 176', skip: kSkipKnownFailure,
-        () {
+    test('Link reference definitions - Example 16', () {
       final markdown = '''[foo]: /url''';
       final expected = '''''';
 
@@ -2898,7 +2886,7 @@ with blank line\'
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 177', () {
+    test('Link reference definitions - Example 17', () {
       final markdown = '''[
 foo
 ]: /url
@@ -2913,7 +2901,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 178', () {
+    test('Link reference definitions - Example 18', () {
       final markdown = '''[foo]: /url "title" ok''';
       final expected = '''<p>[foo]: /url &quot;title&quot; ok</p>''';
 
@@ -2925,7 +2913,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 179', () {
+    test('Link reference definitions - Example 19', () {
       final markdown = '''[foo]: /url
 "title" ok''';
       final expected = '''<p>&quot;title&quot; ok</p>''';
@@ -2938,7 +2926,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 180', () {
+    test('Link reference definitions - Example 20', () {
       final markdown = '''    [foo]: /url "title"
 
 [foo]''';
@@ -2954,7 +2942,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 181', () {
+    test('Link reference definitions - Example 21', () {
       final markdown = '''```
 [foo]: /url
 ```
@@ -2972,7 +2960,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 182', () {
+    test('Link reference definitions - Example 22', () {
       final markdown = '''Foo
 [bar]: /baz
 
@@ -2989,7 +2977,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 183', () {
+    test('Link reference definitions - Example 23', () {
       final markdown = '''# [Foo]
 [foo]: /url
 > bar''';
@@ -3006,7 +2994,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 184', () {
+    test('Link reference definitions - Example 24', () {
       final markdown = '''[foo]: /url
 bar
 ===
@@ -3022,7 +3010,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 185', () {
+    test('Link reference definitions - Example 25', () {
       final markdown = '''[foo]: /url
 ===
 [foo]''';
@@ -3037,7 +3025,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 186', () {
+    test('Link reference definitions - Example 26', () {
       final markdown = '''[foo]: /foo-url "foo"
 [bar]: /bar-url
   "bar"
@@ -3058,8 +3046,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 187', skip: kSkipKnownFailure,
-        () {
+    test('Link reference definitions - Example 27', () {
       final markdown = '''[foo]
 
 > [foo]: /url''';
@@ -3075,8 +3062,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('Link reference definitions - Example 188', skip: kSkipKnownFailure,
-        () {
+    test('Link reference definitions - Example 28', () {
       final markdown = '''[foo]: /url''';
       final expected = '''''';
 
@@ -3088,7 +3074,7 @@ bar
       expect(html.trim(), expected.trim());
     });
 
-    test('Paragraphs - Example 189', () {
+    test('Paragraphs - Example 1', () {
       final markdown = '''aaa
 
 bbb''';
@@ -3103,7 +3089,7 @@ bbb''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Paragraphs - Example 190', () {
+    test('Paragraphs - Example 2', () {
       final markdown = '''aaa
 bbb
 
@@ -3122,7 +3108,7 @@ ddd</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Paragraphs - Example 191', () {
+    test('Paragraphs - Example 3', () {
       final markdown = '''aaa
 
 
@@ -3138,7 +3124,7 @@ bbb''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Paragraphs - Example 192', () {
+    test('Paragraphs - Example 4', () {
       final markdown = '''  aaa
  bbb''';
       final expected = '''<p>aaa
@@ -3152,7 +3138,7 @@ bbb</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Paragraphs - Example 193', () {
+    test('Paragraphs - Example 5', () {
       final markdown = '''aaa
              bbb
                                        ccc''';
@@ -3168,7 +3154,7 @@ ccc</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Paragraphs - Example 194', () {
+    test('Paragraphs - Example 6', () {
       final markdown = '''   aaa
 bbb''';
       final expected = '''<p>aaa
@@ -3182,7 +3168,7 @@ bbb</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Paragraphs - Example 195', () {
+    test('Paragraphs - Example 7', () {
       final markdown = '''    aaa
 bbb''';
       final expected = '''<pre><code>aaa
@@ -3197,7 +3183,7 @@ bbb''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Paragraphs - Example 196', () {
+    test('Paragraphs - Example 8', () {
       final markdown = '''aaa     
 bbb     ''';
       final expected = '''<p>aaa<br />
@@ -3211,8 +3197,8 @@ bbb</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Blank lines - Example 197', () {
-      final markdown = '''
+    test('Blank lines - Example 1', () {
+      final markdown = '''  
 
 aaa
   
@@ -3231,7 +3217,7 @@ aaa
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 198', () {
+    test('Block quotes - Example 1', () {
       final markdown = '''> # Foo
 > bar
 > baz''';
@@ -3249,7 +3235,7 @@ baz</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 199', () {
+    test('Block quotes - Example 2', () {
       final markdown = '''># Foo
 >bar
 > baz''';
@@ -3267,7 +3253,7 @@ baz</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 200', () {
+    test('Block quotes - Example 3', () {
       final markdown = '''   > # Foo
    > bar
  > baz''';
@@ -3285,7 +3271,7 @@ baz</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 201', () {
+    test('Block quotes - Example 4', () {
       final markdown = '''    > # Foo
     > bar
     > baz''';
@@ -3302,7 +3288,7 @@ baz</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 202', () {
+    test('Block quotes - Example 5', () {
       final markdown = '''> # Foo
 > bar
 baz''';
@@ -3320,7 +3306,7 @@ baz</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 203', skip: kSkipKnownFailure, () {
+    test('Block quotes - Example 6', () {
       final markdown = '''> bar
 baz
 > foo''';
@@ -3338,7 +3324,7 @@ foo</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 204', () {
+    test('Block quotes - Example 7', () {
       final markdown = '''> foo
 ---''';
       final expected = '''<blockquote>
@@ -3354,7 +3340,7 @@ foo</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 205', () {
+    test('Block quotes - Example 8', () {
       final markdown = '''> - foo
 - bar''';
       final expected = '''<blockquote>
@@ -3374,7 +3360,7 @@ foo</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 206', () {
+    test('Block quotes - Example 9', () {
       final markdown = '''>     foo
     bar''';
       final expected = '''<blockquote>
@@ -3392,7 +3378,7 @@ foo</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 207', () {
+    test('Block quotes - Example 10', () {
       final markdown = '''> ```
 foo
 ```''';
@@ -3410,7 +3396,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 208', () {
+    test('Block quotes - Example 11', () {
       final markdown = '''> foo
     - bar''';
       final expected = '''<blockquote>
@@ -3426,7 +3412,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 209', () {
+    test('Block quotes - Example 12', () {
       final markdown = '''>''';
       final expected = '''<blockquote>
 </blockquote>''';
@@ -3439,7 +3425,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 210', () {
+    test('Block quotes - Example 13', () {
       final markdown = '''>
 >  
 > ''';
@@ -3454,7 +3440,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 211', () {
+    test('Block quotes - Example 14', () {
       final markdown = '''>
 > foo
 >  ''';
@@ -3470,7 +3456,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 212', () {
+    test('Block quotes - Example 15', () {
       final markdown = '''> foo
 
 > bar''';
@@ -3489,7 +3475,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 213', () {
+    test('Block quotes - Example 16', () {
       final markdown = '''> foo
 > bar''';
       final expected = '''<blockquote>
@@ -3505,7 +3491,7 @@ bar</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 214', () {
+    test('Block quotes - Example 17', () {
       final markdown = '''> foo
 >
 > bar''';
@@ -3522,7 +3508,7 @@ bar</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 215', () {
+    test('Block quotes - Example 18', () {
       final markdown = '''foo
 > bar''';
       final expected = '''<p>foo</p>
@@ -3538,7 +3524,7 @@ bar</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 216', () {
+    test('Block quotes - Example 19', () {
       final markdown = '''> aaa
 ***
 > bbb''';
@@ -3558,7 +3544,7 @@ bar</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 217', () {
+    test('Block quotes - Example 20', () {
       final markdown = '''> bar
 baz''';
       final expected = '''<blockquote>
@@ -3574,7 +3560,7 @@ baz</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 218', () {
+    test('Block quotes - Example 21', () {
       final markdown = '''> bar
 
 baz''';
@@ -3591,7 +3577,7 @@ baz''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 219', () {
+    test('Block quotes - Example 22', () {
       final markdown = '''> bar
 >
 baz''';
@@ -3608,7 +3594,7 @@ baz''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 220', () {
+    test('Block quotes - Example 23', () {
       final markdown = '''> > > foo
 bar''';
       final expected = '''<blockquote>
@@ -3628,7 +3614,7 @@ bar</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 221', skip: kSkipKnownFailure, () {
+    test('Block quotes - Example 24', () {
       final markdown = '''>>> foo
 > bar
 >>baz''';
@@ -3650,7 +3636,7 @@ baz</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('Block quotes - Example 222', () {
+    test('Block quotes - Example 25', () {
       final markdown = '''>     code
 
 >    not code''';
@@ -3670,7 +3656,7 @@ baz</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 223', () {
+    test('List items - Example 1', () {
       final markdown = '''A paragraph
 with two lines.
 
@@ -3693,7 +3679,7 @@ with two lines.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 224', () {
+    test('List items - Example 2', () {
       final markdown = '''1.  A paragraph
     with two lines.
 
@@ -3720,7 +3706,7 @@ with two lines.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 225', () {
+    test('List items - Example 3', () {
       final markdown = '''- one
 
  two''';
@@ -3737,7 +3723,7 @@ with two lines.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 226', () {
+    test('List items - Example 4', () {
       final markdown = '''- one
 
   two''';
@@ -3756,7 +3742,7 @@ with two lines.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 227', () {
+    test('List items - Example 5', () {
       final markdown = ''' -    one
 
      two''';
@@ -3774,7 +3760,7 @@ with two lines.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 228', () {
+    test('List items - Example 6', () {
       final markdown = ''' -    one
 
       two''';
@@ -3793,7 +3779,7 @@ with two lines.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 229', () {
+    test('List items - Example 7', () {
       final markdown = '''   > > 1.  one
 >>
 >>     two''';
@@ -3816,7 +3802,7 @@ with two lines.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 230', () {
+    test('List items - Example 8', () {
       final markdown = '''>>- one
 >>
   >  > two''';
@@ -3837,7 +3823,7 @@ with two lines.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 231', () {
+    test('List items - Example 9', () {
       final markdown = '''-one
 
 2.two''';
@@ -3852,7 +3838,7 @@ with two lines.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 232', () {
+    test('List items - Example 10', () {
       final markdown = '''- foo
 
 
@@ -3872,7 +3858,7 @@ with two lines.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 233', () {
+    test('List items - Example 11', () {
       final markdown = '''1.  foo
 
     ```
@@ -3902,7 +3888,7 @@ with two lines.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 234', () {
+    test('List items - Example 12', () {
       final markdown = '''- Foo
 
       bar
@@ -3928,7 +3914,7 @@ baz
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 235', () {
+    test('List items - Example 13', () {
       final markdown = '''123456789. ok''';
       final expected = '''<ol start="123456789">
 <li>ok</li>
@@ -3942,7 +3928,7 @@ baz
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 236', () {
+    test('List items - Example 14', () {
       final markdown = '''1234567890. not ok''';
       final expected = '''<p>1234567890. not ok</p>''';
 
@@ -3954,7 +3940,7 @@ baz
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 237', () {
+    test('List items - Example 15', () {
       final markdown = '''0. ok''';
       final expected = '''<ol start="0">
 <li>ok</li>
@@ -3968,7 +3954,7 @@ baz
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 238', () {
+    test('List items - Example 16', () {
       final markdown = '''003. ok''';
       final expected = '''<ol start="3">
 <li>ok</li>
@@ -3982,7 +3968,7 @@ baz
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 239', () {
+    test('List items - Example 17', () {
       final markdown = '''-1. not ok''';
       final expected = '''<p>-1. not ok</p>''';
 
@@ -3994,7 +3980,7 @@ baz
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 240', () {
+    test('List items - Example 18', () {
       final markdown = '''- foo
 
       bar''';
@@ -4014,7 +4000,7 @@ baz
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 241', () {
+    test('List items - Example 19', () {
       final markdown = '''  10.  foo
 
            bar''';
@@ -4034,7 +4020,7 @@ baz
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 242', () {
+    test('List items - Example 20', () {
       final markdown = '''    indented code
 
 paragraph
@@ -4054,7 +4040,7 @@ paragraph
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 243', () {
+    test('List items - Example 21', () {
       final markdown = '''1.     indented code
 
    paragraph
@@ -4078,7 +4064,7 @@ paragraph
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 244', () {
+    test('List items - Example 22', () {
       final markdown = '''1.      indented code
 
    paragraph
@@ -4102,7 +4088,7 @@ paragraph
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 245', () {
+    test('List items - Example 23', () {
       final markdown = '''   foo
 
 bar''';
@@ -4117,7 +4103,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 246', () {
+    test('List items - Example 24', () {
       final markdown = '''-    foo
 
   bar''';
@@ -4134,7 +4120,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 247', () {
+    test('List items - Example 25', () {
       final markdown = '''-  foo
 
    bar''';
@@ -4153,7 +4139,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 248', skip: kSkipKnownFailure, () {
+    test('List items - Example 26', () {
       final markdown = '''-
   foo
 -
@@ -4182,7 +4168,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 249', () {
+    test('List items - Example 27', () {
       final markdown = '''-   
   foo''';
       final expected = '''<ul>
@@ -4197,7 +4183,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 250', () {
+    test('List items - Example 28', () {
       final markdown = '''-
 
   foo''';
@@ -4214,7 +4200,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 251', () {
+    test('List items - Example 29', () {
       final markdown = '''- foo
 -
 - bar''';
@@ -4232,7 +4218,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 252', () {
+    test('List items - Example 30', () {
       final markdown = '''- foo
 -   
 - bar''';
@@ -4250,7 +4236,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 253', () {
+    test('List items - Example 31', () {
       final markdown = '''1. foo
 2.
 3. bar''';
@@ -4268,7 +4254,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 254', () {
+    test('List items - Example 32', () {
       final markdown = '''*''';
       final expected = '''<ul>
 <li></li>
@@ -4282,7 +4268,7 @@ bar''';
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 255', () {
+    test('List items - Example 33', () {
       final markdown = '''foo
 *
 
@@ -4301,7 +4287,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 256', () {
+    test('List items - Example 34', () {
       final markdown = ''' 1.  A paragraph
      with two lines.
 
@@ -4328,7 +4314,7 @@ with two lines.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 257', () {
+    test('List items - Example 35', () {
       final markdown = '''  1.  A paragraph
       with two lines.
 
@@ -4355,7 +4341,7 @@ with two lines.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 258', () {
+    test('List items - Example 36', () {
       final markdown = '''   1.  A paragraph
        with two lines.
 
@@ -4382,7 +4368,7 @@ with two lines.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 259', () {
+    test('List items - Example 37', () {
       final markdown = '''    1.  A paragraph
         with two lines.
 
@@ -4405,7 +4391,7 @@ with two lines.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 260', skip: kSkipKnownFailure, () {
+    test('List items - Example 38', () {
       final markdown = '''  1.  A paragraph
 with two lines.
 
@@ -4432,7 +4418,7 @@ with two lines.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 261', () {
+    test('List items - Example 39', () {
       final markdown = '''  1.  A paragraph
     with two lines.''';
       final expected = '''<ol>
@@ -4448,7 +4434,7 @@ with two lines.</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 262', () {
+    test('List items - Example 40', () {
       final markdown = '''> 1. > Blockquote
 continued here.''';
       final expected = '''<blockquote>
@@ -4470,7 +4456,7 @@ continued here.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 263', () {
+    test('List items - Example 41', () {
       final markdown = '''> 1. > Blockquote
 > continued here.''';
       final expected = '''<blockquote>
@@ -4492,7 +4478,7 @@ continued here.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 264', () {
+    test('List items - Example 42', () {
       final markdown = '''- foo
   - bar
     - baz
@@ -4521,7 +4507,7 @@ continued here.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 265', () {
+    test('List items - Example 43', () {
       final markdown = '''- foo
  - bar
   - baz
@@ -4541,7 +4527,7 @@ continued here.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 266', () {
+    test('List items - Example 44', () {
       final markdown = '''10) foo
     - bar''';
       final expected = '''<ol start="10">
@@ -4560,7 +4546,7 @@ continued here.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 267', () {
+    test('List items - Example 45', () {
       final markdown = '''10) foo
    - bar''';
       final expected = '''<ol start="10">
@@ -4578,7 +4564,7 @@ continued here.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 268', () {
+    test('List items - Example 46', () {
       final markdown = '''- - foo''';
       final expected = '''<ul>
 <li>
@@ -4596,7 +4582,7 @@ continued here.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 269', () {
+    test('List items - Example 47', () {
       final markdown = '''1. - 2. foo''';
       final expected = '''<ol>
 <li>
@@ -4618,7 +4604,7 @@ continued here.</p>
       expect(html.trim(), expected.trim());
     });
 
-    test('List items - Example 270', () {
+    test('List items - Example 48', () {
       final markdown = '''- # Foo
 - Bar
   ---
@@ -4640,7 +4626,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 271', () {
+    test('Lists - Example 1', () {
       final markdown = '''- foo
 - bar
 + baz''';
@@ -4660,7 +4646,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 272', () {
+    test('Lists - Example 2', () {
       final markdown = '''1. foo
 2. bar
 3) baz''';
@@ -4680,7 +4666,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 273', () {
+    test('Lists - Example 3', () {
       final markdown = '''Foo
 - bar
 - baz''';
@@ -4698,7 +4684,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 274', () {
+    test('Lists - Example 4', () {
       final markdown = '''The number of windows in my house is
 14.  The number of doors is 6.''';
       final expected = '''<p>The number of windows in my house is
@@ -4712,7 +4698,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 275', () {
+    test('Lists - Example 5', () {
       final markdown = '''The number of windows in my house is
 1.  The number of doors is 6.''';
       final expected = '''<p>The number of windows in my house is</p>
@@ -4728,7 +4714,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 276', () {
+    test('Lists - Example 6', () {
       final markdown = '''- foo
 
 - bar
@@ -4755,7 +4741,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 277', () {
+    test('Lists - Example 7', () {
       final markdown = '''- foo
   - bar
     - baz
@@ -4785,7 +4771,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 278', skip: kSkipNongoal_MdNotToHtml, () {
+    test('Lists - Example 8', () {
       final markdown = '''- foo
 - bar
 
@@ -4811,7 +4797,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 279', skip: kSkipNongoal_MdNotToHtml, () {
+    test('Lists - Example 9', () {
       final markdown = '''-   foo
 
     notcode
@@ -4842,7 +4828,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 280', () {
+    test('Lists - Example 10', () {
       final markdown = '''- a
  - b
   - c
@@ -4868,7 +4854,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 281', () {
+    test('Lists - Example 11', () {
       final markdown = '''1. a
 
   2. b
@@ -4894,7 +4880,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 282', () {
+    test('Lists - Example 12', () {
       final markdown = '''- a
  - b
   - c
@@ -4916,7 +4902,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 283', () {
+    test('Lists - Example 13', () {
       final markdown = '''1. a
 
   2. b
@@ -4941,7 +4927,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 284', () {
+    test('Lists - Example 14', () {
       final markdown = '''- a
 - b
 
@@ -4966,7 +4952,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 285', () {
+    test('Lists - Example 15', () {
       final markdown = '''* a
 *
 
@@ -4989,7 +4975,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 286', () {
+    test('Lists - Example 16', () {
       final markdown = '''- a
 - b
 
@@ -5016,7 +5002,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 287', skip: kSkipNongoal_MdNotToHtml, () {
+    test('Lists - Example 17', () {
       final markdown = '''- a
 - b
 
@@ -5042,7 +5028,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 288', skip: kSkipKnownFailure, () {
+    test('Lists - Example 18', () {
       final markdown = '''- a
 - ```
   b
@@ -5069,7 +5055,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 289', () {
+    test('Lists - Example 19', () {
       final markdown = '''- a
   - b
 
@@ -5095,7 +5081,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 290', () {
+    test('Lists - Example 20', () {
       final markdown = '''* a
   > b
   >
@@ -5117,7 +5103,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 291', skip: kSkipKnownFailure, () {
+    test('Lists - Example 21', () {
       final markdown = '''- a
   > b
   ```
@@ -5143,7 +5129,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 292', () {
+    test('Lists - Example 22', () {
       final markdown = '''- a''';
       final expected = '''<ul>
 <li>a</li>
@@ -5157,7 +5143,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 293', () {
+    test('Lists - Example 23', () {
       final markdown = '''- a
   - b''';
       final expected = '''<ul>
@@ -5176,7 +5162,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 294', () {
+    test('Lists - Example 24', () {
       final markdown = '''1. ```
    foo
    ```
@@ -5198,7 +5184,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 295', () {
+    test('Lists - Example 25', () {
       final markdown = '''* foo
   * bar
 
@@ -5221,7 +5207,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Lists - Example 296', () {
+    test('Lists - Example 26', () {
       final markdown = '''- a
   - b
   - c
@@ -5254,7 +5240,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Inlines - Example 297', () {
+    test('Lists - Example 27', () {
       final markdown = '''`hi`lo`''';
       final expected = '''<p><code>hi</code>lo`</p>''';
 
@@ -5266,11 +5252,9 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Backslash escapes - Example 298', skip: kSkipKnownFailure, () {
-      final markdown =
-          '''\\!\\"\\#\\\$\\%\\&\\\'\\(\\)\\*\\+\\,\\-\\.\\/\\:\\;\\<\\=\\>\\?\\@\\[\\\\\\]\\^\\_\\`\\{\\|\\}\\~''';
-      final expected =
-          '''<p>!&quot;#\$%&amp;\'()*+,-./:;&lt;=&gt;?@[\\]^_`{|}~</p>''';
+    test('Backslash escapes - Example 1', () {
+      final markdown = '''\\!\\"\\#\\\$\\%\\&\\'\\(\\)\\*\\+\\,\\-\\.\\/\\:\\;\\<\\=\\>\\?\\@\\[\\\\\\]\\^\\_\\`\\{\\|\\}\\~''';
+      final expected = '''<p>!&quot;#\$%&amp;'()*+,-./:;&lt;=&gt;?@[\\]^_`{|}~</p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -5280,7 +5264,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Backslash escapes - Example 299', () {
+    test('Backslash escapes - Example 2', () {
       final markdown = '''\\	\\A\\a\\ \\3\\φ\\«''';
       final expected = '''<p>\\	\\A\\a\\ \\3\\φ\\«</p>''';
 
@@ -5292,7 +5276,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Backslash escapes - Example 300', () {
+    test('Backslash escapes - Example 3', () {
       final markdown = '''\\*not emphasized*
 \\<br/> not a tag
 \\[not a link](/foo)
@@ -5320,7 +5304,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Backslash escapes - Example 301', () {
+    test('Backslash escapes - Example 4', () {
       final markdown = '''\\\\*emphasis*''';
       final expected = '''<p>\\<em>emphasis</em></p>''';
 
@@ -5332,7 +5316,7 @@ baz</li>
       expect(html.trim(), expected.trim());
     });
 
-    test('Backslash escapes - Example 302', () {
+    test('Backslash escapes - Example 5', () {
       final markdown = '''foo\\
 bar''';
       final expected = '''<p>foo<br />
@@ -5346,7 +5330,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Backslash escapes - Example 303', () {
+    test('Backslash escapes - Example 6', () {
       final markdown = '''`` \\[\\` ``''';
       final expected = '''<p><code>\\[\\`</code></p>''';
 
@@ -5358,7 +5342,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Backslash escapes - Example 304', () {
+    test('Backslash escapes - Example 7', () {
       final markdown = '''    \\[\\]''';
       final expected = '''<pre><code>\\[\\]
 </code></pre>''';
@@ -5371,7 +5355,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Backslash escapes - Example 305', () {
+    test('Backslash escapes - Example 8', () {
       final markdown = '''~~~
 \\[\\]
 ~~~''';
@@ -5386,10 +5370,9 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Backslash escapes - Example 306', () {
+    test('Backslash escapes - Example 9', () {
       final markdown = '''<http://example.com?find=\\*>''';
-      final expected =
-          '''<p><a href="http://example.com?find=%5C*">http://example.com?find=\\*</a></p>''';
+      final expected = '''<p><a href="http://example.com?find=%5C*">http://example.com?find=\\*</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -5399,7 +5382,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Backslash escapes - Example 307', skip: kSkipKnownFailure, () {
+    test('Backslash escapes - Example 10', () {
       final markdown = '''<a href="/bar\\/)">''';
       final expected = '''<a href="/bar\\/)">''';
 
@@ -5411,7 +5394,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Backslash escapes - Example 308', () {
+    test('Backslash escapes - Example 11', () {
       final markdown = '''[foo](/bar\\* "ti\\*tle")''';
       final expected = '''<p><a href="/bar*" title="ti*tle">foo</a></p>''';
 
@@ -5423,7 +5406,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Backslash escapes - Example 309', skip: kSkipKnownFailure, () {
+    test('Backslash escapes - Example 12', () {
       final markdown = '''[foo]
 
 [foo]: /bar\\* "ti\\*tle"''';
@@ -5437,7 +5420,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Backslash escapes - Example 310', skip: kSkipKnownFailure, () {
+    test('Backslash escapes - Example 13', () {
       final markdown = '''``` foo\\+bar
 foo
 ```''';
@@ -5452,7 +5435,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 311', () {
+    test('Entity and numeric character references - Example 1', () {
       final markdown = '''&nbsp; &amp; &copy; &AElig; &Dcaron;
 &frac34; &HilbertSpace; &DifferentialD;
 &ClockwiseContourIntegral; &ngE;''';
@@ -5468,7 +5451,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 312', () {
+    test('Entity and numeric character references - Example 2', () {
       final markdown = '''&#35; &#1234; &#992; &#0;''';
       final expected = '''<p># Ӓ Ϡ �</p>''';
 
@@ -5480,7 +5463,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 313', () {
+    test('Entity and numeric character references - Example 3', () {
       final markdown = '''&#X22; &#XD06; &#xcab;''';
       final expected = '''<p>&quot; ആ ಫ</p>''';
 
@@ -5492,7 +5475,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 314', () {
+    test('Entity and numeric character references - Example 4', () {
       final markdown = '''&nbsp &x; &#; &#x;
 &#987654321;
 &#abcdef0;
@@ -5510,7 +5493,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 315', () {
+    test('Entity and numeric character references - Example 5', () {
       final markdown = '''&copy''';
       final expected = '''<p>&amp;copy</p>''';
 
@@ -5522,7 +5505,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 316', () {
+    test('Entity and numeric character references - Example 6', () {
       final markdown = '''&MadeUpEntity;''';
       final expected = '''<p>&amp;MadeUpEntity;</p>''';
 
@@ -5534,8 +5517,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 317',
-        skip: kSkipKnownFailure, () {
+    test('Entity and numeric character references - Example 7', () {
       final markdown = '''<a href="&ouml;&ouml;.html">''';
       final expected = '''<a href="&ouml;&ouml;.html">''';
 
@@ -5547,10 +5529,9 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 318', () {
+    test('Entity and numeric character references - Example 8', () {
       final markdown = '''[foo](/f&ouml;&ouml; "f&ouml;&ouml;")''';
-      final expected =
-          '''<p><a href="/f%C3%B6%C3%B6" title="föö">foo</a></p>''';
+      final expected = '''<p><a href="/f%C3%B6%C3%B6" title="föö">foo</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -5560,13 +5541,11 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 319',
-        skip: kSkipKnownFailure, () {
+    test('Entity and numeric character references - Example 9', () {
       final markdown = '''[foo]
 
 [foo]: /f&ouml;&ouml; "f&ouml;&ouml;"''';
-      final expected =
-          '''<p><a href="/f%C3%B6%C3%B6" title="föö">foo</a></p>''';
+      final expected = '''<p><a href="/f%C3%B6%C3%B6" title="föö">foo</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -5576,8 +5555,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 320',
-        skip: kSkipKnownFailure, () {
+    test('Entity and numeric character references - Example 10', () {
       final markdown = '''``` f&ouml;&ouml;
 foo
 ```''';
@@ -5592,7 +5570,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 321', () {
+    test('Entity and numeric character references - Example 11', () {
       final markdown = '''`f&ouml;&ouml;`''';
       final expected = '''<p><code>f&amp;ouml;&amp;ouml;</code></p>''';
 
@@ -5604,7 +5582,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 322', () {
+    test('Entity and numeric character references - Example 12', () {
       final markdown = '''    f&ouml;f&ouml;''';
       final expected = '''<pre><code>f&amp;ouml;f&amp;ouml;
 </code></pre>''';
@@ -5617,7 +5595,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 323', () {
+    test('Entity and numeric character references - Example 13', () {
       final markdown = '''&#42;foo&#42;
 *foo*''';
       final expected = '''<p>*foo*
@@ -5631,7 +5609,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 324', () {
+    test('Entity and numeric character references - Example 14', () {
       final markdown = '''&#42; foo
 
 * foo''';
@@ -5648,7 +5626,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 325', () {
+    test('Entity and numeric character references - Example 15', () {
       final markdown = '''foo&#10;&#10;bar''';
       final expected = '''<p>foo
 
@@ -5662,7 +5640,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 326', () {
+    test('Entity and numeric character references - Example 16', () {
       final markdown = '''&#9;foo''';
       final expected = '''<p>	foo</p>''';
 
@@ -5674,7 +5652,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Entity and numeric character references - Example 327', () {
+    test('Entity and numeric character references - Example 17', () {
       final markdown = '''[a](url &quot;tit&quot;)''';
       final expected = '''<p>[a](url &quot;tit&quot;)</p>''';
 
@@ -5686,7 +5664,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 328', () {
+    test('Code spans - Example 1', () {
       final markdown = '''`foo`''';
       final expected = '''<p><code>foo</code></p>''';
 
@@ -5698,7 +5676,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 329', () {
+    test('Code spans - Example 2', () {
       final markdown = '''`` foo ` bar ``''';
       final expected = '''<p><code>foo ` bar</code></p>''';
 
@@ -5710,7 +5688,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 330', () {
+    test('Code spans - Example 3', () {
       final markdown = '''` `` `''';
       final expected = '''<p><code>``</code></p>''';
 
@@ -5722,7 +5700,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 331', () {
+    test('Code spans - Example 4', () {
       final markdown = '''`  ``  `''';
       final expected = '''<p><code> `` </code></p>''';
 
@@ -5734,7 +5712,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 332', () {
+    test('Code spans - Example 5', () {
       final markdown = '''` a`''';
       final expected = '''<p><code> a</code></p>''';
 
@@ -5746,7 +5724,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 333', () {
+    test('Code spans - Example 6', () {
       final markdown = '''` b `''';
       final expected = '''<p><code> b </code></p>''';
 
@@ -5758,7 +5736,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 334', () {
+    test('Code spans - Example 7', () {
       final markdown = '''` `
 `  `''';
       final expected = '''<p><code> </code>
@@ -5772,7 +5750,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 335', () {
+    test('Code spans - Example 8', () {
       final markdown = '''``
 foo
 bar  
@@ -5788,7 +5766,7 @@ baz
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 336', () {
+    test('Code spans - Example 9', () {
       final markdown = '''``
 foo 
 ``''';
@@ -5802,7 +5780,7 @@ foo
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 337', () {
+    test('Code spans - Example 10', () {
       final markdown = '''`foo   bar 
 baz`''';
       final expected = '''<p><code>foo   bar  baz</code></p>''';
@@ -5815,7 +5793,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 338', () {
+    test('Code spans - Example 11', () {
       final markdown = '''`foo\\`bar`''';
       final expected = '''<p><code>foo\\</code>bar`</p>''';
 
@@ -5827,7 +5805,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 339', () {
+    test('Code spans - Example 12', () {
       final markdown = '''``foo`bar``''';
       final expected = '''<p><code>foo`bar</code></p>''';
 
@@ -5839,7 +5817,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 340', () {
+    test('Code spans - Example 13', () {
       final markdown = '''` foo `` bar `''';
       final expected = '''<p><code>foo `` bar</code></p>''';
 
@@ -5851,7 +5829,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 341', () {
+    test('Code spans - Example 14', () {
       final markdown = '''*foo`*`''';
       final expected = '''<p>*foo<code>*</code></p>''';
 
@@ -5863,7 +5841,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 342', () {
+    test('Code spans - Example 15', () {
       final markdown = '''[not a `link](/foo`)''';
       final expected = '''<p>[not a <code>link](/foo</code>)</p>''';
 
@@ -5875,7 +5853,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 343', () {
+    test('Code spans - Example 16', () {
       final markdown = '''`<a href="`">`''';
       final expected = '''<p><code>&lt;a href=&quot;</code>&quot;&gt;`</p>''';
 
@@ -5887,7 +5865,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 344', skip: kSkipNongoal_MdNotToHtml, () {
+    test('Code spans - Example 17', () {
       final markdown = '''<a href="`">`''';
       final expected = '''<p><a href="`">`</p>''';
 
@@ -5899,7 +5877,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 345', () {
+    test('Code spans - Example 18', () {
       final markdown = '''`<http://foo.bar.`baz>`''';
       final expected = '''<p><code>&lt;http://foo.bar.</code>baz&gt;`</p>''';
 
@@ -5911,10 +5889,9 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 346', () {
+    test('Code spans - Example 19', () {
       final markdown = '''<http://foo.bar.`baz>`''';
-      final expected =
-          '''<p><a href="http://foo.bar.%60baz">http://foo.bar.`baz</a>`</p>''';
+      final expected = '''<p><a href="http://foo.bar.%60baz">http://foo.bar.`baz</a>`</p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -5924,7 +5901,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 347', () {
+    test('Code spans - Example 20', () {
       final markdown = '''```foo``''';
       final expected = '''<p>```foo``</p>''';
 
@@ -5936,7 +5913,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 348', () {
+    test('Code spans - Example 21', () {
       final markdown = '''`foo''';
       final expected = '''<p>`foo</p>''';
 
@@ -5948,7 +5925,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Code spans - Example 349', () {
+    test('Code spans - Example 22', () {
       final markdown = '''`foo``bar``''';
       final expected = '''<p>`foo<code>bar</code></p>''';
 
@@ -5960,7 +5937,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 350', () {
+    test('Emphasis and strong emphasis - Example 1', () {
       final markdown = '''*foo bar*''';
       final expected = '''<p><em>foo bar</em></p>''';
 
@@ -5972,7 +5949,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 351', () {
+    test('Emphasis and strong emphasis - Example 2', () {
       final markdown = '''a * foo bar*''';
       final expected = '''<p>a * foo bar*</p>''';
 
@@ -5984,7 +5961,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 352', () {
+    test('Emphasis and strong emphasis - Example 3', () {
       final markdown = '''a*"foo"*''';
       final expected = '''<p>a*&quot;foo&quot;*</p>''';
 
@@ -5996,8 +5973,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 353', skip: kSkipKnownFailure,
-        () {
+    test('Emphasis and strong emphasis - Example 4', () {
       final markdown = '''* a *''';
       final expected = '''<p>* a *</p>''';
 
@@ -6009,7 +5985,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 354', () {
+    test('Emphasis and strong emphasis - Example 5', () {
       final markdown = '''foo*bar*''';
       final expected = '''<p>foo<em>bar</em></p>''';
 
@@ -6021,7 +5997,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 355', () {
+    test('Emphasis and strong emphasis - Example 6', () {
       final markdown = '''5*6*78''';
       final expected = '''<p>5<em>6</em>78</p>''';
 
@@ -6033,7 +6009,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 356', () {
+    test('Emphasis and strong emphasis - Example 7', () {
       final markdown = '''_foo bar_''';
       final expected = '''<p><em>foo bar</em></p>''';
 
@@ -6045,7 +6021,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 357', () {
+    test('Emphasis and strong emphasis - Example 8', () {
       final markdown = '''_ foo bar_''';
       final expected = '''<p>_ foo bar_</p>''';
 
@@ -6057,7 +6033,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 358', () {
+    test('Emphasis and strong emphasis - Example 9', () {
       final markdown = '''a_"foo"_''';
       final expected = '''<p>a_&quot;foo&quot;_</p>''';
 
@@ -6069,7 +6045,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 359', () {
+    test('Emphasis and strong emphasis - Example 10', () {
       final markdown = '''foo_bar_''';
       final expected = '''<p>foo_bar_</p>''';
 
@@ -6081,7 +6057,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 360', () {
+    test('Emphasis and strong emphasis - Example 11', () {
       final markdown = '''5_6_78''';
       final expected = '''<p>5_6_78</p>''';
 
@@ -6093,7 +6069,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 361', () {
+    test('Emphasis and strong emphasis - Example 12', () {
       final markdown = '''пристаням_стремятся_''';
       final expected = '''<p>пристаням_стремятся_</p>''';
 
@@ -6105,7 +6081,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 362', () {
+    test('Emphasis and strong emphasis - Example 13', () {
       final markdown = '''aa_"bb"_cc''';
       final expected = '''<p>aa_&quot;bb&quot;_cc</p>''';
 
@@ -6117,7 +6093,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 363', () {
+    test('Emphasis and strong emphasis - Example 14', () {
       final markdown = '''foo-_(bar)_''';
       final expected = '''<p>foo-<em>(bar)</em></p>''';
 
@@ -6129,7 +6105,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 364', () {
+    test('Emphasis and strong emphasis - Example 15', () {
       final markdown = '''_foo*''';
       final expected = '''<p>_foo*</p>''';
 
@@ -6141,7 +6117,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 365', () {
+    test('Emphasis and strong emphasis - Example 16', () {
       final markdown = '''*foo bar *''';
       final expected = '''<p>*foo bar *</p>''';
 
@@ -6153,7 +6129,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 366', () {
+    test('Emphasis and strong emphasis - Example 17', () {
       final markdown = '''*foo bar
 *''';
       final expected = '''<p>*foo bar
@@ -6167,7 +6143,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 367', () {
+    test('Emphasis and strong emphasis - Example 18', () {
       final markdown = '''*(*foo)''';
       final expected = '''<p>*(*foo)</p>''';
 
@@ -6179,7 +6155,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 368', () {
+    test('Emphasis and strong emphasis - Example 19', () {
       final markdown = '''*(*foo*)*''';
       final expected = '''<p><em>(<em>foo</em>)</em></p>''';
 
@@ -6191,7 +6167,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 369', () {
+    test('Emphasis and strong emphasis - Example 20', () {
       final markdown = '''*foo*bar''';
       final expected = '''<p><em>foo</em>bar</p>''';
 
@@ -6203,7 +6179,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 370', () {
+    test('Emphasis and strong emphasis - Example 21', () {
       final markdown = '''_foo bar _''';
       final expected = '''<p>_foo bar _</p>''';
 
@@ -6215,7 +6191,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 371', () {
+    test('Emphasis and strong emphasis - Example 22', () {
       final markdown = '''_(_foo)''';
       final expected = '''<p>_(_foo)</p>''';
 
@@ -6227,7 +6203,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 372', () {
+    test('Emphasis and strong emphasis - Example 23', () {
       final markdown = '''_(_foo_)_''';
       final expected = '''<p><em>(<em>foo</em>)</em></p>''';
 
@@ -6239,7 +6215,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 373', () {
+    test('Emphasis and strong emphasis - Example 24', () {
       final markdown = '''_foo_bar''';
       final expected = '''<p>_foo_bar</p>''';
 
@@ -6251,7 +6227,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 374', () {
+    test('Emphasis and strong emphasis - Example 25', () {
       final markdown = '''_пристаням_стремятся''';
       final expected = '''<p>_пристаням_стремятся</p>''';
 
@@ -6263,7 +6239,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 375', () {
+    test('Emphasis and strong emphasis - Example 26', () {
       final markdown = '''_foo_bar_baz_''';
       final expected = '''<p><em>foo_bar_baz</em></p>''';
 
@@ -6275,7 +6251,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 376', () {
+    test('Emphasis and strong emphasis - Example 27', () {
       final markdown = '''_(bar)_.''';
       final expected = '''<p><em>(bar)</em>.</p>''';
 
@@ -6287,7 +6263,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 377', () {
+    test('Emphasis and strong emphasis - Example 28', () {
       final markdown = '''**foo bar**''';
       final expected = '''<p><strong>foo bar</strong></p>''';
 
@@ -6299,7 +6275,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 378', () {
+    test('Emphasis and strong emphasis - Example 29', () {
       final markdown = '''** foo bar**''';
       final expected = '''<p>** foo bar**</p>''';
 
@@ -6311,7 +6287,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 379', () {
+    test('Emphasis and strong emphasis - Example 30', () {
       final markdown = '''a**"foo"**''';
       final expected = '''<p>a**&quot;foo&quot;**</p>''';
 
@@ -6323,7 +6299,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 380', () {
+    test('Emphasis and strong emphasis - Example 31', () {
       final markdown = '''foo**bar**''';
       final expected = '''<p>foo<strong>bar</strong></p>''';
 
@@ -6335,7 +6311,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 381', () {
+    test('Emphasis and strong emphasis - Example 32', () {
       final markdown = '''__foo bar__''';
       final expected = '''<p><strong>foo bar</strong></p>''';
 
@@ -6347,7 +6323,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 382', () {
+    test('Emphasis and strong emphasis - Example 33', () {
       final markdown = '''__ foo bar__''';
       final expected = '''<p>__ foo bar__</p>''';
 
@@ -6359,7 +6335,7 @@ baz`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 383', () {
+    test('Emphasis and strong emphasis - Example 34', () {
       final markdown = '''__
 foo bar__''';
       final expected = '''<p>__
@@ -6373,7 +6349,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 384', () {
+    test('Emphasis and strong emphasis - Example 35', () {
       final markdown = '''a__"foo"__''';
       final expected = '''<p>a__&quot;foo&quot;__</p>''';
 
@@ -6385,7 +6361,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 385', () {
+    test('Emphasis and strong emphasis - Example 36', () {
       final markdown = '''foo__bar__''';
       final expected = '''<p>foo__bar__</p>''';
 
@@ -6397,7 +6373,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 386', () {
+    test('Emphasis and strong emphasis - Example 37', () {
       final markdown = '''5__6__78''';
       final expected = '''<p>5__6__78</p>''';
 
@@ -6409,7 +6385,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 387', () {
+    test('Emphasis and strong emphasis - Example 38', () {
       final markdown = '''пристаням__стремятся__''';
       final expected = '''<p>пристаням__стремятся__</p>''';
 
@@ -6421,7 +6397,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 388', () {
+    test('Emphasis and strong emphasis - Example 39', () {
       final markdown = '''__foo, __bar__, baz__''';
       final expected = '''<p><strong>foo, bar, baz</strong></p>''';
 
@@ -6433,7 +6409,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 389', () {
+    test('Emphasis and strong emphasis - Example 40', () {
       final markdown = '''foo-__(bar)__''';
       final expected = '''<p>foo-<strong>(bar)</strong></p>''';
 
@@ -6445,7 +6421,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 390', () {
+    test('Emphasis and strong emphasis - Example 41', () {
       final markdown = '''**foo bar **''';
       final expected = '''<p>**foo bar **</p>''';
 
@@ -6457,7 +6433,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 391', () {
+    test('Emphasis and strong emphasis - Example 42', () {
       final markdown = '''**(**foo)''';
       final expected = '''<p>**(**foo)</p>''';
 
@@ -6469,7 +6445,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 392', () {
+    test('Emphasis and strong emphasis - Example 43', () {
       final markdown = '''*(**foo**)*''';
       final expected = '''<p><em>(<strong>foo</strong>)</em></p>''';
 
@@ -6481,11 +6457,10 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 393', () {
+    test('Emphasis and strong emphasis - Example 44', () {
       final markdown = '''**Gomphocarpus (*Gomphocarpus physocarpus*, syn.
 *Asclepias physocarpa*)**''';
-      final expected =
-          '''<p><strong>Gomphocarpus (<em>Gomphocarpus physocarpus</em>, syn.
+      final expected = '''<p><strong>Gomphocarpus (<em>Gomphocarpus physocarpus</em>, syn.
 <em>Asclepias physocarpa</em>)</strong></p>''';
 
       final parser = CmarkParser();
@@ -6496,10 +6471,9 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 394', () {
+    test('Emphasis and strong emphasis - Example 45', () {
       final markdown = '''**foo "*bar*" foo**''';
-      final expected =
-          '''<p><strong>foo &quot;<em>bar</em>&quot; foo</strong></p>''';
+      final expected = '''<p><strong>foo &quot;<em>bar</em>&quot; foo</strong></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -6509,7 +6483,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 395', () {
+    test('Emphasis and strong emphasis - Example 46', () {
       final markdown = '''**foo**bar''';
       final expected = '''<p><strong>foo</strong>bar</p>''';
 
@@ -6521,7 +6495,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 396', () {
+    test('Emphasis and strong emphasis - Example 47', () {
       final markdown = '''__foo bar __''';
       final expected = '''<p>__foo bar __</p>''';
 
@@ -6533,7 +6507,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 397', () {
+    test('Emphasis and strong emphasis - Example 48', () {
       final markdown = '''__(__foo)''';
       final expected = '''<p>__(__foo)</p>''';
 
@@ -6545,7 +6519,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 398', () {
+    test('Emphasis and strong emphasis - Example 49', () {
       final markdown = '''_(__foo__)_''';
       final expected = '''<p><em>(<strong>foo</strong>)</em></p>''';
 
@@ -6557,7 +6531,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 399', () {
+    test('Emphasis and strong emphasis - Example 50', () {
       final markdown = '''__foo__bar''';
       final expected = '''<p>__foo__bar</p>''';
 
@@ -6569,7 +6543,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 400', () {
+    test('Emphasis and strong emphasis - Example 51', () {
       final markdown = '''__пристаням__стремятся''';
       final expected = '''<p>__пристаням__стремятся</p>''';
 
@@ -6581,7 +6555,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 401', () {
+    test('Emphasis and strong emphasis - Example 52', () {
       final markdown = '''__foo__bar__baz__''';
       final expected = '''<p><strong>foo__bar__baz</strong></p>''';
 
@@ -6593,7 +6567,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 402', () {
+    test('Emphasis and strong emphasis - Example 53', () {
       final markdown = '''__(bar)__.''';
       final expected = '''<p><strong>(bar)</strong>.</p>''';
 
@@ -6605,7 +6579,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 403', () {
+    test('Emphasis and strong emphasis - Example 54', () {
       final markdown = '''*foo [bar](/url)*''';
       final expected = '''<p><em>foo <a href="/url">bar</a></em></p>''';
 
@@ -6617,7 +6591,7 @@ foo bar__</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 404', () {
+    test('Emphasis and strong emphasis - Example 55', () {
       final markdown = '''*foo
 bar*''';
       final expected = '''<p><em>foo
@@ -6631,7 +6605,7 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 405', () {
+    test('Emphasis and strong emphasis - Example 56', () {
       final markdown = '''_foo __bar__ baz_''';
       final expected = '''<p><em>foo <strong>bar</strong> baz</em></p>''';
 
@@ -6643,7 +6617,7 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 406', () {
+    test('Emphasis and strong emphasis - Example 57', () {
       final markdown = '''_foo _bar_ baz_''';
       final expected = '''<p><em>foo <em>bar</em> baz</em></p>''';
 
@@ -6655,7 +6629,7 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 407', () {
+    test('Emphasis and strong emphasis - Example 58', () {
       final markdown = '''__foo_ bar_''';
       final expected = '''<p><em><em>foo</em> bar</em></p>''';
 
@@ -6667,7 +6641,7 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 408', () {
+    test('Emphasis and strong emphasis - Example 59', () {
       final markdown = '''*foo *bar**''';
       final expected = '''<p><em>foo <em>bar</em></em></p>''';
 
@@ -6679,7 +6653,7 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 409', () {
+    test('Emphasis and strong emphasis - Example 60', () {
       final markdown = '''*foo **bar** baz*''';
       final expected = '''<p><em>foo <strong>bar</strong> baz</em></p>''';
 
@@ -6691,7 +6665,7 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 410', () {
+    test('Emphasis and strong emphasis - Example 61', () {
       final markdown = '''*foo**bar**baz*''';
       final expected = '''<p><em>foo<strong>bar</strong>baz</em></p>''';
 
@@ -6703,7 +6677,7 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 411', () {
+    test('Emphasis and strong emphasis - Example 62', () {
       final markdown = '''*foo**bar*''';
       final expected = '''<p><em>foo**bar</em></p>''';
 
@@ -6715,7 +6689,7 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 412', () {
+    test('Emphasis and strong emphasis - Example 63', () {
       final markdown = '''***foo** bar*''';
       final expected = '''<p><em><strong>foo</strong> bar</em></p>''';
 
@@ -6727,7 +6701,7 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 413', () {
+    test('Emphasis and strong emphasis - Example 64', () {
       final markdown = '''*foo **bar***''';
       final expected = '''<p><em>foo <strong>bar</strong></em></p>''';
 
@@ -6739,7 +6713,7 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 414', () {
+    test('Emphasis and strong emphasis - Example 65', () {
       final markdown = '''*foo**bar***''';
       final expected = '''<p><em>foo<strong>bar</strong></em></p>''';
 
@@ -6751,7 +6725,7 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 415', () {
+    test('Emphasis and strong emphasis - Example 66', () {
       final markdown = '''foo***bar***baz''';
       final expected = '''<p>foo<em><strong>bar</strong></em>baz</p>''';
 
@@ -6763,7 +6737,7 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 416', () {
+    test('Emphasis and strong emphasis - Example 67', () {
       final markdown = '''foo******bar*********baz''';
       final expected = '''<p>foo<strong>bar</strong>***baz</p>''';
 
@@ -6775,10 +6749,9 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 417', () {
+    test('Emphasis and strong emphasis - Example 68', () {
       final markdown = '''*foo **bar *baz* bim** bop*''';
-      final expected =
-          '''<p><em>foo <strong>bar <em>baz</em> bim</strong> bop</em></p>''';
+      final expected = '''<p><em>foo <strong>bar <em>baz</em> bim</strong> bop</em></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -6788,10 +6761,9 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 418', () {
+    test('Emphasis and strong emphasis - Example 69', () {
       final markdown = '''*foo [*bar*](/url)*''';
-      final expected =
-          '''<p><em>foo <a href="/url"><em>bar</em></a></em></p>''';
+      final expected = '''<p><em>foo <a href="/url"><em>bar</em></a></em></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -6801,7 +6773,7 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 419', () {
+    test('Emphasis and strong emphasis - Example 70', () {
       final markdown = '''** is not an empty emphasis''';
       final expected = '''<p>** is not an empty emphasis</p>''';
 
@@ -6813,7 +6785,7 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 420', () {
+    test('Emphasis and strong emphasis - Example 71', () {
       final markdown = '''**** is not an empty strong emphasis''';
       final expected = '''<p>**** is not an empty strong emphasis</p>''';
 
@@ -6825,7 +6797,7 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 421', () {
+    test('Emphasis and strong emphasis - Example 72', () {
       final markdown = '''**foo [bar](/url)**''';
       final expected = '''<p><strong>foo <a href="/url">bar</a></strong></p>''';
 
@@ -6837,7 +6809,7 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 422', () {
+    test('Emphasis and strong emphasis - Example 73', () {
       final markdown = '''**foo
 bar**''';
       final expected = '''<p><strong>foo
@@ -6851,7 +6823,7 @@ bar</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 423', () {
+    test('Emphasis and strong emphasis - Example 74', () {
       final markdown = '''__foo _bar_ baz__''';
       final expected = '''<p><strong>foo <em>bar</em> baz</strong></p>''';
 
@@ -6863,7 +6835,7 @@ bar</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 424', () {
+    test('Emphasis and strong emphasis - Example 75', () {
       final markdown = '''__foo __bar__ baz__''';
       final expected = '''<p><strong>foo bar baz</strong></p>''';
 
@@ -6875,7 +6847,7 @@ bar</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 425', () {
+    test('Emphasis and strong emphasis - Example 76', () {
       final markdown = '''____foo__ bar__''';
       final expected = '''<p><strong>foo bar</strong></p>''';
 
@@ -6887,7 +6859,7 @@ bar</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 426', () {
+    test('Emphasis and strong emphasis - Example 77', () {
       final markdown = '''**foo **bar****''';
       final expected = '''<p><strong>foo bar</strong></p>''';
 
@@ -6899,7 +6871,7 @@ bar</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 427', () {
+    test('Emphasis and strong emphasis - Example 78', () {
       final markdown = '''**foo *bar* baz**''';
       final expected = '''<p><strong>foo <em>bar</em> baz</strong></p>''';
 
@@ -6911,7 +6883,7 @@ bar</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 428', () {
+    test('Emphasis and strong emphasis - Example 79', () {
       final markdown = '''**foo*bar*baz**''';
       final expected = '''<p><strong>foo<em>bar</em>baz</strong></p>''';
 
@@ -6923,7 +6895,7 @@ bar</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 429', () {
+    test('Emphasis and strong emphasis - Example 80', () {
       final markdown = '''***foo* bar**''';
       final expected = '''<p><strong><em>foo</em> bar</strong></p>''';
 
@@ -6935,7 +6907,7 @@ bar</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 430', () {
+    test('Emphasis and strong emphasis - Example 81', () {
       final markdown = '''**foo *bar***''';
       final expected = '''<p><strong>foo <em>bar</em></strong></p>''';
 
@@ -6947,7 +6919,7 @@ bar</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 431', () {
+    test('Emphasis and strong emphasis - Example 82', () {
       final markdown = '''**foo *bar **baz**
 bim* bop**''';
       final expected = '''<p><strong>foo <em>bar <strong>baz</strong>
@@ -6961,10 +6933,9 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 432', () {
+    test('Emphasis and strong emphasis - Example 83', () {
       final markdown = '''**foo [*bar*](/url)**''';
-      final expected =
-          '''<p><strong>foo <a href="/url"><em>bar</em></a></strong></p>''';
+      final expected = '''<p><strong>foo <a href="/url"><em>bar</em></a></strong></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -6974,7 +6945,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 433', () {
+    test('Emphasis and strong emphasis - Example 84', () {
       final markdown = '''__ is not an empty emphasis''';
       final expected = '''<p>__ is not an empty emphasis</p>''';
 
@@ -6986,7 +6957,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 434', () {
+    test('Emphasis and strong emphasis - Example 85', () {
       final markdown = '''____ is not an empty strong emphasis''';
       final expected = '''<p>____ is not an empty strong emphasis</p>''';
 
@@ -6998,7 +6969,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 435', () {
+    test('Emphasis and strong emphasis - Example 86', () {
       final markdown = '''foo ***''';
       final expected = '''<p>foo ***</p>''';
 
@@ -7010,7 +6981,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 436', () {
+    test('Emphasis and strong emphasis - Example 87', () {
       final markdown = '''foo *\\**''';
       final expected = '''<p>foo <em>*</em></p>''';
 
@@ -7022,7 +6993,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 437', () {
+    test('Emphasis and strong emphasis - Example 88', () {
       final markdown = '''foo *_*''';
       final expected = '''<p>foo <em>_</em></p>''';
 
@@ -7034,7 +7005,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 438', () {
+    test('Emphasis and strong emphasis - Example 89', () {
       final markdown = '''foo *****''';
       final expected = '''<p>foo *****</p>''';
 
@@ -7046,7 +7017,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 439', () {
+    test('Emphasis and strong emphasis - Example 90', () {
       final markdown = '''foo **\\***''';
       final expected = '''<p>foo <strong>*</strong></p>''';
 
@@ -7058,7 +7029,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 440', () {
+    test('Emphasis and strong emphasis - Example 91', () {
       final markdown = '''foo **_**''';
       final expected = '''<p>foo <strong>_</strong></p>''';
 
@@ -7070,7 +7041,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 441', () {
+    test('Emphasis and strong emphasis - Example 92', () {
       final markdown = '''**foo*''';
       final expected = '''<p>*<em>foo</em></p>''';
 
@@ -7082,7 +7053,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 442', () {
+    test('Emphasis and strong emphasis - Example 93', () {
       final markdown = '''*foo**''';
       final expected = '''<p><em>foo</em>*</p>''';
 
@@ -7094,7 +7065,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 443', () {
+    test('Emphasis and strong emphasis - Example 94', () {
       final markdown = '''***foo**''';
       final expected = '''<p>*<strong>foo</strong></p>''';
 
@@ -7106,7 +7077,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 444', () {
+    test('Emphasis and strong emphasis - Example 95', () {
       final markdown = '''****foo*''';
       final expected = '''<p>***<em>foo</em></p>''';
 
@@ -7118,7 +7089,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 445', () {
+    test('Emphasis and strong emphasis - Example 96', () {
       final markdown = '''**foo***''';
       final expected = '''<p><strong>foo</strong>*</p>''';
 
@@ -7130,7 +7101,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 446', () {
+    test('Emphasis and strong emphasis - Example 97', () {
       final markdown = '''*foo****''';
       final expected = '''<p><em>foo</em>***</p>''';
 
@@ -7142,7 +7113,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 447', () {
+    test('Emphasis and strong emphasis - Example 98', () {
       final markdown = '''foo ___''';
       final expected = '''<p>foo ___</p>''';
 
@@ -7154,7 +7125,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 448', () {
+    test('Emphasis and strong emphasis - Example 99', () {
       final markdown = '''foo _\\__''';
       final expected = '''<p>foo <em>_</em></p>''';
 
@@ -7166,7 +7137,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 449', () {
+    test('Emphasis and strong emphasis - Example 100', () {
       final markdown = '''foo _*_''';
       final expected = '''<p>foo <em>*</em></p>''';
 
@@ -7178,7 +7149,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 450', () {
+    test('Emphasis and strong emphasis - Example 101', () {
       final markdown = '''foo _____''';
       final expected = '''<p>foo _____</p>''';
 
@@ -7190,7 +7161,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 451', () {
+    test('Emphasis and strong emphasis - Example 102', () {
       final markdown = '''foo __\\___''';
       final expected = '''<p>foo <strong>_</strong></p>''';
 
@@ -7202,7 +7173,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 452', () {
+    test('Emphasis and strong emphasis - Example 103', () {
       final markdown = '''foo __*__''';
       final expected = '''<p>foo <strong>*</strong></p>''';
 
@@ -7214,7 +7185,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 453', () {
+    test('Emphasis and strong emphasis - Example 104', () {
       final markdown = '''__foo_''';
       final expected = '''<p>_<em>foo</em></p>''';
 
@@ -7226,7 +7197,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 454', () {
+    test('Emphasis and strong emphasis - Example 105', () {
       final markdown = '''_foo__''';
       final expected = '''<p><em>foo</em>_</p>''';
 
@@ -7238,7 +7209,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 455', () {
+    test('Emphasis and strong emphasis - Example 106', () {
       final markdown = '''___foo__''';
       final expected = '''<p>_<strong>foo</strong></p>''';
 
@@ -7250,7 +7221,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 456', () {
+    test('Emphasis and strong emphasis - Example 107', () {
       final markdown = '''____foo_''';
       final expected = '''<p>___<em>foo</em></p>''';
 
@@ -7262,7 +7233,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 457', () {
+    test('Emphasis and strong emphasis - Example 108', () {
       final markdown = '''__foo___''';
       final expected = '''<p><strong>foo</strong>_</p>''';
 
@@ -7274,7 +7245,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 458', () {
+    test('Emphasis and strong emphasis - Example 109', () {
       final markdown = '''_foo____''';
       final expected = '''<p><em>foo</em>___</p>''';
 
@@ -7286,7 +7257,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 459', () {
+    test('Emphasis and strong emphasis - Example 110', () {
       final markdown = '''**foo**''';
       final expected = '''<p><strong>foo</strong></p>''';
 
@@ -7298,7 +7269,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 460', () {
+    test('Emphasis and strong emphasis - Example 111', () {
       final markdown = '''*_foo_*''';
       final expected = '''<p><em><em>foo</em></em></p>''';
 
@@ -7310,7 +7281,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 461', () {
+    test('Emphasis and strong emphasis - Example 112', () {
       final markdown = '''__foo__''';
       final expected = '''<p><strong>foo</strong></p>''';
 
@@ -7322,7 +7293,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 462', () {
+    test('Emphasis and strong emphasis - Example 113', () {
       final markdown = '''_*foo*_''';
       final expected = '''<p><em><em>foo</em></em></p>''';
 
@@ -7334,7 +7305,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 463', () {
+    test('Emphasis and strong emphasis - Example 114', () {
       final markdown = '''****foo****''';
       final expected = '''<p><strong>foo</strong></p>''';
 
@@ -7346,7 +7317,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 464', () {
+    test('Emphasis and strong emphasis - Example 115', () {
       final markdown = '''____foo____''';
       final expected = '''<p><strong>foo</strong></p>''';
 
@@ -7358,7 +7329,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 465', () {
+    test('Emphasis and strong emphasis - Example 116', () {
       final markdown = '''******foo******''';
       final expected = '''<p><strong>foo</strong></p>''';
 
@@ -7370,7 +7341,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 466', () {
+    test('Emphasis and strong emphasis - Example 117', () {
       final markdown = '''***foo***''';
       final expected = '''<p><em><strong>foo</strong></em></p>''';
 
@@ -7382,7 +7353,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 467', () {
+    test('Emphasis and strong emphasis - Example 118', () {
       final markdown = '''_____foo_____''';
       final expected = '''<p><em><strong>foo</strong></em></p>''';
 
@@ -7394,7 +7365,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 468', () {
+    test('Emphasis and strong emphasis - Example 119', () {
       final markdown = '''*foo _bar* baz_''';
       final expected = '''<p><em>foo _bar</em> baz_</p>''';
 
@@ -7406,10 +7377,9 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 469', () {
+    test('Emphasis and strong emphasis - Example 120', () {
       final markdown = '''*foo __bar *baz bim__ bam*''';
-      final expected =
-          '''<p><em>foo <strong>bar *baz bim</strong> bam</em></p>''';
+      final expected = '''<p><em>foo <strong>bar *baz bim</strong> bam</em></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -7419,7 +7389,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 470', () {
+    test('Emphasis and strong emphasis - Example 121', () {
       final markdown = '''**foo **bar baz**''';
       final expected = '''<p>**foo <strong>bar baz</strong></p>''';
 
@@ -7431,7 +7401,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 471', () {
+    test('Emphasis and strong emphasis - Example 122', () {
       final markdown = '''*foo *bar baz*''';
       final expected = '''<p>*foo <em>bar baz</em></p>''';
 
@@ -7443,7 +7413,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 472', () {
+    test('Emphasis and strong emphasis - Example 123', () {
       final markdown = '''*[bar*](/url)''';
       final expected = '''<p>*<a href="/url">bar*</a></p>''';
 
@@ -7455,7 +7425,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 473', () {
+    test('Emphasis and strong emphasis - Example 124', () {
       final markdown = '''_foo [bar_](/url)''';
       final expected = '''<p>_foo <a href="/url">bar_</a></p>''';
 
@@ -7467,8 +7437,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 474', skip: kSkipKnownFailure,
-        () {
+    test('Emphasis and strong emphasis - Example 125', () {
       final markdown = '''*<img src="foo" title="*"/>''';
       final expected = '''<p>*<img src="foo" title="*"/></p>''';
 
@@ -7480,8 +7449,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 475', skip: kSkipKnownFailure,
-        () {
+    test('Emphasis and strong emphasis - Example 126', () {
       final markdown = '''**<a href="**">''';
       final expected = '''<p>**<a href="**"></p>''';
 
@@ -7493,8 +7461,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 476', skip: kSkipKnownFailure,
-        () {
+    test('Emphasis and strong emphasis - Example 127', () {
       final markdown = '''__<a href="__">''';
       final expected = '''<p>__<a href="__"></p>''';
 
@@ -7506,7 +7473,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 477', () {
+    test('Emphasis and strong emphasis - Example 128', () {
       final markdown = '''*a `*`*''';
       final expected = '''<p><em>a <code>*</code></em></p>''';
 
@@ -7518,7 +7485,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 478', () {
+    test('Emphasis and strong emphasis - Example 129', () {
       final markdown = '''_a `_`_''';
       final expected = '''<p><em>a <code>_</code></em></p>''';
 
@@ -7530,10 +7497,9 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 479', () {
+    test('Emphasis and strong emphasis - Example 130', () {
       final markdown = '''**a<http://foo.bar/?q=**>''';
-      final expected =
-          '''<p>**a<a href="http://foo.bar/?q=**">http://foo.bar/?q=**</a></p>''';
+      final expected = '''<p>**a<a href="http://foo.bar/?q=**">http://foo.bar/?q=**</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -7543,10 +7509,9 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Emphasis and strong emphasis - Example 480', () {
+    test('Emphasis and strong emphasis - Example 131', () {
       final markdown = '''__a<http://foo.bar/?q=__>''';
-      final expected =
-          '''<p>__a<a href="http://foo.bar/?q=__">http://foo.bar/?q=__</a></p>''';
+      final expected = '''<p>__a<a href="http://foo.bar/?q=__">http://foo.bar/?q=__</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -7556,7 +7521,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 481', () {
+    test('Links - Example 1', () {
       final markdown = '''[link](/uri "title")''';
       final expected = '''<p><a href="/uri" title="title">link</a></p>''';
 
@@ -7568,7 +7533,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 482', () {
+    test('Links - Example 2', () {
       final markdown = '''[link](/uri)''';
       final expected = '''<p><a href="/uri">link</a></p>''';
 
@@ -7580,7 +7545,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 483', () {
+    test('Links - Example 3', () {
       final markdown = '''[link]()''';
       final expected = '''<p><a href="">link</a></p>''';
 
@@ -7592,7 +7557,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 484', () {
+    test('Links - Example 4', () {
       final markdown = '''[link](<>)''';
       final expected = '''<p><a href="">link</a></p>''';
 
@@ -7604,7 +7569,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 485', () {
+    test('Links - Example 5', () {
       final markdown = '''[link](/my uri)''';
       final expected = '''<p>[link](/my uri)</p>''';
 
@@ -7616,7 +7581,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 486', () {
+    test('Links - Example 6', () {
       final markdown = '''[link](</my uri>)''';
       final expected = '''<p><a href="/my%20uri">link</a></p>''';
 
@@ -7628,7 +7593,7 @@ bim</em> bop</strong></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 487', () {
+    test('Links - Example 7', () {
       final markdown = '''[link](foo
 bar)''';
       final expected = '''<p>[link](foo
@@ -7642,7 +7607,7 @@ bar)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 488', skip: kSkipKnownFailure, () {
+    test('Links - Example 8', () {
       final markdown = '''[link](<foo
 bar>)''';
       final expected = '''<p>[link](<foo
@@ -7656,7 +7621,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 489', () {
+    test('Links - Example 9', () {
       final markdown = '''[a](<b)c>)''';
       final expected = '''<p><a href="b)c">a</a></p>''';
 
@@ -7668,7 +7633,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 490', () {
+    test('Links - Example 10', () {
       final markdown = '''[link](<foo\\>)''';
       final expected = '''<p>[link](&lt;foo&gt;)</p>''';
 
@@ -7680,7 +7645,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 491', skip: kSkipKnownFailure, () {
+    test('Links - Example 11', () {
       final markdown = '''[a](<b)c
 [a](<b)c>
 [a](<b>c)''';
@@ -7696,7 +7661,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 492', () {
+    test('Links - Example 12', () {
       final markdown = '''[link](\\(foo\\))''';
       final expected = '''<p><a href="(foo)">link</a></p>''';
 
@@ -7708,7 +7673,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 493', () {
+    test('Links - Example 13', () {
       final markdown = '''[link](foo(and(bar)))''';
       final expected = '''<p><a href="foo(and(bar))">link</a></p>''';
 
@@ -7720,7 +7685,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 494', () {
+    test('Links - Example 14', () {
       final markdown = '''[link](foo\\(and\\(bar\\))''';
       final expected = '''<p><a href="foo(and(bar)">link</a></p>''';
 
@@ -7732,7 +7697,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 495', () {
+    test('Links - Example 15', () {
       final markdown = '''[link](<foo(and(bar)>)''';
       final expected = '''<p><a href="foo(and(bar)">link</a></p>''';
 
@@ -7744,7 +7709,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 496', () {
+    test('Links - Example 16', () {
       final markdown = '''[link](foo\\)\\:)''';
       final expected = '''<p><a href="foo):">link</a></p>''';
 
@@ -7756,7 +7721,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 497', () {
+    test('Links - Example 17', () {
       final markdown = '''[link](#fragment)
 
 [link](http://example.com#fragment)
@@ -7774,7 +7739,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 498', () {
+    test('Links - Example 18', () {
       final markdown = '''[link](foo\\bar)''';
       final expected = '''<p><a href="foo%5Cbar">link</a></p>''';
 
@@ -7786,7 +7751,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 499', () {
+    test('Links - Example 19', () {
       final markdown = '''[link](foo%20b&auml;)''';
       final expected = '''<p><a href="foo%20b%C3%A4">link</a></p>''';
 
@@ -7798,7 +7763,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 500', () {
+    test('Links - Example 20', () {
       final markdown = '''[link]("title")''';
       final expected = '''<p><a href="%22title%22">link</a></p>''';
 
@@ -7810,9 +7775,9 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 501', () {
+    test('Links - Example 21', () {
       final markdown = '''[link](/url "title")
-[link](/url \'title\')
+[link](/url 'title')
 [link](/url (title))''';
       final expected = '''<p><a href="/url" title="title">link</a>
 <a href="/url" title="title">link</a>
@@ -7826,10 +7791,9 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 502', () {
+    test('Links - Example 22', () {
       final markdown = '''[link](/url "title \\"&quot;")''';
-      final expected =
-          '''<p><a href="/url" title="title &quot;&quot;">link</a></p>''';
+      final expected = '''<p><a href="/url" title="title &quot;&quot;">link</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -7839,7 +7803,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 503', () {
+    test('Links - Example 23', () {
       final markdown = '''[link](/url "title")''';
       final expected = '''<p><a href="/url%C2%A0%22title%22">link</a></p>''';
 
@@ -7851,10 +7815,9 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 504', () {
+    test('Links - Example 24', () {
       final markdown = '''[link](/url "title "and" title")''';
-      final expected =
-          '''<p>[link](/url &quot;title &quot;and&quot; title&quot;)</p>''';
+      final expected = '''<p>[link](/url &quot;title &quot;and&quot; title&quot;)</p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -7864,10 +7827,9 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 505', () {
-      final markdown = '''[link](/url \'title "and" title\')''';
-      final expected =
-          '''<p><a href="/url" title="title &quot;and&quot; title">link</a></p>''';
+    test('Links - Example 25', () {
+      final markdown = '''[link](/url 'title "and" title')''';
+      final expected = '''<p><a href="/url" title="title &quot;and&quot; title">link</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -7877,7 +7839,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 506', skip: kSkipKnownFailure, () {
+    test('Links - Example 26', () {
       final markdown = '''[link](   /uri
   "title"  )''';
       final expected = '''<p><a href="/uri" title="title">link</a></p>''';
@@ -7890,7 +7852,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 507', () {
+    test('Links - Example 27', () {
       final markdown = '''[link] (/uri)''';
       final expected = '''<p>[link] (/uri)</p>''';
 
@@ -7902,7 +7864,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 508', () {
+    test('Links - Example 28', () {
       final markdown = '''[link [foo [bar]]](/uri)''';
       final expected = '''<p><a href="/uri">link [foo [bar]]</a></p>''';
 
@@ -7914,7 +7876,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 509', () {
+    test('Links - Example 29', () {
       final markdown = '''[link] bar](/uri)''';
       final expected = '''<p>[link] bar](/uri)</p>''';
 
@@ -7926,7 +7888,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 510', () {
+    test('Links - Example 30', () {
       final markdown = '''[link [bar](/uri)''';
       final expected = '''<p>[link <a href="/uri">bar</a></p>''';
 
@@ -7938,7 +7900,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 511', () {
+    test('Links - Example 31', () {
       final markdown = '''[link \\[bar](/uri)''';
       final expected = '''<p><a href="/uri">link [bar</a></p>''';
 
@@ -7950,10 +7912,9 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 512', () {
+    test('Links - Example 32', () {
       final markdown = '''[link *foo **bar** `#`*](/uri)''';
-      final expected =
-          '''<p><a href="/uri">link <em>foo <strong>bar</strong> <code>#</code></em></a></p>''';
+      final expected = '''<p><a href="/uri">link <em>foo <strong>bar</strong> <code>#</code></em></a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -7963,10 +7924,9 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 513', () {
+    test('Links - Example 33', () {
       final markdown = '''[![moon](moon.jpg)](/uri)''';
-      final expected =
-          '''<p><a href="/uri"><img src="moon.jpg" alt="moon" /></a></p>''';
+      final expected = '''<p><a href="/uri"><img src="moon.jpg" alt="moon" /></a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -7976,7 +7936,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 514', () {
+    test('Links - Example 34', () {
       final markdown = '''[foo [bar](/uri)](/uri)''';
       final expected = '''<p>[foo <a href="/uri">bar</a>](/uri)</p>''';
 
@@ -7988,10 +7948,9 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 515', () {
+    test('Links - Example 35', () {
       final markdown = '''[foo *[bar [baz](/uri)](/uri)*](/uri)''';
-      final expected =
-          '''<p>[foo <em>[bar <a href="/uri">baz</a>](/uri)</em>](/uri)</p>''';
+      final expected = '''<p>[foo <em>[bar <a href="/uri">baz</a>](/uri)</em>](/uri)</p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -8001,7 +7960,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 516', () {
+    test('Links - Example 36', () {
       final markdown = '''![[[foo](uri1)](uri2)](uri3)''';
       final expected = '''<p><img src="uri3" alt="[foo](uri2)" /></p>''';
 
@@ -8013,7 +7972,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 517', () {
+    test('Links - Example 37', () {
       final markdown = '''*[foo*](/uri)''';
       final expected = '''<p>*<a href="/uri">foo*</a></p>''';
 
@@ -8025,7 +7984,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 518', () {
+    test('Links - Example 38', () {
       final markdown = '''[foo *bar](baz*)''';
       final expected = '''<p><a href="baz*">foo *bar</a></p>''';
 
@@ -8037,7 +7996,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 519', () {
+    test('Links - Example 39', () {
       final markdown = '''*foo [bar* baz]''';
       final expected = '''<p><em>foo [bar</em> baz]</p>''';
 
@@ -8049,7 +8008,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 520', skip: kSkipKnownFailure, () {
+    test('Links - Example 40', () {
       final markdown = '''[foo <bar attr="](baz)">''';
       final expected = '''<p>[foo <bar attr="](baz)"></p>''';
 
@@ -8061,7 +8020,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 521', () {
+    test('Links - Example 41', () {
       final markdown = '''[foo`](/uri)`''';
       final expected = '''<p>[foo<code>](/uri)</code></p>''';
 
@@ -8073,10 +8032,9 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 522', () {
+    test('Links - Example 42', () {
       final markdown = '''[foo<http://example.com/?search=](uri)>''';
-      final expected =
-          '''<p>[foo<a href="http://example.com/?search=%5D(uri)">http://example.com/?search=](uri)</a></p>''';
+      final expected = '''<p>[foo<a href="http://example.com/?search=%5D(uri)">http://example.com/?search=](uri)</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -8086,7 +8044,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 523', skip: kSkipKnownFailure, () {
+    test('Links - Example 43', () {
       final markdown = '''[foo][bar]
 
 [bar]: /url "title"''';
@@ -8100,7 +8058,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 524', skip: kSkipKnownFailure, () {
+    test('Links - Example 44', () {
       final markdown = '''[link [foo [bar]]][ref]
 
 [ref]: /uri''';
@@ -8114,7 +8072,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 525', skip: kSkipKnownFailure, () {
+    test('Links - Example 45', () {
       final markdown = '''[link \\[bar][ref]
 
 [ref]: /uri''';
@@ -8128,12 +8086,11 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 526', skip: kSkipKnownFailure, () {
+    test('Links - Example 46', () {
       final markdown = '''[link *foo **bar** `#`*][ref]
 
 [ref]: /uri''';
-      final expected =
-          '''<p><a href="/uri">link <em>foo <strong>bar</strong> <code>#</code></em></a></p>''';
+      final expected = '''<p><a href="/uri">link <em>foo <strong>bar</strong> <code>#</code></em></a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -8143,12 +8100,11 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 527', skip: kSkipKnownFailure, () {
+    test('Links - Example 47', () {
       final markdown = '''[![moon](moon.jpg)][ref]
 
 [ref]: /uri''';
-      final expected =
-          '''<p><a href="/uri"><img src="moon.jpg" alt="moon" /></a></p>''';
+      final expected = '''<p><a href="/uri"><img src="moon.jpg" alt="moon" /></a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -8158,12 +8114,11 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 528', skip: kSkipKnownFailure, () {
+    test('Links - Example 48', () {
       final markdown = '''[foo [bar](/uri)][ref]
 
 [ref]: /uri''';
-      final expected =
-          '''<p>[foo <a href="/uri">bar</a>]<a href="/uri">ref</a></p>''';
+      final expected = '''<p>[foo <a href="/uri">bar</a>]<a href="/uri">ref</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -8173,12 +8128,11 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 529', skip: kSkipKnownFailure, () {
+    test('Links - Example 49', () {
       final markdown = '''[foo *bar [baz][ref]*][ref]
 
 [ref]: /uri''';
-      final expected =
-          '''<p>[foo <em>bar <a href="/uri">baz</a></em>]<a href="/uri">ref</a></p>''';
+      final expected = '''<p>[foo <em>bar <a href="/uri">baz</a></em>]<a href="/uri">ref</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -8188,7 +8142,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 530', skip: kSkipKnownFailure, () {
+    test('Links - Example 50', () {
       final markdown = '''*[foo*][ref]
 
 [ref]: /uri''';
@@ -8202,7 +8156,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 531', skip: kSkipKnownFailure, () {
+    test('Links - Example 51', () {
       final markdown = '''[foo *bar][ref]
 
 [ref]: /uri''';
@@ -8216,7 +8170,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 532', skip: kSkipKnownFailure, () {
+    test('Links - Example 52', () {
       final markdown = '''[foo <bar attr="][ref]">
 
 [ref]: /uri''';
@@ -8230,7 +8184,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 533', skip: kSkipKnownFailure, () {
+    test('Links - Example 53', () {
       final markdown = '''[foo`][ref]`
 
 [ref]: /uri''';
@@ -8244,12 +8198,11 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 534', skip: kSkipKnownFailure, () {
+    test('Links - Example 54', () {
       final markdown = '''[foo<http://example.com/?search=][ref]>
 
 [ref]: /uri''';
-      final expected =
-          '''<p>[foo<a href="http://example.com/?search=%5D%5Bref%5D">http://example.com/?search=][ref]</a></p>''';
+      final expected = '''<p>[foo<a href="http://example.com/?search=%5D%5Bref%5D">http://example.com/?search=][ref]</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -8259,7 +8212,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 535', skip: kSkipKnownFailure, () {
+    test('Links - Example 55', () {
       final markdown = '''[foo][BaR]
 
 [bar]: /url "title"''';
@@ -8273,12 +8226,11 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 536', skip: kSkipKnownFailure, () {
+    test('Links - Example 56', () {
       final markdown = '''[Толпой][Толпой] is a Russian word.
 
 [ТОЛПОЙ]: /url''';
-      final expected =
-          '''<p><a href="/url">Толпой</a> is a Russian word.</p>''';
+      final expected = '''<p><a href="/url">Толпой</a> is a Russian word.</p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -8288,7 +8240,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 537', () {
+    test('Links - Example 57', () {
       final markdown = '''[Foo
   bar]: /url
 
@@ -8303,7 +8255,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 538', skip: kSkipKnownFailure, () {
+    test('Links - Example 58', () {
       final markdown = '''[foo] [bar]
 
 [bar]: /url "title"''';
@@ -8317,7 +8269,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 539', skip: kSkipKnownFailure, () {
+    test('Links - Example 59', () {
       final markdown = '''[foo]
 [bar]
 
@@ -8333,7 +8285,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 540', () {
+    test('Links - Example 60', () {
       final markdown = '''[foo]: /url1
 
 [foo]: /url2
@@ -8349,7 +8301,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 541', skip: kSkipKnownFailure, () {
+    test('Links - Example 61', () {
       final markdown = '''[bar][foo\\!]
 
 [foo!]: /url''';
@@ -8363,7 +8315,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 542', () {
+    test('Links - Example 62', () {
       final markdown = '''[foo][ref[]
 
 [ref[]: /uri''';
@@ -8378,7 +8330,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 543', () {
+    test('Links - Example 63', () {
       final markdown = '''[foo][ref[bar]]
 
 [ref[bar]]: /uri''';
@@ -8393,7 +8345,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 544', () {
+    test('Links - Example 64', () {
       final markdown = '''[[[foo]]]
 
 [[[foo]]]: /url''';
@@ -8408,7 +8360,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 545', skip: kSkipKnownFailure, () {
+    test('Links - Example 65', () {
       final markdown = '''[foo][ref\\[]
 
 [ref\\[]: /uri''';
@@ -8422,7 +8374,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 546', () {
+    test('Links - Example 66', () {
       final markdown = '''[bar\\\\]: /uri
 
 [bar\\\\]''';
@@ -8436,7 +8388,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 547', () {
+    test('Links - Example 67', () {
       final markdown = '''[]
 
 []: /uri''';
@@ -8451,7 +8403,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 548', () {
+    test('Links - Example 68', () {
       final markdown = '''[
  ]
 
@@ -8470,7 +8422,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 549', skip: kSkipKnownFailure, () {
+    test('Links - Example 69', () {
       final markdown = '''[foo][]
 
 [foo]: /url "title"''';
@@ -8484,12 +8436,11 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 550', skip: kSkipKnownFailure, () {
+    test('Links - Example 70', () {
       final markdown = '''[*foo* bar][]
 
 [*foo* bar]: /url "title"''';
-      final expected =
-          '''<p><a href="/url" title="title"><em>foo</em> bar</a></p>''';
+      final expected = '''<p><a href="/url" title="title"><em>foo</em> bar</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -8499,7 +8450,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 551', skip: kSkipKnownFailure, () {
+    test('Links - Example 71', () {
       final markdown = '''[Foo][]
 
 [foo]: /url "title"''';
@@ -8513,7 +8464,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 552', skip: kSkipKnownFailure, () {
+    test('Links - Example 72', () {
       final markdown = '''[foo] 
 []
 
@@ -8529,7 +8480,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 553', skip: kSkipKnownFailure, () {
+    test('Links - Example 73', () {
       final markdown = '''[foo]
 
 [foo]: /url "title"''';
@@ -8543,12 +8494,11 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 554', skip: kSkipKnownFailure, () {
+    test('Links - Example 74', () {
       final markdown = '''[*foo* bar]
 
 [*foo* bar]: /url "title"''';
-      final expected =
-          '''<p><a href="/url" title="title"><em>foo</em> bar</a></p>''';
+      final expected = '''<p><a href="/url" title="title"><em>foo</em> bar</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -8558,12 +8508,11 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 555', skip: kSkipKnownFailure, () {
+    test('Links - Example 75', () {
       final markdown = '''[[*foo* bar]]
 
 [*foo* bar]: /url "title"''';
-      final expected =
-          '''<p>[<a href="/url" title="title"><em>foo</em> bar</a>]</p>''';
+      final expected = '''<p>[<a href="/url" title="title"><em>foo</em> bar</a>]</p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -8573,7 +8522,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 556', skip: kSkipKnownFailure, () {
+    test('Links - Example 76', () {
       final markdown = '''[[bar [foo]
 
 [foo]: /url''';
@@ -8587,7 +8536,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 557', skip: kSkipKnownFailure, () {
+    test('Links - Example 77', () {
       final markdown = '''[Foo]
 
 [foo]: /url "title"''';
@@ -8601,7 +8550,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 558', skip: kSkipKnownFailure, () {
+    test('Links - Example 78', () {
       final markdown = '''[foo] bar
 
 [foo]: /url''';
@@ -8615,7 +8564,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 559', skip: kSkipKnownFailure, () {
+    test('Links - Example 79', () {
       final markdown = '''\\[foo]
 
 [foo]: /url "title"''';
@@ -8629,7 +8578,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 560', () {
+    test('Links - Example 80', () {
       final markdown = '''[foo*]: /url
 
 *[foo*]''';
@@ -8643,7 +8592,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 561', skip: kSkipKnownFailure, () {
+    test('Links - Example 81', () {
       final markdown = '''[foo][bar]
 
 [foo]: /url1
@@ -8658,7 +8607,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 562', skip: kSkipKnownFailure, () {
+    test('Links - Example 82', () {
       final markdown = '''[foo][]
 
 [foo]: /url1''';
@@ -8672,7 +8621,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 563', skip: kSkipKnownFailure, () {
+    test('Links - Example 83', () {
       final markdown = '''[foo]()
 
 [foo]: /url1''';
@@ -8686,7 +8635,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 564', skip: kSkipKnownFailure, () {
+    test('Links - Example 84', () {
       final markdown = '''[foo](not a link)
 
 [foo]: /url1''';
@@ -8700,7 +8649,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 565', skip: kSkipKnownFailure, () {
+    test('Links - Example 85', () {
       final markdown = '''[foo][bar][baz]
 
 [baz]: /url''';
@@ -8714,13 +8663,12 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 566', skip: kSkipKnownFailure, () {
+    test('Links - Example 86', () {
       final markdown = '''[foo][bar][baz]
 
 [baz]: /url1
 [bar]: /url2''';
-      final expected =
-          '''<p><a href="/url2">foo</a><a href="/url1">baz</a></p>''';
+      final expected = '''<p><a href="/url2">foo</a><a href="/url1">baz</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -8730,7 +8678,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Links - Example 567', skip: kSkipKnownFailure, () {
+    test('Links - Example 87', () {
       final markdown = '''[foo][bar][baz]
 
 [baz]: /url1
@@ -8745,7 +8693,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 568', () {
+    test('Images - Example 1', () {
       final markdown = '''![foo](/url "title")''';
       final expected = '''<p><img src="/url" alt="foo" title="title" /></p>''';
 
@@ -8757,12 +8705,11 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 569', skip: kSkipKnownFailure, () {
+    test('Images - Example 2', () {
       final markdown = '''![foo *bar*]
 
 [foo *bar*]: train.jpg "train & tracks"''';
-      final expected =
-          '''<p><img src="train.jpg" alt="foo bar" title="train &amp; tracks" /></p>''';
+      final expected = '''<p><img src="train.jpg" alt="foo bar" title="train &amp; tracks" /></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -8772,7 +8719,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 570', () {
+    test('Images - Example 3', () {
       final markdown = '''![foo ![bar](/url)](/url2)''';
       final expected = '''<p><img src="/url2" alt="foo bar" /></p>''';
 
@@ -8784,7 +8731,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 571', () {
+    test('Images - Example 4', () {
       final markdown = '''![foo [bar](/url)](/url2)''';
       final expected = '''<p><img src="/url2" alt="foo bar" /></p>''';
 
@@ -8796,12 +8743,11 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 572', skip: kSkipKnownFailure, () {
+    test('Images - Example 5', () {
       final markdown = '''![foo *bar*][]
 
 [foo *bar*]: train.jpg "train & tracks"''';
-      final expected =
-          '''<p><img src="train.jpg" alt="foo bar" title="train &amp; tracks" /></p>''';
+      final expected = '''<p><img src="train.jpg" alt="foo bar" title="train &amp; tracks" /></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -8811,12 +8757,11 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 573', skip: kSkipKnownFailure, () {
+    test('Images - Example 6', () {
       final markdown = '''![foo *bar*][foobar]
 
 [FOOBAR]: train.jpg "train & tracks"''';
-      final expected =
-          '''<p><img src="train.jpg" alt="foo bar" title="train &amp; tracks" /></p>''';
+      final expected = '''<p><img src="train.jpg" alt="foo bar" title="train &amp; tracks" /></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -8826,7 +8771,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 574', () {
+    test('Images - Example 7', () {
       final markdown = '''![foo](train.jpg)''';
       final expected = '''<p><img src="train.jpg" alt="foo" /></p>''';
 
@@ -8838,10 +8783,9 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 575', () {
+    test('Images - Example 8', () {
       final markdown = '''My ![foo bar](/path/to/train.jpg  "title"   )''';
-      final expected =
-          '''<p>My <img src="/path/to/train.jpg" alt="foo bar" title="title" /></p>''';
+      final expected = '''<p>My <img src="/path/to/train.jpg" alt="foo bar" title="title" /></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -8851,7 +8795,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 576', () {
+    test('Images - Example 9', () {
       final markdown = '''![foo](<url>)''';
       final expected = '''<p><img src="url" alt="foo" /></p>''';
 
@@ -8863,7 +8807,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 577', () {
+    test('Images - Example 10', () {
       final markdown = '''![](/url)''';
       final expected = '''<p><img src="/url" alt="" /></p>''';
 
@@ -8875,7 +8819,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 578', skip: kSkipKnownFailure, () {
+    test('Images - Example 11', () {
       final markdown = '''![foo][bar]
 
 [bar]: /url''';
@@ -8889,7 +8833,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 579', skip: kSkipKnownFailure, () {
+    test('Images - Example 12', () {
       final markdown = '''![foo][bar]
 
 [BAR]: /url''';
@@ -8903,7 +8847,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 580', skip: kSkipKnownFailure, () {
+    test('Images - Example 13', () {
       final markdown = '''![foo][]
 
 [foo]: /url "title"''';
@@ -8917,12 +8861,11 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 581', skip: kSkipKnownFailure, () {
+    test('Images - Example 14', () {
       final markdown = '''![*foo* bar][]
 
 [*foo* bar]: /url "title"''';
-      final expected =
-          '''<p><img src="/url" alt="foo bar" title="title" /></p>''';
+      final expected = '''<p><img src="/url" alt="foo bar" title="title" /></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -8932,7 +8875,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 582', skip: kSkipKnownFailure, () {
+    test('Images - Example 15', () {
       final markdown = '''![Foo][]
 
 [foo]: /url "title"''';
@@ -8946,7 +8889,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 583', skip: kSkipKnownFailure, () {
+    test('Images - Example 16', () {
       final markdown = '''![foo] 
 []
 
@@ -8962,7 +8905,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 584', skip: kSkipKnownFailure, () {
+    test('Images - Example 17', () {
       final markdown = '''![foo]
 
 [foo]: /url "title"''';
@@ -8976,12 +8919,11 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 585', skip: kSkipKnownFailure, () {
+    test('Images - Example 18', () {
       final markdown = '''![*foo* bar]
 
 [*foo* bar]: /url "title"''';
-      final expected =
-          '''<p><img src="/url" alt="foo bar" title="title" /></p>''';
+      final expected = '''<p><img src="/url" alt="foo bar" title="title" /></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -8991,7 +8933,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 586', () {
+    test('Images - Example 19', () {
       final markdown = '''![[foo]]
 
 [[foo]]: /url "title"''';
@@ -9006,7 +8948,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 587', skip: kSkipKnownFailure, () {
+    test('Images - Example 20', () {
       final markdown = '''![Foo]
 
 [foo]: /url "title"''';
@@ -9020,7 +8962,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 588', skip: kSkipKnownFailure, () {
+    test('Images - Example 21', () {
       final markdown = '''!\\[foo]
 
 [foo]: /url "title"''';
@@ -9034,7 +8976,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Images - Example 589', skip: kSkipKnownFailure, () {
+    test('Images - Example 22', () {
       final markdown = '''\\![foo]
 
 [foo]: /url "title"''';
@@ -9048,10 +8990,9 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 590', () {
+    test('Autolinks - Example 1', () {
       final markdown = '''<http://foo.bar.baz>''';
-      final expected =
-          '''<p><a href="http://foo.bar.baz">http://foo.bar.baz</a></p>''';
+      final expected = '''<p><a href="http://foo.bar.baz">http://foo.bar.baz</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -9061,10 +9002,9 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 591', () {
+    test('Autolinks - Example 2', () {
       final markdown = '''<http://foo.bar.baz/test?q=hello&id=22&boolean>''';
-      final expected =
-          '''<p><a href="http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean">http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean</a></p>''';
+      final expected = '''<p><a href="http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean">http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -9074,10 +9014,9 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 592', () {
+    test('Autolinks - Example 3', () {
       final markdown = '''<irc://foo.bar:2233/baz>''';
-      final expected =
-          '''<p><a href="irc://foo.bar:2233/baz">irc://foo.bar:2233/baz</a></p>''';
+      final expected = '''<p><a href="irc://foo.bar:2233/baz">irc://foo.bar:2233/baz</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -9087,10 +9026,9 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 593', () {
+    test('Autolinks - Example 4', () {
       final markdown = '''<MAILTO:FOO@BAR.BAZ>''';
-      final expected =
-          '''<p><a href="MAILTO:FOO@BAR.BAZ">MAILTO:FOO@BAR.BAZ</a></p>''';
+      final expected = '''<p><a href="MAILTO:FOO@BAR.BAZ">MAILTO:FOO@BAR.BAZ</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -9100,7 +9038,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 594', () {
+    test('Autolinks - Example 5', () {
       final markdown = '''<a+b+c:d>''';
       final expected = '''<p><a href="a+b+c:d">a+b+c:d</a></p>''';
 
@@ -9112,10 +9050,9 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 595', () {
+    test('Autolinks - Example 6', () {
       final markdown = '''<made-up-scheme://foo,bar>''';
-      final expected =
-          '''<p><a href="made-up-scheme://foo,bar">made-up-scheme://foo,bar</a></p>''';
+      final expected = '''<p><a href="made-up-scheme://foo,bar">made-up-scheme://foo,bar</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -9125,7 +9062,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 596', () {
+    test('Autolinks - Example 7', () {
       final markdown = '''<http://../>''';
       final expected = '''<p><a href="http://../">http://../</a></p>''';
 
@@ -9137,10 +9074,9 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 597', () {
+    test('Autolinks - Example 8', () {
       final markdown = '''<localhost:5001/foo>''';
-      final expected =
-          '''<p><a href="localhost:5001/foo">localhost:5001/foo</a></p>''';
+      final expected = '''<p><a href="localhost:5001/foo">localhost:5001/foo</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -9150,7 +9086,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 598', () {
+    test('Autolinks - Example 9', () {
       final markdown = '''<http://foo.bar/baz bim>''';
       final expected = '''<p>&lt;http://foo.bar/baz bim&gt;</p>''';
 
@@ -9162,10 +9098,9 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 599', () {
+    test('Autolinks - Example 10', () {
       final markdown = '''<http://example.com/\\[\\>''';
-      final expected =
-          '''<p><a href="http://example.com/%5C%5B%5C">http://example.com/\\[\\</a></p>''';
+      final expected = '''<p><a href="http://example.com/%5C%5B%5C">http://example.com/\\[\\</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -9175,10 +9110,9 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 600', () {
+    test('Autolinks - Example 11', () {
       final markdown = '''<foo@bar.example.com>''';
-      final expected =
-          '''<p><a href="mailto:foo@bar.example.com">foo@bar.example.com</a></p>''';
+      final expected = '''<p><a href="mailto:foo@bar.example.com">foo@bar.example.com</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -9188,10 +9122,9 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 601', () {
+    test('Autolinks - Example 12', () {
       final markdown = '''<foo+special@Bar.baz-bar0.com>''';
-      final expected =
-          '''<p><a href="mailto:foo+special@Bar.baz-bar0.com">foo+special@Bar.baz-bar0.com</a></p>''';
+      final expected = '''<p><a href="mailto:foo+special@Bar.baz-bar0.com">foo+special@Bar.baz-bar0.com</a></p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -9201,7 +9134,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 602', () {
+    test('Autolinks - Example 13', () {
       final markdown = '''<foo\\+@bar.example.com>''';
       final expected = '''<p>&lt;foo+@bar.example.com&gt;</p>''';
 
@@ -9213,7 +9146,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 603', () {
+    test('Autolinks - Example 14', () {
       final markdown = '''<>''';
       final expected = '''<p>&lt;&gt;</p>''';
 
@@ -9225,7 +9158,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 604', () {
+    test('Autolinks - Example 15', () {
       final markdown = '''< http://foo.bar >''';
       final expected = '''<p>&lt; http://foo.bar &gt;</p>''';
 
@@ -9237,7 +9170,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 605', () {
+    test('Autolinks - Example 16', () {
       final markdown = '''<m:abc>''';
       final expected = '''<p>&lt;m:abc&gt;</p>''';
 
@@ -9249,7 +9182,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 606', () {
+    test('Autolinks - Example 17', () {
       final markdown = '''<foo.bar.baz>''';
       final expected = '''<p>&lt;foo.bar.baz&gt;</p>''';
 
@@ -9261,7 +9194,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 607', () {
+    test('Autolinks - Example 18', () {
       final markdown = '''http://example.com''';
       final expected = '''<p>http://example.com</p>''';
 
@@ -9273,7 +9206,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Autolinks - Example 608', () {
+    test('Autolinks - Example 19', () {
       final markdown = '''foo@bar.example.com''';
       final expected = '''<p>foo@bar.example.com</p>''';
 
@@ -9285,7 +9218,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 609', skip: kSkipNongoal_MdToHtml, () {
+    test('Raw HTML - Example 1', () {
       final markdown = '''<a><bab><c2c>''';
       final expected = '''<p><a><bab><c2c></p>''';
 
@@ -9297,7 +9230,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 610', skip: kSkipNongoal_MdToHtml, () {
+    test('Raw HTML - Example 2', () {
       final markdown = '''<a/><b2/>''';
       final expected = '''<p><a/><b2/></p>''';
 
@@ -9309,7 +9242,7 @@ bar>)</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 611', skip: kSkipNongoal_MdToHtml, () {
+    test('Raw HTML - Example 3', () {
       final markdown = '''<a  /><b2
 data="foo" >''';
       final expected = '''<p><a  /><b2
@@ -9323,10 +9256,10 @@ data="foo" ></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 612', skip: kSkipNongoal_MdToHtml, () {
-      final markdown = '''<a foo="bar" bam = \'baz <em>"</em>\'
+    test('Raw HTML - Example 4', () {
+      final markdown = '''<a foo="bar" bam = 'baz <em>"</em>'
 _boolean zoop:33=zoop:33 />''';
-      final expected = '''<p><a foo="bar" bam = \'baz <em>"</em>\'
+      final expected = '''<p><a foo="bar" bam = 'baz <em>"</em>'
 _boolean zoop:33=zoop:33 /></p>''';
 
       final parser = CmarkParser();
@@ -9337,7 +9270,7 @@ _boolean zoop:33=zoop:33 /></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 613', skip: kSkipNongoal_MdToHtml, () {
+    test('Raw HTML - Example 5', () {
       final markdown = '''Foo <responsive-image src="foo.jpg" />''';
       final expected = '''<p>Foo <responsive-image src="foo.jpg" /></p>''';
 
@@ -9349,7 +9282,7 @@ _boolean zoop:33=zoop:33 /></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 614', () {
+    test('Raw HTML - Example 6', () {
       final markdown = '''<33> <__>''';
       final expected = '''<p>&lt;33&gt; &lt;__&gt;</p>''';
 
@@ -9361,7 +9294,7 @@ _boolean zoop:33=zoop:33 /></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 615', () {
+    test('Raw HTML - Example 7', () {
       final markdown = '''<a h*#ref="hi">''';
       final expected = '''<p>&lt;a h*#ref=&quot;hi&quot;&gt;</p>''';
 
@@ -9373,10 +9306,9 @@ _boolean zoop:33=zoop:33 /></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 616', skip: kSkipKnownFailure, () {
-      final markdown = '''<a href="hi\'> <a href=hi\'>''';
-      final expected =
-          '''<p>&lt;a href=&quot;hi\'&gt; &lt;a href=hi\'&gt;</p>''';
+    test('Raw HTML - Example 8', () {
+      final markdown = '''<a href="hi'> <a href=hi'>''';
+      final expected = '''<p>&lt;a href=&quot;hi'&gt; &lt;a href=hi'&gt;</p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -9386,7 +9318,7 @@ _boolean zoop:33=zoop:33 /></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 617', () {
+    test('Raw HTML - Example 9', () {
       final markdown = '''< a><
 foo><bar/ >
 <foo bar=baz
@@ -9404,9 +9336,9 @@ bim!bop /&gt;</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 618', skip: kSkipKnownFailure, () {
-      final markdown = '''<a href=\'bar\'title=title>''';
-      final expected = '''<p>&lt;a href=\'bar\'title=title&gt;</p>''';
+    test('Raw HTML - Example 10', () {
+      final markdown = '''<a href='bar'title=title>''';
+      final expected = '''<p>&lt;a href='bar'title=title&gt;</p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -9416,7 +9348,7 @@ bim!bop /&gt;</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 619', skip: kSkipNongoal_MdToHtml, () {
+    test('Raw HTML - Example 11', () {
       final markdown = '''</a></foo >''';
       final expected = '''<p></a></foo ></p>''';
 
@@ -9428,7 +9360,7 @@ bim!bop /&gt;</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 620', () {
+    test('Raw HTML - Example 12', () {
       final markdown = '''</a href="foo">''';
       final expected = '''<p>&lt;/a href=&quot;foo&quot;&gt;</p>''';
 
@@ -9440,7 +9372,7 @@ bim!bop /&gt;</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 621', skip: kSkipNongoal_MdToHtml, () {
+    test('Raw HTML - Example 13', () {
       final markdown = '''foo <!-- this is a --
 comment - with hyphens -->''';
       final expected = '''<p>foo <!-- this is a --
@@ -9454,7 +9386,7 @@ comment - with hyphens --></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 622', skip: kSkipNongoal_MdToHtml, () {
+    test('Raw HTML - Example 14', () {
       final markdown = '''foo <!--> foo -->
 
 foo <!---> foo -->''';
@@ -9469,7 +9401,7 @@ foo <!---> foo -->''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 623', skip: kSkipNongoal_MdToHtml, () {
+    test('Raw HTML - Example 15', () {
       final markdown = '''foo <?php echo \$a; ?>''';
       final expected = '''<p>foo <?php echo \$a; ?></p>''';
 
@@ -9481,7 +9413,7 @@ foo <!---> foo -->''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 624', skip: kSkipNongoal_MdToHtml, () {
+    test('Raw HTML - Example 16', () {
       final markdown = '''foo <!ELEMENT br EMPTY>''';
       final expected = '''<p>foo <!ELEMENT br EMPTY></p>''';
 
@@ -9493,7 +9425,7 @@ foo <!---> foo -->''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 625', skip: kSkipNongoal_MdNotToHtml, () {
+    test('Raw HTML - Example 17', () {
       final markdown = '''foo <![CDATA[>&<]]>''';
       final expected = '''<p>foo <![CDATA[>&<]]></p>''';
 
@@ -9505,7 +9437,7 @@ foo <!---> foo -->''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 626', skip: kSkipNongoal_MdToHtml, () {
+    test('Raw HTML - Example 18', () {
       final markdown = '''foo <a href="&ouml;">''';
       final expected = '''<p>foo <a href="&ouml;"></p>''';
 
@@ -9517,7 +9449,7 @@ foo <!---> foo -->''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 627', skip: kSkipNongoal_MdNotToHtml, () {
+    test('Raw HTML - Example 19', () {
       final markdown = '''foo <a href="\\*">''';
       final expected = '''<p>foo <a href="\\*"></p>''';
 
@@ -9529,7 +9461,7 @@ foo <!---> foo -->''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Raw HTML - Example 628', () {
+    test('Raw HTML - Example 20', () {
       final markdown = '''<a href="\\"">''';
       final expected = '''<p>&lt;a href=&quot;&quot;&quot;&gt;</p>''';
 
@@ -9541,7 +9473,7 @@ foo <!---> foo -->''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Hard line breaks - Example 629', () {
+    test('Hard line breaks - Example 1', () {
       final markdown = '''foo  
 baz''';
       final expected = '''<p>foo<br />
@@ -9555,7 +9487,7 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Hard line breaks - Example 630', () {
+    test('Hard line breaks - Example 2', () {
       final markdown = '''foo\\
 baz''';
       final expected = '''<p>foo<br />
@@ -9569,7 +9501,7 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Hard line breaks - Example 631', () {
+    test('Hard line breaks - Example 3', () {
       final markdown = '''foo       
 baz''';
       final expected = '''<p>foo<br />
@@ -9583,7 +9515,7 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Hard line breaks - Example 632', () {
+    test('Hard line breaks - Example 4', () {
       final markdown = '''foo  
      bar''';
       final expected = '''<p>foo<br />
@@ -9597,7 +9529,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Hard line breaks - Example 633', () {
+    test('Hard line breaks - Example 5', () {
       final markdown = '''foo\\
      bar''';
       final expected = '''<p>foo<br />
@@ -9611,7 +9543,7 @@ bar</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Hard line breaks - Example 634', () {
+    test('Hard line breaks - Example 6', () {
       final markdown = '''*foo  
 bar*''';
       final expected = '''<p><em>foo<br />
@@ -9625,7 +9557,7 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Hard line breaks - Example 635', () {
+    test('Hard line breaks - Example 7', () {
       final markdown = '''*foo\\
 bar*''';
       final expected = '''<p><em>foo<br />
@@ -9639,7 +9571,7 @@ bar</em></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Hard line breaks - Example 636', () {
+    test('Hard line breaks - Example 8', () {
       final markdown = '''`code  
 span`''';
       final expected = '''<p><code>code   span</code></p>''';
@@ -9652,7 +9584,7 @@ span`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Hard line breaks - Example 637', () {
+    test('Hard line breaks - Example 9', () {
       final markdown = '''`code\\
 span`''';
       final expected = '''<p><code>code\\ span</code></p>''';
@@ -9665,7 +9597,7 @@ span`''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Hard line breaks - Example 638', skip: kSkipNongoal_MdToHtml, () {
+    test('Hard line breaks - Example 10', () {
       final markdown = '''<a href="foo  
 bar">''';
       final expected = '''<p><a href="foo  
@@ -9679,7 +9611,7 @@ bar"></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Hard line breaks - Example 639', skip: kSkipNongoal_MdToHtml, () {
+    test('Hard line breaks - Example 11', () {
       final markdown = '''<a href="foo\\
 bar">''';
       final expected = '''<p><a href="foo\\
@@ -9693,7 +9625,7 @@ bar"></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Hard line breaks - Example 640', () {
+    test('Hard line breaks - Example 12', () {
       final markdown = '''foo\\''';
       final expected = '''<p>foo\\</p>''';
 
@@ -9705,7 +9637,7 @@ bar"></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Hard line breaks - Example 641', () {
+    test('Hard line breaks - Example 13', () {
       final markdown = '''foo  ''';
       final expected = '''<p>foo</p>''';
 
@@ -9717,7 +9649,7 @@ bar"></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Hard line breaks - Example 642', () {
+    test('Hard line breaks - Example 14', () {
       final markdown = '''### foo\\''';
       final expected = '''<h3>foo\\</h3>''';
 
@@ -9729,7 +9661,7 @@ bar"></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Hard line breaks - Example 643', () {
+    test('Hard line breaks - Example 15', () {
       final markdown = '''### foo  ''';
       final expected = '''<h3>foo</h3>''';
 
@@ -9741,7 +9673,7 @@ bar"></p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Soft line breaks - Example 644', () {
+    test('Soft line breaks - Example 1', () {
       final markdown = '''foo
 baz''';
       final expected = '''<p>foo
@@ -9755,7 +9687,7 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Soft line breaks - Example 645', () {
+    test('Soft line breaks - Example 2', () {
       final markdown = '''foo 
  baz''';
       final expected = '''<p>foo
@@ -9769,9 +9701,9 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Textual content - Example 646', skip: kSkipKnownFailure, () {
-      final markdown = '''hello \$.;\'there''';
-      final expected = '''<p>hello \$.;\'there</p>''';
+    test('Textual content - Example 1', () {
+      final markdown = '''hello \$.;'there''';
+      final expected = '''<p>hello \$.;'there</p>''';
 
       final parser = CmarkParser();
       parser.feed(markdown);
@@ -9781,7 +9713,7 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Textual content - Example 647', () {
+    test('Textual content - Example 2', () {
       final markdown = '''Foo χρῆν''';
       final expected = '''<p>Foo χρῆν</p>''';
 
@@ -9793,7 +9725,7 @@ baz</p>''';
       expect(html.trim(), expected.trim());
     });
 
-    test('Textual content - Example 648', () {
+    test('Textual content - Example 3', () {
       final markdown = '''Multiple     spaces''';
       final expected = '''<p>Multiple     spaces</p>''';
 
@@ -9804,5 +9736,6 @@ baz</p>''';
 
       expect(html.trim(), expected.trim());
     });
+
   });
 }
