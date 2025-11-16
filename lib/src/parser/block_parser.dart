@@ -2161,21 +2161,13 @@ class BlockParser {
 
   void _appendFootnotes(CmarkNode root) {
     // Move footnote definitions to end of document (C's create_footnote_list)
-    final referenced = <CmarkNode>[];
-    for (final entry in footnoteMap.entries) {
-      final node = entry.node;
-      node.unlink();
-      if (node.footnoteReferenceIndex > 0) {
-        referenced.add(node);
-      }
+    final entries = footnoteMap.entries.toList();
+    for (final entry in entries) {
+      entry.node.unlink();
     }
 
-    referenced.sort(
-      (a, b) => a.footnoteReferenceIndex.compareTo(b.footnoteReferenceIndex),
-    );
-
-    for (final node in referenced) {
-      root.appendChild(node);
+    for (final entry in footnoteMap.getReferencedInOrder()) {
+      root.appendChild(entry.node);
     }
   }
 

@@ -19,6 +19,7 @@ class HtmlRenderer {
     _inTableHeader = false;
     _needClosingTableBody = false;
     _plainTextMode = null;
+    _footnotesWithInlineBackrefs.clear();
     _inFootnoteSection = false;
 
     // Use iterator like C's cmark_iter
