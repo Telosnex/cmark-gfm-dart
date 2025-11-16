@@ -290,7 +290,6 @@ Future<void> _runConformanceTestsSummary(List<String> extraArgs) async {
               messages: messages,
             ),
           );
-          stdout.writeln('❌ $name');
         }
         break;
       default:
@@ -315,7 +314,7 @@ Future<void> _runConformanceTestsSummary(List<String> extraArgs) async {
     stdout.writeln(
         'No structured failures were captured, but dart test exited with code $code.');
   } else {
-    stdout.writeln('Failing tests (${failing.length}):');
+    stdout.writeln('# ${failing.length} FAILING');
     for (var i = 0; i < failing.length; i++) {
       final failure = failing[i];
       stdout.writeln('  ${i + 1}. ${failure.name}');
@@ -333,6 +332,7 @@ Future<void> _runConformanceTestsSummary(List<String> extraArgs) async {
     }
     stdout.writeln(
         'Tip: use `dart run dev/conformance.dart show "<test name>"` to see the full test case.');
+    stdout.writeln('# ${failing.length} FAILING');
   }
 
   if (code != 0) {
