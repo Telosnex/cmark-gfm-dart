@@ -1,12 +1,10 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import '../node.dart';
-import '../reference/reference_map.dart';
-import '../reference/reference_parser.dart';
-import '../inline/inline_parser.dart';
-import '../util/node_iterator.dart';
-import '../footnote/footnote_map.dart';
-import 'parser_options.dart';
+
+import 'package:cmark_gfm/cmark_gfm.dart';
+import 'package:cmark_gfm/src/inline/inline_parser.dart';
+import 'package:cmark_gfm/src/reference/reference_parser.dart';
+import 'package:cmark_gfm/src/util/node_iterator.dart';
 
 const int kCodeIndent = 4;
 const int kTabStop = 4;
