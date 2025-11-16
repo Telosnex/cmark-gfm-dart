@@ -501,7 +501,7 @@ class BlockParser {
 
   _CheckOpenBlocksResult _checkOpenBlocks() {
     var container = root;
-    var allMatched = false;
+    var allMatched = true;
 
     while (_isOpen(container.lastChild)) {
       container = container.lastChild!;
@@ -981,9 +981,13 @@ class BlockParser {
     _findFirstNonspace();
 
     final trailingChild = container.lastChild;
+    final trailingChildIsOpen =
+        trailingChild != null && (trailingChild.flags & 1) != 0;
     if (blank && trailingChild != null) {
-      final isFencedCodeBlock = trailingChild.type == CmarkNodeType.codeBlock &&
-          trailingChild.codeData.isFenced;
+      final isFencedCodeBlock =
+          trailingChild.type == CmarkNodeType.codeBlock &&
+              trailingChild.codeData.isFenced &&
+              trailingChildIsOpen;
       if (!isFencedCodeBlock) {
         trailingChild.flags |= 2; // LAST_LINE_BLANK
       }
@@ -993,7 +997,8 @@ class BlockParser {
     // Port of C's last_line_blank calculation
     final trailingFencedChild = trailingChild != null &&
         trailingChild.type == CmarkNodeType.codeBlock &&
-        trailingChild.codeData.isFenced;
+        trailingChild.codeData.isFenced &&
+        trailingChildIsOpen;
 
     final shouldSetBlank = blank &&
         container.type != CmarkNodeType.blockQuote &&
