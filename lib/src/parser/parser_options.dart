@@ -3,16 +3,18 @@ class CmarkMathOptions {
   const CmarkMathOptions({
     this.allowBlockDoubleDollar = true,
     this.allowBracketDelimiters = true,
+    this.allowSingleDollar = true,
   });
 
   final bool allowBlockDoubleDollar;
   final bool allowBracketDelimiters;
+  final bool allowSingleDollar;
 }
 
 /// Options controlling parser behaviour.
 class CmarkParserOptions {
   const CmarkParserOptions({
-    this.enableMath = false,
+    this.enableMath = true,
     this.mathOptions = const CmarkMathOptions(),
     this.maxReferenceSize,
     this.enableAutolinkExtension = false,

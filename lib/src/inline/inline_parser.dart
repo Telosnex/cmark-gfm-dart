@@ -196,11 +196,14 @@ class InlineParser {
     }
 
     if (leadingChar == 0x24) {
-      // Only parse inline double-dollar math, NOT single-dollar
+      // Try double-dollar first (higher precedence)
       if (mathOptions.allowBlockDoubleDollar && subj.peekCharN(1) == 0x24) {
         return _parseDoubleDollarMath(subj);
       }
-      // Single-dollar math removed - too ambiguous with regular text
+      // Try single-dollar with strict "money guard" heuristics
+      if (mathOptions.allowSingleDollar) {
+        return _parseSingleDollarMath(subj);
+      }
     }
 
     return null;
@@ -273,6 +276,165 @@ class InlineParser {
 
     subj.pos = start;
     return null;
+  }
+
+  /// Parse single-dollar inline math with strict "money guard" heuristics.
+  ///
+  /// Rules to avoid false positives like "$20 times two is $40":
+  /// 1. Opening `$` must NOT be preceded by a word character (a-z, A-Z, 0-9)
+  /// 2. Opening `$` must NOT be followed by whitespace
+  /// 3. Closing `$` must NOT be preceded by whitespace
+  /// 4. Closing `$` must NOT be followed by a digit
+  /// 5. If content starts with a digit AND contains whitespace, must have a
+  ///    letter or math symbol (^ _ \ { }) BEFORE that whitespace
+  ///
+  /// Rule 5 catches cross-span currency like "$20 times two is $40" while
+  /// allowing tight numeric spans like "$1,048,576$" (no whitespace).
+  CmarkNode? _parseSingleDollarMath(Subject subj) {
+    final start = subj.pos;
+
+    // Rule 1: Opening $ must NOT be preceded by a word character
+    if (start > 0) {
+      final before = subj.peekAt(start - 1);
+      if (_isWordChar(before)) {
+        return null;
+      }
+    }
+
+    subj.advance(); // consume opening $
+
+    // Rule 2: Opening $ must NOT be followed by whitespace
+    final firstContentChar = subj.peekChar();
+    if (firstContentChar == 0 ||
+        firstContentChar == 0x20 ||
+        firstContentChar == 0x09 ||
+        firstContentChar == 0x0A || 
+        firstContentChar == 0x0D) {
+      subj.pos = start;
+      return null;
+    }
+
+    // Also reject if followed by another $ (that's $$, not single-dollar)
+    if (firstContentChar == 0x24) {
+      subj.pos = start;
+      return null;
+    }
+
+    // Rule 5: If first char is a digit, require a letter before any closer.
+    // This catches currency like $20 but allows math like $5x$ or $2^n$.
+    final startsWithDigit = _isDigit(firstContentChar);
+
+    final contentStart = subj.pos;
+    var seenLetterOrMathSymbol = false;
+    var seenWhitespace = false;
+
+    // Scan for closing $
+    while (!subj.isEof()) {
+      final ch = subj.peekChar();
+
+      // Track whitespace (for Rule 5)
+      if (ch == 0x20 || ch == 0x09) {
+        seenWhitespace = true;
+      }
+
+      // Track if we've seen a letter or math symbol BEFORE whitespace (for Rule 5)
+      // Math symbols: ^ _ \ { } (common LaTeX)
+      if (!seenWhitespace &&
+          (_isLetter(ch) ||
+              ch == 0x5E || // ^
+              ch == 0x5F || // _
+              ch == 0x5C || // \
+              ch == 0x7B || // {
+              ch == 0x7D)) {
+        // }
+        seenLetterOrMathSymbol = true;
+      }
+
+      // No newlines in inline math
+      if (ch == 0x0A || ch == 0x0D) {
+        subj.pos = start;
+        return null;
+      }
+
+      if (ch == 0x24) {
+        // Found potential closing $
+        final contentEnd = subj.pos;
+
+        // Rule 3: Closing $ must NOT be preceded by whitespace
+        if (contentEnd > contentStart) {
+          final before = subj.peekAt(contentEnd - 1);
+          if (before == 0x20 || before == 0x09) {
+            // Whitespace before closing $ - not valid, keep scanning
+            subj.advance();
+            continue;
+          }
+        } else {
+          // Empty content - not valid
+          subj.pos = start;
+          return null;
+        }
+
+        // Rule 4: Closing $ must NOT be followed by a digit
+        final after = subj.peekCharN(1);
+        if (_isDigit(after)) {
+          // Digit after closing $ - not valid math (e.g., "$20..." pattern)
+          subj.advance();
+          continue;
+        }
+
+        // Rule 5: If started with digit AND content has whitespace, must have
+        // seen a letter/math symbol BEFORE that whitespace.
+        // This catches "$20 times two is $40" but allows "$1,048,576$"
+        if (startsWithDigit && seenWhitespace && !seenLetterOrMathSymbol) {
+          subj.advance();
+          continue;
+        }
+
+        // All rules pass - we have valid math!
+        final bytes = subj.input.sublist(contentStart, contentEnd);
+        final literal = utf8.decode(bytes, allowMalformed: true);
+        final normalized = _normalizeInlineMathLiteral(literal);
+        if (normalized.isEmpty) {
+          subj.pos = start;
+          return null;
+        }
+
+        subj.advance(); // consume closing $
+        return _buildInlineMathNode(
+          subj: subj,
+          start: start,
+          end: subj.pos,
+          literal: normalized,
+          display: false,
+          opening: r'$',
+          closing: r'$',
+        );
+      }
+
+      subj.advance();
+    }
+
+    // No valid closing $ found
+    subj.pos = start;
+    return null;
+  }
+
+  /// Returns true if the byte is a word character (a-z, A-Z, 0-9).
+  bool _isWordChar(int ch) {
+    return (ch >= 0x30 && ch <= 0x39) || // 0-9
+        (ch >= 0x41 && ch <= 0x5A) || // A-Z
+        (ch >= 0x61 && ch <= 0x7A); // a-z
+  }
+
+  /// Returns true if the byte is a digit (0-9).
+  bool _isDigit(int ch) {
+    return ch >= 0x30 && ch <= 0x39;
+  }
+
+  /// Returns true if the byte is a letter (a-z, A-Z).
+  bool _isLetter(int ch) {
+    return (ch >= 0x41 && ch <= 0x5A) || // A-Z
+        (ch >= 0x61 && ch <= 0x7A); // a-z
   }
 
   String? _scanToEscapedDelimiter(Subject subj, int closingChar) {
