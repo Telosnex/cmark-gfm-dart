@@ -916,8 +916,12 @@ class InlineParser {
 
     // For strikethrough (~), only allow 1 or 2 tildes (from GFM strikethrough extension)
     if (opener.delimChar == 0x7E) {
+      // If singleTildeStrikethrough is false, require exactly 2 tildes
+      final minTildes = options.singleTildeStrikethrough ? 1 : 2;
       if (openerNumChars > 2 ||
           closerNumChars > 2 ||
+          openerNumChars < minTildes ||
+          closerNumChars < minTildes ||
           openerNumChars != closerNumChars) {
         return closer.next; // No match - continue
       }
