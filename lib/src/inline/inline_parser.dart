@@ -360,11 +360,12 @@ class InlineParser {
         // Found potential closing $
         final contentEnd = subj.pos;
 
-        // Rule 3: Closing $ must NOT be preceded by whitespace
+        // Rule 3: Closing $ must NOT be preceded by whitespace or /
+        // (math expressions don't end with forward slash - catches $id/$schema)
         if (contentEnd > contentStart) {
           final before = subj.peekAt(contentEnd - 1);
-          if (before == 0x20 || before == 0x09) {
-            // Whitespace before closing $ - not valid, keep scanning
+          if (before == 0x20 || before == 0x09 || before == 0x2F) {
+            // Whitespace or / before closing $ - not valid, keep scanning
             subj.advance();
             continue;
           }

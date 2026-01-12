@@ -84,6 +84,14 @@ void main() {
       expect(html, isNot(contains('class="math')));
     });
 
+    test('rejects: JSON Schema style \$id/\$schema', () {
+      // Path-like patterns with / before closing $ should not be math
+      final html = render(r'Baseline (no $id/$schema/title/description)');
+      expect(html, contains(r'$id'));
+      expect(html, contains(r'$schema'));
+      expect(html, isNot(contains('class="math')));
+    });
+
     test('accepts: math with punctuation after', () {
       final html = render(r'We have $x^2$, $y^2$, and $z^2$.');
       expect(html, contains('x^2'));
