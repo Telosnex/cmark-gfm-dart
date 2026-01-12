@@ -2,7 +2,7 @@
 class CmarkMathOptions {
   const CmarkMathOptions({
     this.allowBlockDoubleDollar = true,
-    this.allowBracketDelimiters = true,
+    this.allowBracketDelimiters = false,
     this.allowSingleDollar = true,
   });
 

@@ -187,7 +187,7 @@ class InlineParser {
   }
 
   CmarkNode? _tryParseMath(Subject subj, int leadingChar) {
-    if (leadingChar == 0x5C) {
+    if (leadingChar == 0x5C && mathOptions.allowBracketDelimiters) {
       final next = subj.peekCharN(1);
       if (next == 0x28 || next == 0x5B) {
         return _parseBracketMath(subj, display: next == 0x5B);
