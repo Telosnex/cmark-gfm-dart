@@ -155,6 +155,13 @@ void main() {
       expect(html, contains('1,048,576'));
     });
 
+    test('numeric math with equals: \$1048576 = 2^{20}\$', () {
+      final html =
+          render(r'can be solved by recognizing that $1048576 = 2^{20}$');
+      expect(html, contains('class="math'));
+      expect(html, contains(r'1048576 = 2^{20}'));
+    });
+
     test('preserves double-dollar precedence', () {
       final html = render(r'Display $$E=mc^2$$ math.');
       expect(html, contains('math-display'));

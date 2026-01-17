@@ -326,8 +326,9 @@ class InlineParser {
     final startsWithDigit = _isDigit(firstContentChar);
 
     final contentStart = subj.pos;
-    var seenLetterOrMathSymbol = false;
     var seenWhitespace = false;
+    var hasEarlyMathIndicator = false; // letter/symbol BEFORE whitespace
+    var hasOperator = false; // operator ANYWHERE
 
     // Scan for closing $
     while (!subj.isEof()) {
@@ -338,17 +339,26 @@ class InlineParser {
         seenWhitespace = true;
       }
 
-      // Track if we've seen a letter or math symbol BEFORE whitespace (for Rule 5)
-      // Math symbols: ^ _ \ { } (common LaTeX)
+      // Track letters/LaTeX symbols BEFORE whitespace.
+      // These suggest the content is math, not currency.
+      // e.g., "$x + 2$" has 'x' before the space.
       if (!seenWhitespace &&
           (_isLetter(ch) ||
-              ch == 0x5E || // ^
-              ch == 0x5F || // _
               ch == 0x5C || // \
               ch == 0x7B || // {
-              ch == 0x7D)) {
-        // }
-        seenLetterOrMathSymbol = true;
+              ch == 0x7D)) { // }
+        hasEarlyMathIndicator = true;
+      }
+
+      // Track binary operators ANYWHERE - these connect parts of an expression.
+      // e.g., "$1048576 = 2^{20}$" - the '=' ties it together.
+      // Note: ^ and _ are modifiers, not connectors, so they don't count here.
+      // They're already covered by hasEarlyMathIndicator if they appear early.
+      if (ch == 0x3D || // =
+          ch == 0x2B || // +
+          ch == 0x3C || // <
+          ch == 0x3E) { // >
+        hasOperator = true;
       }
 
       // No newlines in inline math
@@ -384,10 +394,15 @@ class InlineParser {
           continue;
         }
 
-        // Rule 5: If started with digit AND content has whitespace, must have
-        // seen a letter/math symbol BEFORE that whitespace.
-        // This catches "$20 times two is $40" but allows "$1,048,576$"
-        if (startsWithDigit && seenWhitespace && !seenLetterOrMathSymbol) {
+        // Rule 5: If started with digit AND content has whitespace, require
+        // either a letter/symbol BEFORE whitespace, or an operator ANYWHERE.
+        // This catches "$20 times two is $40" (cross-span currency)
+        // but allows "$1048576 = 2^{20}$" (operator ties it together)
+        // and "$5x + 2$" (letter before whitespace).
+        if (startsWithDigit &&
+            seenWhitespace &&
+            !hasEarlyMathIndicator &&
+            !hasOperator) {
           subj.advance();
           continue;
         }
