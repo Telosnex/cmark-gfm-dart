@@ -6,6 +6,7 @@ import '../reference/reference_map.dart';
 import '../footnote/footnote_map.dart';
 import '../parser/parser_options.dart';
 import '../util/strbuf.dart';
+import '../util/utf8.dart';
 import '../houdini/html_unescape.dart' as houdini;
 import 'subject.dart';
 import 'delimiter.dart';
@@ -804,10 +805,14 @@ class InlineParser {
 
     final leftFlanking = numDelims > 0 &&
         !_isSpace(afterChar) &&
-        (!_isPunct(afterChar) || _isSpace(beforeChar) || _isPunct(beforeChar));
+        (!_isUnicodePunct(afterChar) ||
+            _isSpace(beforeChar) ||
+            _isUnicodePunct(beforeChar));
     final rightFlanking = numDelims > 0 &&
         !_isSpace(beforeChar) &&
-        (!_isPunct(beforeChar) || _isSpace(afterChar) || _isPunct(afterChar));
+        (!_isUnicodePunct(beforeChar) ||
+            _isSpace(afterChar) ||
+            _isUnicodePunct(afterChar));
 
     if (c == 0x5F) {
       // _
@@ -1326,6 +1331,8 @@ class InlineParser {
         (ch >= 0x5B && ch <= 0x60) ||
         (ch >= 0x7B && ch <= 0x7E);
   }
+
+  bool _isUnicodePunct(int ch) => CmarkUtf8.isPunctuation(ch);
 }
 
 int _scanHtmlTag(Uint8List data, int offset) {
