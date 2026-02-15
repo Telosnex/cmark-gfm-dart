@@ -1,8 +1,6 @@
 import 'package:cmark_gfm/cmark_gfm.dart';
 import 'package:test/test.dart';
 
-import '../helpers.dart';
-
 void main() {
   group('Footnote reference index', () {
     test('standard format [^N] references get correct indices', () {
