@@ -10,13 +10,13 @@ import 'package:test/test.dart';
 import '../helpers.dart';
 import 'perf_tester.dart';
 
-Future<void> main(List<String> args) async {
-  if (args.contains('--bench')) {
-    await runBlockParserPerfTest();
-    return;
-  }
+Future<void> main() async {
+  // if (args.contains('--bench')) {
+  //   await runBlockParserPerfTest();
+  //   return;
+  // }
 
-  test('BlockParser v1 vs v2 performance', skip: true, () async {
+  test('BlockParser v1 vs v2 performance', skip: false, () async {
     await runBlockParserPerfTest();
   }, timeout: const Timeout(Duration(minutes: 10)));
 }

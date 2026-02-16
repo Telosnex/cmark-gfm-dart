@@ -1,13 +1,82 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:cmark_gfm/cmark_gfm.dart';
+import 'package:cmark_gfm/src/houdini/html_unescape.dart' as houdini;
+import 'package:cmark_gfm/src/inline/autolink_postprocess.dart';
 import 'package:cmark_gfm/src/inline/inline_parser.dart';
 import 'package:cmark_gfm/src/reference/reference_parser.dart';
 import 'package:cmark_gfm/src/util/node_iterator.dart';
+import 'package:cmark_gfm/src/util/strbuf.dart';
+
 
 const int kCodeIndent = 4;
 const int kTabStop = 4;
+
+const Set<String> _htmlBlockType1Tags = {'script', 'pre', 'style'};
+const Set<String> _htmlBlockType6Tags = {
+  'address',
+  'article',
+  'aside',
+  'base',
+  'basefont',
+  'blockquote',
+  'body',
+  'caption',
+  'center',
+  'col',
+  'colgroup',
+  'dd',
+  'details',
+  'dialog',
+  'dir',
+  'div',
+  'dl',
+  'dt',
+  'fieldset',
+  'figcaption',
+  'figure',
+  'footer',
+  'form',
+  'frame',
+  'frameset',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'head',
+  'header',
+  'hr',
+  'html',
+  'iframe',
+  'legend',
+  'li',
+  'link',
+  'main',
+  'menu',
+  'menuitem',
+  'nav',
+  'noframes',
+  'ol',
+  'optgroup',
+  'option',
+  'p',
+  'param',
+  'section',
+  'summary',
+  'table',
+  'tbody',
+  'td',
+  'tfoot',
+  'th',
+  'thead',
+  'title',
+  'tr',
+  'track',
+  'ul',
+};
+const Set<String> _htmlBlockType7ForbiddenTags = {'script', 'style', 'pre'};
 
 /// Real port of cmark-gfm's block parser with proper container stack.
 class BlockParserV2 {
@@ -237,6 +306,9 @@ class BlockParserV2 {
     _inlineParser!.reset();
     _sawFootnoteReference = false;
     _processInlines(rootToFinalize, _inlineParser!);
+    if (options.enableAutolinkExtension) {
+      applyAutolinks(rootToFinalize);
+    }
 
     // Link footnote references to definitions and set indices
     final bool hasFootnoteDefs = footnoteMap.size > 0 || _sawFootnoteDefinition;
@@ -262,7 +334,11 @@ class BlockParserV2 {
 
     // Type-specific finalization
     if (node.type == CmarkNodeType.paragraph) {
-      _resolveReferenceLinkDefinitions(node);
+      final hasContent = _resolveReferenceLinkDefinitions(node);
+      if (!hasContent) {
+        node.unlink();
+        return;
+      }
     } else if (node.type == CmarkNodeType.list) {
       node.listData.tight = _calculateTightness(node);
     } else if (node.type == CmarkNodeType.codeBlock) {
@@ -278,16 +354,19 @@ class BlockParserV2 {
           pos++;
         }
         if (pos < content.length) {
-          node.codeData.info = content.substring(0, pos).trim();
-          pos++;
-          if (pos < content.length &&
-              content.codeUnitAt(pos - 1) == 0x0D &&
-              content.codeUnitAt(pos) == 0x0A) {
+          final infoLine = content.substring(0, pos);
+          node.codeData.info = _normalizeInfoString(infoLine);
+
+          if (pos < content.length && content.codeUnitAt(pos) == 0x0D) {
             pos++;
           }
+          if (pos < content.length && content.codeUnitAt(pos) == 0x0A) {
+            pos++;
+          }
+
           node.codeData.literal = content.substring(pos);
         } else {
-          node.codeData.info = content.trim();
+          node.codeData.info = _normalizeInfoString(content);
           node.codeData.literal = '';
         }
       } else {
@@ -309,8 +388,9 @@ class BlockParserV2 {
     // Recurse to children
     var child = node.firstChild;
     while (child != null) {
+      final next = child.next;
       _finalizeTreeRecursive(child);
-      child = child.next;
+      child = next;
     }
   }
 
@@ -353,6 +433,8 @@ class BlockParserV2 {
 
           // For rendering, we need to access the definition's label
           node.footnoteDefLabel = label;
+        } else {
+          _convertFootnoteReferenceToText(node, label);
         }
       }
       evType = iter2.next();
@@ -415,22 +497,26 @@ class BlockParserV2 {
   _CheckOpenBlocksResult _checkOpenBlocks() {
     var container = root;
     var allMatched = true;
+    var lastMatched = root;
 
     while (_isOpen(container.lastChild)) {
-      container = container.lastChild!;
+      final child = container.lastChild!;
+      container = child;
 
       _findFirstNonspace();
 
       final matched = _checkContinuation(container);
       if (!matched) {
         allMatched = false;
-        // Finalize the unmatched container before returning parent
-        container = _finalize(container);
-        return _CheckOpenBlocksResult(container, allMatched);
+        container = child.parent ?? root;
+        break;
+      } else {
+        lastMatched = container;
       }
     }
 
-    return _CheckOpenBlocksResult(container, allMatched);
+    final resultContainer = allMatched ? lastMatched : container;
+    return _CheckOpenBlocksResult(resultContainer, allMatched);
   }
 
   bool _isOpen(CmarkNode? node) {
@@ -449,6 +535,8 @@ class BlockParserV2 {
         return false; // Headings never continue
       case CmarkNodeType.paragraph:
         return !blank;
+      case CmarkNodeType.htmlBlock:
+        return _parseHtmlBlockPrefix(container);
       case CmarkNodeType.table:
         // Table continues if line has pipes AND is not a delimiter row
         if (blank || !_currentLine.contains('|')) {
@@ -574,14 +662,36 @@ class BlockParserV2 {
     return true;
   }
 
+  bool _parseHtmlBlockPrefix(CmarkNode container) {
+    final type = container.htmlBlockType;
+    if (type >= 1 && type <= 5) {
+      return true;
+    }
+    if (type == 6 || type == 7) {
+      return !blank;
+    }
+    return true;
+  }
+
   int _scanCloseFence(int pos, int fenceChar) {
-    var count = 0;
+    final start = pos;
     while (_charAt(pos) == fenceChar) {
-      count++;
       pos++;
     }
+    final count = pos - start;
+    if (count < 3) {
+      return 0;
+    }
+    while (true) {
+      final ch = _charAt(pos);
+      if (ch == 0x20 || ch == 0x09 || ch == 0xA0) {
+        pos++;
+        continue;
+      }
+      break;
+    }
     final next = _charAt(pos);
-    if (next == 0x0A || next == 0x0D || next == 0) {
+    if (next == 0 || next == 0x0A || next == 0x0D) {
       return count;
     }
     return 0;
@@ -642,6 +752,19 @@ class BlockParserV2 {
         }
       }
 
+      if (!indented) {
+        final htmlStart = _scanHtmlBlockStart(
+          firstNonspace,
+          allowType7: container.type != CmarkNodeType.paragraph,
+        );
+        if (htmlStart != null) {
+          container = _addChild(container, CmarkNodeType.htmlBlock);
+          container.htmlBlockType = htmlStart.type;
+          container.htmlBlockEndTag = htmlStart.endTag;
+          break;
+        }
+      }
+
       // Try setext heading (must come before thematic break)
       if (!indented && container.type == CmarkNodeType.paragraph) {
         final setextLevel = _scanSetextHeadingLine(firstNonspace);
@@ -685,9 +808,16 @@ class BlockParserV2 {
           // This is a delimiter row - convert paragraph to table
           final paraContent = container.content.toString();
           // Strip trailing newline from para content
-          final headerText = paraContent.endsWith('\n')
+          var headerText = paraContent.endsWith('\n')
               ? paraContent.substring(0, paraContent.length - 1)
               : paraContent;
+
+          String? leadingText;
+          final lastNewline = headerText.lastIndexOf('\n');
+          if (lastNewline >= 0) {
+            leadingText = headerText.substring(0, lastNewline).trimRight();
+            headerText = headerText.substring(lastNewline + 1);
+          }
 
           final headerCells = _parseTableRow(headerText);
           final alignments =
@@ -695,6 +825,17 @@ class BlockParserV2 {
 
           if (headerCells.length == alignments.length &&
               headerCells.isNotEmpty) {
+            if (leadingText != null && leadingText.isNotEmpty) {
+              final paragraphNode = CmarkNode(CmarkNodeType.paragraph)
+                ..flags |= 1
+                ..startLine = container.startLine
+                ..startColumn = container.startColumn
+                ..content.write(leadingText)
+                ..content.write('\n');
+              _insertNodeBefore(container, paragraphNode);
+              _finalize(paragraphNode);
+            }
+
             // Valid table - convert paragraph to table
             container.type = CmarkNodeType.table;
             container.content.clear();
@@ -735,6 +876,10 @@ class BlockParserV2 {
           if (_charAt(labelEnd) == 0x5D) {
             final label = _currentLine.substring(firstNonspace + 2, labelEnd);
             _advanceOffset(firstNonspace + footnoteMatch - offset, false);
+            final spacesAfterColon = _countSpacesFromPosition(offset);
+            if (spacesAfterColon > 0) {
+              _advanceOffset(spacesAfterColon, true);
+            }
             container = _addChild(container, CmarkNodeType.footnoteDefinition);
             container.content.write(label);
             continue;
@@ -863,16 +1008,48 @@ class BlockParserV2 {
     return container;
   }
 
+  void _insertNodeBefore(CmarkNode target, CmarkNode newNode) {
+    final parent = target.parent;
+    if (parent == null) {
+      return;
+    }
+
+    newNode.parent = parent;
+    newNode.previous = target.previous;
+    newNode.next = target;
+
+    if (target.previous != null) {
+      target.previous!.next = newNode;
+    } else {
+      parent.firstChild = newNode;
+    }
+
+    target.previous = newNode;
+  }
+
   void _addTextToContainer(
       CmarkNode container, CmarkNode lastMatchedContainer) {
     _findFirstNonspace();
 
-    if (blank && container.lastChild != null) {
-      container.lastChild!.flags |= 2; // LAST_LINE_BLANK
+    final trailingChild = container.lastChild;
+    final trailingChildIsOpen =
+        trailingChild != null && (trailingChild.flags & 1) != 0;
+    if (blank && trailingChild != null) {
+      final isFencedCodeBlock = trailingChild.type == CmarkNodeType.codeBlock &&
+          trailingChild.codeData.isFenced &&
+          trailingChildIsOpen;
+      if (!isFencedCodeBlock) {
+        trailingChild.flags |= 2; // LAST_LINE_BLANK
+      }
     }
 
     // Set last_line_blank flag on container
     // Port of C's last_line_blank calculation
+    final trailingFencedChild = trailingChild != null &&
+        trailingChild.type == CmarkNodeType.codeBlock &&
+        trailingChild.codeData.isFenced &&
+        trailingChildIsOpen;
+
     final shouldSetBlank = blank &&
         container.type != CmarkNodeType.blockQuote &&
         container.type != CmarkNodeType.heading &&
@@ -881,7 +1058,8 @@ class BlockParserV2 {
             container.codeData.isFenced) &&
         !(container.type == CmarkNodeType.item &&
             container.firstChild == null &&
-            container.startLine == lineNumber);
+            container.startLine == lineNumber) &&
+        !(container.type == CmarkNodeType.item && trailingFencedChild);
 
     if (shouldSetBlank) {
       container.flags |= 2; // LAST_LINE_BLANK
@@ -907,14 +1085,26 @@ class BlockParserV2 {
         current.type == CmarkNodeType.paragraph) {
       _addLine(current);
     } else {
+      while (current != lastMatchedContainer) {
+        final parent = _finalize(current);
+        if (parent == current) {
+          break;
+        }
+        current = parent;
+      }
+
       if (container.type == CmarkNodeType.mathBlock) {
         _addLine(container);
       } else if (container.type == CmarkNodeType.table) {
         // Add a table row
         _addTableRow(container);
-      } else if (container.type == CmarkNodeType.codeBlock ||
-          container.type == CmarkNodeType.htmlBlock) {
+      } else if (container.type == CmarkNodeType.codeBlock) {
         _addLine(container);
+      } else if (container.type == CmarkNodeType.htmlBlock) {
+        _addLine(container);
+        if (_htmlBlockShouldClose(container)) {
+          container = _finalize(container);
+        }
       } else if (blank) {
         // Do nothing for blank lines
       } else if (_acceptsLines(container.type)) {
@@ -948,6 +1138,33 @@ class BlockParserV2 {
     }
     // Add newline separator (like cmark's add_line does)
     node.content.writeCharCode(0x0A);
+  }
+
+  bool _htmlBlockShouldClose(CmarkNode node) {
+    final type = node.htmlBlockType;
+    if (type == 0) {
+      return false;
+    }
+
+    switch (type) {
+      case 1:
+        final endTag = node.htmlBlockEndTag;
+        if (endTag == null) {
+          return false;
+        }
+        final lower = _currentLine.toLowerCase();
+        return _lineContainsClosingTag(lower, endTag);
+      case 2:
+        return _currentLine.contains('-->');
+      case 3:
+        return _currentLine.contains('?>');
+      case 4:
+        return _currentLine.contains('>');
+      case 5:
+        return _currentLine.contains(']]>');
+      default:
+        return false;
+    }
   }
 
   CmarkNode _finalizeMathBlockNode(CmarkNode node) {
@@ -1079,19 +1296,18 @@ class BlockParserV2 {
 
           if (pos < content.length) {
             final infoLine = content.substring(0, pos);
-            node.codeData.info = infoLine.trim();
+            node.codeData.info = _normalizeInfoString(infoLine);
 
-            // Skip past newline
-            pos++;
-            if (pos < content.length &&
-                content.codeUnitAt(pos - 1) == 0x0D &&
-                content.codeUnitAt(pos) == 0x0A) {
+            if (pos < content.length && content.codeUnitAt(pos) == 0x0D) {
+              pos++;
+            }
+            if (pos < content.length && content.codeUnitAt(pos) == 0x0A) {
               pos++;
             }
 
             node.codeData.literal = content.substring(pos);
           } else {
-            node.codeData.info = content.trim();
+            node.codeData.info = _normalizeInfoString(content);
             node.codeData.literal = '';
           }
         } else {
@@ -1459,6 +1675,326 @@ class BlockParserV2 {
     return null;
   }
 
+  _HtmlBlockStart? _scanHtmlBlockStart(int pos, {required bool allowType7}) {
+    if (_charAt(pos) != 0x3C) {
+      return null;
+    }
+
+    final line = _currentLine.substring(pos);
+    if (line.isEmpty) {
+      return null;
+    }
+
+    final lower = line.toLowerCase();
+
+    for (final tag in _htmlBlockType1Tags) {
+      if (_matchesType1Tag(lower, tag)) {
+        return _HtmlBlockStart(type: 1, endTag: tag);
+      }
+    }
+
+    if (line.startsWith('<!--')) {
+      return const _HtmlBlockStart(type: 2);
+    }
+
+    if (line.startsWith('<?')) {
+      return const _HtmlBlockStart(type: 3);
+    }
+
+    if (line.startsWith('<![CDATA[')) {
+      return const _HtmlBlockStart(type: 5);
+    }
+
+    if (line.startsWith('<!') &&
+        line.length > 2 &&
+        _isUppercaseLetter(line.codeUnitAt(2))) {
+      return const _HtmlBlockStart(type: 4);
+    }
+
+    if (_matchesType6Tag(lower, line)) {
+      return const _HtmlBlockStart(type: 6);
+    }
+
+    if (allowType7 && _matchesType7Tag(line)) {
+      return const _HtmlBlockStart(type: 7);
+    }
+
+    return null;
+  }
+
+  bool _matchesType1Tag(String lower, String tag) {
+    final prefix = '<$tag';
+    if (!lower.startsWith(prefix)) {
+      return false;
+    }
+    final index = prefix.length;
+    if (index >= lower.length) {
+      return true;
+    }
+    final ch = lower.codeUnitAt(index);
+    return _isHtmlBoundaryChar(ch);
+  }
+
+  bool _matchesType6Tag(String lower, String original) {
+    if (!lower.startsWith('<')) {
+      return false;
+    }
+
+    var idx = 1;
+    if (idx < lower.length && lower.codeUnitAt(idx) == 0x2F) {
+      idx++;
+    }
+
+    if (idx >= lower.length || !_isAsciiAlpha(lower.codeUnitAt(idx))) {
+      return false;
+    }
+
+    final nameStart = idx;
+    idx++;
+    while (idx < lower.length && _isTagNameChar(lower.codeUnitAt(idx))) {
+      idx++;
+    }
+
+    final name = lower.substring(nameStart, idx);
+    if (!_htmlBlockType6Tags.contains(name)) {
+      return false;
+    }
+
+    return _hasHtmlBoundary(original, idx);
+  }
+
+  bool _matchesType7Tag(String line) {
+    if (!line.startsWith('<')) {
+      return false;
+    }
+
+    if (line.startsWith('</')) {
+      return _isCompleteClosingTag(line);
+    }
+
+    final next = line.length > 1 ? line.codeUnitAt(1) : 0;
+    if (next == 0x21 || next == 0x3F) {
+      // <! or <? handled by other types
+      return false;
+    }
+
+    return _isCompleteOpeningTag(line);
+  }
+
+  bool _hasHtmlBoundary(String line, int index) {
+    if (index >= line.length) {
+      return true;
+    }
+    final ch = line.codeUnitAt(index);
+    return _isHtmlBoundaryChar(ch);
+  }
+
+  bool _isCompleteOpeningTag(String line) {
+    var idx = 1;
+    if (idx >= line.length || !_isAsciiAlpha(line.codeUnitAt(idx))) {
+      return false;
+    }
+
+    final nameStart = idx;
+    idx++;
+    while (idx < line.length && _isTagNameChar(line.codeUnitAt(idx))) {
+      idx++;
+    }
+
+    final name = line.substring(nameStart, idx).toLowerCase();
+    if (_htmlBlockType7ForbiddenTags.contains(name)) {
+      return false;
+    }
+
+    if (idx < line.length && !_isHtmlBoundaryChar(line.codeUnitAt(idx))) {
+      return false;
+    }
+
+    while (idx < line.length) {
+      var sawWhitespace = false;
+      while (idx < line.length && _isHtmlSpaceChar(line.codeUnitAt(idx))) {
+        sawWhitespace = true;
+        idx++;
+      }
+
+      if (idx >= line.length) {
+        return false;
+      }
+
+      final ch = line.codeUnitAt(idx);
+      if (ch == 0x3E) {
+        idx++;
+        return _onlyTrailingWhitespace(line, idx);
+      }
+      if (ch == 0x2F) {
+        // '/'
+        idx++;
+        if (idx < line.length && line.codeUnitAt(idx) == 0x3E) {
+          idx++;
+          return _onlyTrailingWhitespace(line, idx);
+        }
+        return false;
+      }
+
+      if (!sawWhitespace) {
+        return false;
+      }
+
+      if (!_isAttrNameStart(ch)) {
+        return false;
+      }
+
+      idx++;
+      while (idx < line.length && _isAttrNameChar(line.codeUnitAt(idx))) {
+        idx++;
+      }
+
+      if (idx < line.length && line.codeUnitAt(idx) == 0x3D) {
+        idx++;
+        while (idx < line.length && _isHtmlSpaceChar(line.codeUnitAt(idx))) {
+          idx++;
+        }
+        if (idx >= line.length) {
+          return false;
+        }
+
+        final valueStart = line.codeUnitAt(idx);
+        if (valueStart == 0x22 || valueStart == 0x27) {
+          idx++;
+          while (idx < line.length && line.codeUnitAt(idx) != valueStart) {
+            idx++;
+          }
+          if (idx >= line.length) {
+            return false;
+          }
+          idx++;
+        } else {
+          var hasValue = false;
+          while (idx < line.length) {
+            final valueChar = line.codeUnitAt(idx);
+            if (_isHtmlSpaceChar(valueChar) || valueChar == 0x3E) {
+              break;
+            }
+            if (valueChar == 0x22 ||
+                valueChar == 0x27 ||
+                valueChar == 0x3C ||
+                valueChar == 0x3D ||
+                valueChar == 0x60) {
+              return false;
+            }
+            hasValue = true;
+            idx++;
+          }
+          if (!hasValue) {
+            return false;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  bool _isCompleteClosingTag(String line) {
+    if (!line.startsWith('</')) {
+      return false;
+    }
+
+    var idx = 2;
+    if (idx >= line.length || !_isAsciiAlpha(line.codeUnitAt(idx))) {
+      return false;
+    }
+    idx++;
+    while (idx < line.length && _isTagNameChar(line.codeUnitAt(idx))) {
+      idx++;
+    }
+
+    while (idx < line.length && _isSpaceOrTab(line.codeUnitAt(idx))) {
+      idx++;
+    }
+
+    if (idx >= line.length || line.codeUnitAt(idx) != 0x3E) {
+      return false;
+    }
+    idx++;
+    return _onlyTrailingWhitespace(line, idx);
+  }
+
+  bool _onlyTrailingWhitespace(String line, int index) {
+    for (var i = index; i < line.length; i++) {
+      final ch = line.codeUnitAt(i);
+      if (!_isSpaceOrTab(ch)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool _isHtmlBoundaryChar(int ch) {
+    return ch == 0x20 ||
+        ch == 0x09 ||
+        ch == 0x0A ||
+        ch == 0x0D ||
+        ch == 0x2F ||
+        ch == 0x3E;
+  }
+
+  bool _isHtmlSpaceChar(int ch) =>
+      ch == 0x20 || ch == 0x09 || ch == 0x0A || ch == 0x0D || ch == 0x0C;
+
+  bool _isUppercaseLetter(int code) => code >= 0x41 && code <= 0x5A;
+
+  bool _isAsciiAlpha(int code) =>
+      (code >= 0x41 && code <= 0x5A) || (code >= 0x61 && code <= 0x7A);
+
+  bool _isTagNameChar(int code) =>
+      _isAsciiAlpha(code) || (code >= 0x30 && code <= 0x39) || code == 0x2D;
+
+  String _normalizeInfoString(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) {
+      return '';
+    }
+
+    final buf = CmarkStrbuf();
+    final bytes = utf8.encode(trimmed);
+    houdini.HoudiniHtmlUnescape.unescape(buf, bytes);
+    final unescaped = utf8.decode(buf.detach(), allowMalformed: true);
+    return _unescapeBackslashPunctuation(unescaped);
+  }
+
+  String _unescapeBackslashPunctuation(String input) {
+    if (input.isEmpty) return '';
+    final result = StringBuffer();
+    for (var i = 0; i < input.length; i++) {
+      final code = input.codeUnitAt(i);
+      if (code == 0x5C &&
+          i + 1 < input.length &&
+          _isAsciiPunctuation(input.codeUnitAt(i + 1))) {
+        i++;
+        result.writeCharCode(input.codeUnitAt(i));
+      } else {
+        result.writeCharCode(code);
+      }
+    }
+    return result.toString();
+  }
+
+  bool _isAsciiPunctuation(int code) {
+    return (code >= 0x21 && code <= 0x2F) ||
+        (code >= 0x3A && code <= 0x40) ||
+        (code >= 0x5B && code <= 0x60) ||
+        (code >= 0x7B && code <= 0x7E);
+  }
+
+  bool _isAttrNameStart(int code) =>
+      _isAsciiAlpha(code) || code == 0x5F || code == 0x3A;
+
+  bool _isAttrNameChar(int code) =>
+      _isAttrNameStart(code) ||
+      (code >= 0x30 && code <= 0x39) ||
+      code == 0x2E ||
+      code == 0x2D;
+
   int _scanSetextHeadingLine(int pos) {
     final c = _charAt(pos);
     if (c != 0x3D && c != 0x2D) return 0; // = or -
@@ -1575,20 +2111,29 @@ class BlockParserV2 {
     return _currentLine.codeUnitAt(pos);
   }
 
+  int _countSpacesFromPosition(int pos) {
+    var count = 0;
+    while (true) {
+      final ch = _charAt(pos + count);
+      if (ch == 0x20 || ch == 0x09) {
+        count++;
+      } else {
+        break;
+      }
+    }
+    return count;
+  }
+
   @pragma('vm:prefer-inline')
   bool _isSpaceOrTab(int c) => c == 0x20 || c == 0x09;
+  bool _isWhitespaceChar(int c) =>
+      c == 0x20 || c == 0x09 || c == 0x0A || c == 0x0D || c == 0x0C;
   bool _isDigit(int c) => c >= 0x30 && c <= 0x39;
 
   void _processInlines(CmarkNode node, InlineParser inlineParser) {
     inlineParser.parseInlines(node);
     var child = node.firstChild;
-    var count = 0;
     while (child != null) {
-      count++;
-      if (count > 1000000) {
-        throw StateError(
-            'SAFETY: Processed $count children of ${node.type.name}');
-      }
       final next = child.next;
       if (child.type == CmarkNodeType.footnoteReference) {
         _sawFootnoteReference = true;
@@ -1600,12 +2145,26 @@ class BlockParserV2 {
 
   void _appendFootnotes(CmarkNode root) {
     // Move footnote definitions to end of document (C's create_footnote_list)
-    final footnotes = footnoteMap.getReferencedInOrder();
-    for (final footnote in footnotes) {
-      // Unlink from current position and append to root
-      footnote.node.unlink();
-      root.appendChild(footnote.node);
+    final entries = footnoteMap.entries.toList();
+    for (final entry in entries) {
+      entry.node.unlink();
     }
+
+    for (final entry in footnoteMap.getReferencedInOrder()) {
+      root.appendChild(entry.node);
+    }
+  }
+
+  void _convertFootnoteReferenceToText(CmarkNode node, String label) {
+    node.type = CmarkNodeType.text;
+    node.content
+      ..clear()
+      ..write('[^$label]');
+    node.firstChild = null;
+    node.lastChild = null;
+    node.footnoteReferenceIndex = 0;
+    node.footnoteRefIndex = 0;
+    node.footnoteDefLabel = '';
   }
 
   bool _scanTableStart(int pos) {
@@ -1793,6 +2352,23 @@ class BlockParserV2 {
     return result.toString();
   }
 
+  bool _lineContainsClosingTag(String lineLower, String tag) {
+    final closing = '</$tag';
+    var index = lineLower.indexOf(closing);
+    while (index != -1) {
+      var i = index + closing.length;
+      while (
+          i < lineLower.length && _isWhitespaceChar(lineLower.codeUnitAt(i))) {
+        i++;
+      }
+      if (i < lineLower.length && lineLower.codeUnitAt(i) == 0x3E) {
+        return true;
+      }
+      index = lineLower.indexOf(closing, index + 1);
+    }
+    return false;
+  }
+
   void _addTableRow(CmarkNode table) {
     final alignments = _currentTableAlignments;
     if (alignments == null) {
@@ -1832,6 +2408,13 @@ class _CheckOpenBlocksResult {
   _CheckOpenBlocksResult(this.container, this.allMatched);
   final CmarkNode? container;
   final bool allMatched;
+}
+
+class _HtmlBlockStart {
+  const _HtmlBlockStart({required this.type, this.endTag});
+
+  final int type;
+  final String? endTag;
 }
 
 class _MathBlockStart {
