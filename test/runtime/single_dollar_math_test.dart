@@ -112,6 +112,21 @@ void main() {
       expect(html, isNot(contains('math')));
     });
 
+    test('rejects: OData query params \$filter/\$search', () {
+      final html = render(
+          r'GET /users?$filter=... or GET /people?$search=...');
+      expect(html, contains(r'$filter'));
+      expect(html, contains(r'$search'));
+      expect(html, isNot(contains('class="math')));
+    });
+
+    test('rejects: OData params with ampersand', () {
+      final html = render(r'OData: $top=10&$skip=20&$count=true');
+      expect(html, contains(r'$top'));
+      expect(html, contains(r'$skip'));
+      expect(html, isNot(contains('class="math')));
+    });
+
     test('mixed: currency and math in same line', () {
       final html = render(r'For $20, you get $x^2$ calculations.');
       // $20 should stay as text (digit after closing would need another $)
