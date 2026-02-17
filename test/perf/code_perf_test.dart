@@ -3,8 +3,6 @@
 import 'dart:io';
 
 import 'package:cmark_gfm/cmark_gfm.dart';
-import 'forked/block_parser_v2.dart';
-import 'forked/node2.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -14,33 +12,49 @@ import 'perf_tester.dart';
 String getTextContent(CmarkNode root) {
   final buf = StringBuffer();
   void walk(CmarkNode node) {
-    if (node.type == CmarkNodeType.softbreak) { buf.write('\n'); }
-    else if (node.type == CmarkNodeType.linebreak) { buf.write('\n'); }
-    else if (node.type == CmarkNodeType.codeBlock) { buf.write(node.codeData.literal); }
-    else if (node.type.isInline && node.firstChild == null) { buf.write(node.content.toString()); }
+    if (node.type == CmarkNodeType.softbreak) {
+      buf.write('\n');
+    } else if (node.type == CmarkNodeType.linebreak) {
+      buf.write('\n');
+    } else if (node.type == CmarkNodeType.codeBlock) {
+      buf.write(node.codeData.literal);
+    } else if (node.type.isInline && node.firstChild == null) {
+      buf.write(node.content.toString());
+    }
     var c = node.firstChild;
-    while (c != null) { walk(c); c = c.next; }
+    while (c != null) {
+      walk(c);
+      c = c.next;
+    }
   }
+
   walk(root);
   return buf.toString();
 }
 
 /// Extract all text content from a CmarkNode2 tree.
-String getTextContent2(CmarkNode2 root) {
+String getTextContent2(CmarkNode root) {
   final buf = StringBuffer();
-  void walk(CmarkNode2 node) {
-    if (node.type == CmarkNodeType.softbreak) { buf.write('\n'); }
-    else if (node.type == CmarkNodeType.linebreak) { buf.write('\n'); }
-    else if (node.type == CmarkNodeType.codeBlock) { buf.write(node.codeData.literal); }
-    else if (node.type.isInline && node.firstChild == null) { buf.write(node.contentString); }
+  void walk(CmarkNode node) {
+    if (node.type == CmarkNodeType.softbreak) {
+      buf.write('\n');
+    } else if (node.type == CmarkNodeType.linebreak) {
+      buf.write('\n');
+    } else if (node.type == CmarkNodeType.codeBlock) {
+      buf.write(node.codeData.literal);
+    } else if (node.type.isInline && node.firstChild == null) {
+      buf.write(node.contentString);
+    }
     var c = node.firstChild;
-    while (c != null) { walk(c); c = c.next; }
+    while (c != null) {
+      walk(c);
+      c = c.next;
+    }
   }
+
   walk(root);
   return buf.toString();
 }
-
-
 
 Future<void> main() async {
   // if (args.contains('--bench')) {
@@ -48,13 +62,15 @@ Future<void> main() async {
   //   return;
   // }
 
-  test('BlockParser v1 vs v2 (code)', skip: false, () async {
-    await runBlockParserPerfTest('selectable_region.txt');
-  }, timeout: const Timeout(Duration(minutes: 10)));
+  group('perf test', skip: true, () {
+    test('BlockParser v1 vs v2 (code)', () async {
+      await runBlockParserPerfTest('selectable_region.txt');
+    }, timeout: const Timeout(Duration(minutes: 10)));
 
-  test('BlockParser v1 vs v2 (prose)', skip: false, () async {
-    await runBlockParserPerfTest('long_poem.txt');
-  }, timeout: const Timeout(Duration(minutes: 10)));
+    test('BlockParser v1 vs v2 (prose)', () async {
+      await runBlockParserPerfTest('long_poem.txt');
+    }, timeout: const Timeout(Duration(minutes: 10)));
+  });
 }
 
 Future<void> runBlockParserPerfTest(String filename) async {
@@ -86,7 +102,7 @@ Future<void> runBlockParserPerfTest(String filename) async {
       return parser.finish();
     },
     implementation2: (input) {
-      final parser = BlockParserV2(
+      final parser = BlockParser(
         parserOptions: const CmarkParserOptions(enableMath: true),
       );
       parser.feed(input);
@@ -98,8 +114,10 @@ Future<void> runBlockParserPerfTest(String filename) async {
       // Tree structure may differ in node boundaries (e.g. around $)
       // because V2's fused loop handles unmatched math chars differently.
       // Compare extracted text content instead.
-      final textA = a is CmarkNode2 ? getTextContent2(a) : getTextContent(a as CmarkNode);
-      final textB = b is CmarkNode2 ? getTextContent2(b) : getTextContent(b as CmarkNode);
+      final textA =
+          a is CmarkNode ? getTextContent2(a) : getTextContent(a as CmarkNode);
+      final textB =
+          b is CmarkNode ? getTextContent2(b) : getTextContent(b as CmarkNode);
       return textA == textB;
     },
   );
