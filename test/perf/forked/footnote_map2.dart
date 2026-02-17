@@ -1,39 +1,39 @@
 import 'dart:convert';
 
-import '../node.dart';
-import '../util/strbuf.dart';
-import '../util/utf8.dart';
+import 'package:cmark_gfm/src/util/strbuf.dart';
+import 'package:cmark_gfm/src/util/utf8.dart';
+import 'node2.dart';
 
-class CmarkFootnote {
-  CmarkFootnote({required this.label, required this.node});
+class CmarkFootnote2 {
+  CmarkFootnote2({required this.label, required this.node});
   final String label;
-  final CmarkNode node;
+  final CmarkNode2 node;
 }
 
-class CmarkFootnoteMap {
-  CmarkFootnoteMap();
+class CmarkFootnoteMap2 {
+  CmarkFootnoteMap2();
 
-  final Map<String, CmarkFootnote> _entries = {};
+  final Map<String, CmarkFootnote2> _entries = {};
 
   int get size => _entries.length;
 
-  void add(String label, CmarkNode node) {
+  void add(String label, CmarkNode2 node) {
     final normalized = _normalizeLabel(label);
     if (normalized == null || normalized.isEmpty) return;
     if (_entries.containsKey(normalized)) return;
     node.footnoteReferenceIndex = 0;
-    _entries[normalized] = CmarkFootnote(label: normalized, node: node);
+    _entries[normalized] = CmarkFootnote2(label: normalized, node: node);
   }
 
-  CmarkFootnote? lookup(String label) {
+  CmarkFootnote2? lookup(String label) {
     final normalized = _normalizeLabel(label);
     if (normalized == null || normalized.isEmpty) return null;
     return _entries[normalized];
   }
 
-  Iterable<CmarkFootnote> get entries => _entries.values;
+  Iterable<CmarkFootnote2> get entries => _entries.values;
 
-  List<CmarkFootnote> getReferencedInOrder() {
+  List<CmarkFootnote2> getReferencedInOrder() {
     final referenced = _entries.values
         .where((e) => e.node.footnoteReferenceIndex > 0)
         .toList();

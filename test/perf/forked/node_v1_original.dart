@@ -261,44 +261,42 @@ class CmarkTableCellData {
 }
 
 /// A node in the CommonMark AST.
-///
-/// Key optimizations vs the original implementation:
-/// 1. Constructor just sets type — no StringBuffer, no ternary checks.
-/// 2. Content stored as String? literal — no StringBuffer for text nodes.
-/// 3. Data fields are truly lazy — allocated on first access only.
 class CmarkNode {
-  CmarkNode(this.type);
+  CmarkNode(this.type)
+      : content = StringBuffer(),
+        startLine = 0,
+        startColumn = 0,
+        endLine = 0,
+        endColumn = 0,
+        internalOffset = 0,
+        _listData = type == CmarkNodeType.list || type == CmarkNodeType.item
+            ? CmarkListData()
+            : null,
+        _codeData =
+            type == CmarkNodeType.codeBlock || type == CmarkNodeType.code
+                ? CmarkCodeData()
+                : null,
+        _headingData =
+            type == CmarkNodeType.heading ? CmarkHeadingData() : null,
+        _linkData = type == CmarkNodeType.link || type == CmarkNodeType.image
+            ? CmarkLinkData()
+            : null,
+        _customData = type == CmarkNodeType.customBlock ||
+                type == CmarkNodeType.customInline
+            ? CmarkCustomData()
+            : null,
+        _tableRowData =
+            type == CmarkNodeType.tableRow ? CmarkTableRowData() : null,
+        _tableCellData =
+            type == CmarkNodeType.tableCell ? CmarkTableCellData() : null,
+        _mathData = type == CmarkNodeType.math || type == CmarkNodeType.mathBlock
+            ? CmarkMathData(display: type == CmarkNodeType.mathBlock)
+            : null;
 
   CmarkNodeType type;
 
-  // ---- Lazy content ----
-  String? _literal;
-  StringBuffer? _contentBuf;
+  final StringBuffer content;
 
-  /// Fast path for text nodes — avoids StringBuffer entirely.
-  void setLiteral(String s) {
-    _literal = s;
-  }
-
-  /// StringBuffer access for block nodes that accumulate content.
-  StringBuffer get content {
-    if (_contentBuf == null) {
-      _contentBuf = StringBuffer();
-      if (_literal != null) {
-        _contentBuf!.write(_literal!);
-        _literal = null;
-      }
-    }
-    return _contentBuf!;
-  }
-
-  /// Read content without forcing StringBuffer allocation.
-  String get contentString {
-    if (_literal != null) return _literal!;
-    return _contentBuf?.toString() ?? '';
-  }
-
-  // ---- Tree pointers ----
   CmarkNode? next;
   CmarkNode? previous;
   CmarkNode? parent;
@@ -306,17 +304,13 @@ class CmarkNode {
   CmarkNode? lastChild;
 
   Object? userData;
+  void Function(Object?)? userDataFreeFunc;
 
-  /// First byte of content, set by block parser's _addLine.
-  /// Allows _resolveReferenceLinkDefinitions to skip toString.
-  int firstContentByte = 0;
-
-  // ---- Position tracking ----
-  int startLine = 0;
-  int startColumn = 0;
-  int endLine = 0;
-  int endColumn = 0;
-  int internalOffset = 0;
+  int startLine;
+  int startColumn;
+  int endLine;
+  int endColumn;
+  int internalOffset;
   int htmlBlockType = 0;
   String? htmlBlockEndTag;
 
@@ -325,20 +319,19 @@ class CmarkNode {
 
   /// The number of references/definitions recorded for footnote bookkeeping.
   int footnoteReferenceIndex = 0;
-
-  /// For footnote definitions: how many times this footnote has been referenced.
+  
+  /// For footnote definitions: how many times this footnote has been referenced
   int footnoteDefCount = 0;
-
-  /// For footnote references: which reference number this is (1st, 2nd, 3rd...).
+  
+  /// For footnote references: which reference number this is (1st, 2nd, 3rd...)
   int footnoteRefIndex = 0;
-
-  /// For footnote references: the label of the definition.
+  
+  /// For footnote references: the label of the definition
   String footnoteDefLabel = '';
 
   /// Link to the containing footnote definition node, if any.
   CmarkNode? parentFootnoteDefinition;
 
-  // ---- Lazy data fields ----
   CmarkListData? _listData;
   CmarkCodeData? _codeData;
   CmarkHeadingData? _headingData;
@@ -348,32 +341,13 @@ class CmarkNode {
   CmarkTableCellData? _tableCellData;
   CmarkMathData? _mathData;
 
-  CmarkListData get listData => _listData ??= CmarkListData();
-  CmarkCodeData get codeData => _codeData ??= CmarkCodeData();
-  CmarkHeadingData get headingData => _headingData ??= CmarkHeadingData();
-  CmarkLinkData get linkData => _linkData ??= CmarkLinkData();
-  CmarkCustomData get customData => _customData ??= CmarkCustomData();
-  CmarkTableRowData get tableRowData => _tableRowData ??= CmarkTableRowData();
-  CmarkTableCellData get tableCellData =>
-      _tableCellData ??= CmarkTableCellData();
-  CmarkMathData get mathData => _mathData ??= CmarkMathData();
-
-  /// Initialize heading data when converting from another type.
-  void initializeHeadingData() {
-    _headingData ??= CmarkHeadingData();
-  }
-
-  /// Initialize table cell data when converting or creating cell.
-  void initializeTableCellData() {
-    _tableCellData ??= CmarkTableCellData();
-  }
-
-  // ---- Tree operations ----
-
   /// Returns true if this node can contain [childType]. The rules mirror
   /// `cmark_node_can_contain_type` from the C implementation.
   bool canContain(CmarkNodeType childType) {
-    if (childType == CmarkNodeType.document) return false;
+    if (childType == CmarkNodeType.document) {
+      return false;
+    }
+
     switch (type) {
       case CmarkNodeType.document:
       case CmarkNodeType.blockQuote:
@@ -408,48 +382,46 @@ class CmarkNode {
   /// Removes this node from its parent and sibling list while leaving its
   /// children attached. Equivalent to `cmark_node_unlink`.
   void unlink() {
-    if (previous != null) previous!.next = next;
-    if (next != null) next!.previous = previous;
-    if (parent != null) {
-      if (parent!.firstChild == this) parent!.firstChild = next;
-      if (parent!.lastChild == this) parent!.lastChild = previous;
+    final parent = this.parent;
+
+    if (previous != null) {
+      previous!.next = next;
     }
+    if (next != null) {
+      next!.previous = previous;
+    }
+
+    if (parent != null) {
+      if (parent.firstChild == this) {
+        parent.firstChild = next;
+      }
+      if (parent.lastChild == this) {
+        parent.lastChild = previous;
+      }
+    }
+
     previous = null;
     next = null;
-    parent = null;
+    this.parent = null;
   }
 
-  /// Inserts [newNode] as a sibling immediately after [reference].
+  /// Appends [child] as the final child of this node.
   void insertAfter(CmarkNode reference, CmarkNode newNode) {
     newNode.parent = this;
     newNode.previous = reference;
     newNode.next = reference.next;
+
     if (reference.next != null) {
       reference.next!.previous = newNode;
     } else {
       lastChild = newNode;
     }
+    
     reference.next = newNode;
   }
-
-  /// Appends [child] as the last child of this node.
+  
   void appendChild(CmarkNode child) {
     _insertChild(child, append: true);
-  }
-
-  /// Fast append for freshly-created nodes not in any tree.
-  /// Skips unlink() and the append/prepend branch.
-  @pragma('vm:prefer-inline')
-  void appendNewChild(CmarkNode child) {
-    child.parent = this;
-    if (lastChild == null) {
-      firstChild = child;
-      lastChild = child;
-    } else {
-      child.previous = lastChild;
-      lastChild!.next = child;
-      lastChild = child;
-    }
   }
 
   /// Prepends [child] as the first child of this node.
@@ -458,8 +430,15 @@ class CmarkNode {
   }
 
   void _insertChild(CmarkNode child, {required bool append}) {
+    if (!canContain(child.type)) {
+      throw ArgumentError(
+        'Cannot insert child of type ${child.type} into parent of type $type',
+      );
+    }
+
     child.unlink();
     child.parent = this;
+
     if (firstChild == null) {
       firstChild = child;
       lastChild = child;
@@ -467,6 +446,7 @@ class CmarkNode {
       child.next = null;
       return;
     }
+
     if (append) {
       child.previous = lastChild;
       child.next = null;
@@ -480,7 +460,6 @@ class CmarkNode {
     }
   }
 
-  /// Iterates over the direct children of this node.
   Iterable<CmarkNode> get children sync* {
     var node = firstChild;
     while (node != null) {
@@ -489,80 +468,118 @@ class CmarkNode {
     }
   }
 
+  CmarkListData get listData {
+    _assertData(_listData, 'list');
+    return _listData!;
+  }
+
+  CmarkCodeData get codeData {
+    _assertData(_codeData, 'code');
+    return _codeData!;
+  }
+
+  CmarkHeadingData get headingData {
+    _assertData(_headingData, 'heading');
+    return _headingData!;
+  }
+
+  CmarkLinkData get linkData {
+    _assertData(_linkData, 'link');
+    return _linkData!;
+  }
+
+  CmarkCustomData get customData {
+    _assertData(_customData, 'custom');
+    return _customData!;
+  }
+
+  CmarkMathData get mathData {
+    _assertData(_mathData, 'math');
+    return _mathData!;
+  }
+
+  CmarkTableRowData get tableRowData {
+    _assertData(_tableRowData, 'table row');
+    return _tableRowData!;
+  }
+
+  CmarkTableCellData get tableCellData {
+    _assertData(_tableCellData, 'table cell');
+    return _tableCellData!;
+  }
+
+  void _assertData(Object? data, String kind) {
+    if (data == null) {
+      throw StateError('Node of type $type does not carry $kind data.');
+    }
+  }
+
+  /// Initialize heading data when converting from another type.
+  void initializeHeadingData() {
+    if (_headingData == null) {
+      _headingData = CmarkHeadingData();
+    }
+  }
+
+  /// Initialize table row data.
+  void initializeTableRowData() {
+    if (_tableRowData == null) {
+      _tableRowData = CmarkTableRowData();
+    }
+  }
+  
+  /// Initialize table cell data when converting or creating cell.
+  void initializeTableCellData() {
+    if (_tableCellData == null) {
+      _tableCellData = CmarkTableCellData();
+    }
+  }
+
   CmarkNode deepCopy() {
-    final copy = CmarkNode(type);
-    // Copy content.
-    final s = contentString;
-    if (s.isNotEmpty) copy.setLiteral(s);
-    // Copy position / metadata.
-    copy.startLine = startLine;
-    copy.startColumn = startColumn;
-    copy.endLine = endLine;
-    copy.endColumn = endColumn;
-    copy.internalOffset = internalOffset;
-    copy.htmlBlockType = htmlBlockType;
-    copy.htmlBlockEndTag = htmlBlockEndTag;
-    copy.flags = flags;
-    copy.footnoteReferenceIndex = footnoteReferenceIndex;
-    copy.footnoteDefCount = footnoteDefCount;
-    copy.footnoteRefIndex = footnoteRefIndex;
-    copy.footnoteDefLabel = footnoteDefLabel;
-    copy.firstContentByte = firstContentByte;
-    copy.userData = userData;
-    // Copy data structs (only if allocated).
+    final copy = CmarkNode(type)
+      ..content.write(content.toString())
+      ..startLine = startLine
+      ..startColumn = startColumn
+      ..endLine = endLine
+      ..endColumn = endColumn
+      ..internalOffset = internalOffset
+      ..htmlBlockType = htmlBlockType
+      ..htmlBlockEndTag = htmlBlockEndTag
+      ..flags = flags
+      ..footnoteReferenceIndex = footnoteReferenceIndex
+      ..footnoteDefCount = footnoteDefCount
+      ..footnoteRefIndex = footnoteRefIndex
+      ..footnoteDefLabel = footnoteDefLabel;
+
     if (_listData != null) {
-      copy.listData
-        ..listType = _listData!.listType
-        ..markerOffset = _listData!.markerOffset
-        ..padding = _listData!.padding
-        ..start = _listData!.start
-        ..delimiter = _listData!.delimiter
-        ..bulletChar = _listData!.bulletChar
-        ..tight = _listData!.tight;
+      copy._listData = _listData!.copy();
     }
     if (_codeData != null) {
-      copy.codeData
-        ..info = _codeData!.info
-        ..literal = _codeData!.literal
-        ..fenceLength = _codeData!.fenceLength
-        ..fenceOffset = _codeData!.fenceOffset
-        ..fenceChar = _codeData!.fenceChar
-        ..isFenced = _codeData!.isFenced;
+      copy._codeData = _codeData!.copy();
     }
     if (_headingData != null) {
-      copy.headingData
-        ..level = _headingData!.level
-        ..setext = _headingData!.setext;
+      copy._headingData = _headingData!.copy();
     }
     if (_linkData != null) {
-      copy.linkData
-        ..url = _linkData!.url
-        ..title = _linkData!.title;
+      copy._linkData = _linkData!.copy();
     }
     if (_customData != null) {
-      copy.customData
-        ..onEnter = _customData!.onEnter
-        ..onExit = _customData!.onExit;
-    }
-    if (_mathData != null) {
-      copy.mathData
-        ..literal = _mathData!.literal
-        ..display = _mathData!.display
-        ..openingDelimiter = _mathData!.openingDelimiter
-        ..closingDelimiter = _mathData!.closingDelimiter;
+      copy._customData = _customData!.copy();
     }
     if (_tableRowData != null) {
-      copy.tableRowData.isHeader = _tableRowData!.isHeader;
+      copy._tableRowData = _tableRowData!.copy();
     }
     if (_tableCellData != null) {
-      copy.tableCellData.align = _tableCellData!.align;
+      copy._tableCellData = _tableCellData!.copy();
     }
-    // Recursively copy children.
-    var child = firstChild;
-    while (child != null) {
+    if (_mathData != null) {
+      copy._mathData = _mathData!.copy();
+    }
+
+    for (final child in children) {
       copy.appendChild(child.deepCopy());
-      child = child.next;
     }
+
     return copy;
   }
 }

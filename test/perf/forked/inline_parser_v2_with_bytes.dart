@@ -1,30 +1,30 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import '../node.dart';
-import '../reference/reference_map.dart';
-import '../footnote/footnote_map.dart';
-import '../parser/parser_options.dart';
-import '../util/strbuf.dart';
-import '../util/utf8.dart';
-import '../houdini/html_unescape.dart' as houdini;
-import 'subject.dart';
-import 'delimiter.dart';
-import 'link_parsing.dart';
+import 'package:cmark_gfm/cmark_gfm.dart';
+import 'node2.dart';
+import 'footnote_map2.dart';
+import 'package:cmark_gfm/src/houdini/html_unescape.dart' as houdini;
+import 'delimiter2.dart';
+import 'package:cmark_gfm/src/inline/link_parsing.dart';
+import 'package:cmark_gfm/src/inline/subject.dart';
+import 'package:cmark_gfm/src/util/strbuf.dart';
+import 'package:cmark_gfm/src/util/utf8.dart';
+
 
 /// Optimized inline parser. Key changes vs V1:
 /// 1. Fused main loop — scans for special chars inline instead of per-call dispatch
 /// 2. Batched text accumulation — one utf8.decode per text run instead of per-fragment
 /// 3. Removed redundant c < 256 check in special char scanning
-class InlineParser {
-  InlineParser(
+class InlineParserV2 {
+  InlineParserV2(
     this.refmap, {
-    CmarkFootnoteMap? footnoteMap,
+    CmarkFootnoteMap2? footnoteMap,
     CmarkParserOptions parserOptions = const CmarkParserOptions(),
   })  : options = parserOptions,
         mathOptions = parserOptions.mathOptions,
-        footnoteMap = footnoteMap ?? CmarkFootnoteMap() {
-    _subject = Subject(refmap: refmap, footnoteMap: this.footnoteMap);
+        footnoteMap = footnoteMap ?? CmarkFootnoteMap2() {
+    _subject = Subject(refmap: refmap, footnoteMap: CmarkFootnoteMap());
     if (!_initialized) {
       Subject.initSpecialChars();
       _initialized = true;
@@ -39,12 +39,12 @@ class InlineParser {
   final CmarkReferenceMap refmap;
   final CmarkParserOptions options;
   final CmarkMathOptions mathOptions;
-  final CmarkFootnoteMap footnoteMap;
+  final CmarkFootnoteMap2 footnoteMap;
 
   late final Subject _subject;
 
-  Delimiter? _lastDelim;
-  Bracket? _lastBracket;
+  Delimiter2? _lastDelim;
+  Bracket2? _lastBracket;
   bool _noLinkOpeners = true;
 
   void reset() {
@@ -54,12 +54,12 @@ class InlineParser {
     _noLinkOpeners = true;
   }
 
-  void parseInlines(CmarkNode block) {
+  void parseInlines(CmarkNode2 block) {
     if (block.type.isInline) return;
     if (!_containsInlines(block.type)) return;
 
-    final contentStr = block.content.toString();
-    final content = utf8.encode(contentStr);
+    // Use byte path directly — skips StringBuffer.toString() + utf8.encode()
+    final content = block.contentAsBytes;
     if (content.isEmpty) return;
 
     // Trim trailing whitespace
@@ -116,7 +116,7 @@ class InlineParser {
         final text = allAscii
             ? String.fromCharCodes(input, textStart, textEnd)
             : utf8.decode(Uint8List.sublistView(input, textStart, textEnd));
-        final textNode = CmarkNode(CmarkNodeType.text)
+        final textNode = CmarkNode2(CmarkNodeType.text)
           ..setLiteral(text)
           ..startLine = subj.line
           ..endLine = subj.line
@@ -129,7 +129,7 @@ class InlineParser {
 
       // Handle the special char
       final c = input[subj.pos];
-      CmarkNode? newInl;
+      CmarkNode2? newInl;
 
       if (options.enableMath && (c == 0x24 || c == 0x5C)) {
         newInl = _tryParseMath(subj, c);
@@ -148,8 +148,8 @@ class InlineParser {
               // skipSpaces inline
               while (subj.pos < len && (input[subj.pos] == 0x20 || input[subj.pos] == 0x09)) subj.pos++;
               newInl = (nlpos > 1 && input[nlpos - 1] == 0x20 && input[nlpos - 2] == 0x20)
-                  ? CmarkNode(CmarkNodeType.linebreak)
-                  : CmarkNode(CmarkNodeType.softbreak);
+                  ? CmarkNode2(CmarkNodeType.linebreak)
+                  : CmarkNode2(CmarkNodeType.softbreak);
             }
             break;
           case 0x60: // `
@@ -214,7 +214,7 @@ class InlineParser {
 
   // ---- Everything below is identical to V1 except for the removed parseInline/findSpecialChar calls ----
 
-  CmarkNode? _tryParseMath(Subject subj, int leadingChar) {
+  CmarkNode2? _tryParseMath(Subject subj, int leadingChar) {
     if (leadingChar == 0x5C && mathOptions.allowBracketDelimiters) {
       final next = subj.peekCharN(1);
       if (next == 0x28 || next == 0x5B) {
@@ -235,7 +235,7 @@ class InlineParser {
     return null;
   }
 
-  CmarkNode? _parseBracketMath(Subject subj, {required bool display}) {
+  CmarkNode2? _parseBracketMath(Subject subj, {required bool display}) {
     final start = subj.pos;
     subj.advance();
     subj.advance();
@@ -262,7 +262,7 @@ class InlineParser {
     );
   }
 
-  CmarkNode? _parseDoubleDollarMath(Subject subj) {
+  CmarkNode2? _parseDoubleDollarMath(Subject subj) {
     final start = subj.pos;
     subj.advance();
     subj.advance();
@@ -287,7 +287,7 @@ class InlineParser {
     return null;
   }
 
-  CmarkNode? _parseSingleDollarMath(Subject subj) {
+  CmarkNode2? _parseSingleDollarMath(Subject subj) {
     final start = subj.pos;
     if (start > 0) {
       final before = subj.peekAt(start - 1);
@@ -361,13 +361,13 @@ class InlineParser {
     return null;
   }
 
-  CmarkNode _buildInlineMathNode({
+  CmarkNode2 _buildInlineMathNode({
     required Subject subj, required int start, required int end,
     required String literal, required bool display,
     required String opening, required String closing,
   }) {
     final raw = utf8.decode(Uint8List.sublistView(subj.input, start, end), allowMalformed: true);
-    final node = CmarkNode(CmarkNodeType.math)
+    final node = CmarkNode2(CmarkNodeType.math)
       ..content.write(raw)
       ..startLine = subj.line
       ..endLine = subj.line
@@ -383,8 +383,8 @@ class InlineParser {
 
   String _normalizeInlineMathLiteral(String literal) => literal.trim();
 
-  CmarkNode _makeStr(Subject subj, int startCol, int endCol, String text) {
-    final node = CmarkNode(CmarkNodeType.text)
+  CmarkNode2 _makeStr(Subject subj, int startCol, int endCol, String text) {
+    final node = CmarkNode2(CmarkNodeType.text)
       ..setLiteral(text)
       ..startLine = subj.line
       ..endLine = subj.line
@@ -393,7 +393,20 @@ class InlineParser {
     return node;
   }
 
-  CmarkNode _handleBackticks(Subject subj) {
+  CmarkNode2 _handleNewline(Subject subj) {
+    final nlpos = subj.pos;
+    if (subj.peekAt(subj.pos) == 0x0D) subj.advance();
+    if (subj.peekAt(subj.pos) == 0x0A) subj.advance();
+    subj.line++;
+    subj.columnOffset = -subj.pos;
+    subj.skipSpaces();
+    if (nlpos > 1 && subj.peekAt(nlpos - 1) == 0x20 && subj.peekAt(nlpos - 2) == 0x20) {
+      return CmarkNode2(CmarkNodeType.linebreak);
+    }
+    return CmarkNode2(CmarkNodeType.softbreak);
+  }
+
+  CmarkNode2 _handleBackticks(Subject subj) {
     final startpos = subj.pos;
     var numticks = 0;
     while (subj.peekChar() == 0x60) { subj.advance(); numticks++; }
@@ -411,7 +424,7 @@ class InlineParser {
           code = code.substring(1, code.length - 1);
         }
       }
-      return CmarkNode(CmarkNodeType.code)
+      return CmarkNode2(CmarkNodeType.code)
         ..content.write(code)
         ..startLine = subj.line ..endLine = subj.line
         ..startColumn = startpos + 1 ..endColumn = endpos - 1;
@@ -433,19 +446,19 @@ class InlineParser {
     return 0;
   }
 
-  CmarkNode _handleBackslash(Subject subj) {
+  CmarkNode2 _handleBackslash(Subject subj) {
     subj.advance();
     final nextchar = subj.peekChar();
     if (_isPunct(nextchar)) {
       subj.advance();
       return _makeStr(subj, subj.pos - 2, subj.pos - 1, String.fromCharCode(nextchar));
     } else if (!subj.isEof() && subj.skipLineEnd()) {
-      return CmarkNode(CmarkNodeType.linebreak);
+      return CmarkNode2(CmarkNodeType.linebreak);
     }
     return _makeStr(subj, subj.pos - 1, subj.pos - 1, '\\');
   }
 
-  CmarkNode _handleEntity(Subject subj) {
+  CmarkNode2 _handleEntity(Subject subj) {
     subj.advance();
     final buf = CmarkStrbuf();
     final consumed = houdini.HoudiniHtmlUnescape.unescapeEntity(buf, subj.input, subj.pos);
@@ -455,7 +468,7 @@ class InlineParser {
     return _makeStr(subj, (subj.pos - 1 - consumed), subj.pos - 1, output);
   }
 
-  CmarkNode _handlePointyBrace(Subject subj) {
+  CmarkNode2 _handlePointyBrace(Subject subj) {
     subj.advance();
     final tagStart = subj.pos - 1;
     final urlMatch = _scanAutolinkUri(subj.input, subj.pos);
@@ -479,7 +492,7 @@ class InlineParser {
       final end = tagStart + htmlLen;
       final raw = utf8.decode(Uint8List.sublistView(subj.input, tagStart, end), allowMalformed: true);
       subj.pos = end;
-      return CmarkNode(CmarkNodeType.htmlInline)
+      return CmarkNode2(CmarkNodeType.htmlInline)
         ..content.write(raw)
         ..startLine = subj.line ..endLine = subj.line
         ..startColumn = tagStart + 1 + subj.columnOffset + subj.blockOffset
@@ -495,6 +508,7 @@ class InlineParser {
 
   int _scanAutolinkUri(Uint8List data, int pos) {
     if (pos >= data.length) return 0;
+    // URI autolink must start with [A-Za-z]
     final first = data[pos];
     if (!((first >= 0x41 && first <= 0x5A) || (first >= 0x61 && first <= 0x7A))) return 0;
     final remaining = utf8.decode(Uint8List.sublistView(data, pos), allowMalformed: true);
@@ -503,14 +517,15 @@ class InlineParser {
 
   int _scanAutolinkEmail(Uint8List data, int pos) {
     if (pos >= data.length) return 0;
+    // Email must start with [a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]
     final first = data[pos];
     if (first < 0x21 || first > 0x7E) return 0;
     final remaining = utf8.decode(Uint8List.sublistView(data, pos), allowMalformed: true);
     return _autolinkEmailRe.firstMatch(remaining)?.group(0)?.length ?? 0;
   }
 
-  CmarkNode _makeAutolink(Subject subj, int startCol, int endCol, String url, bool isEmail) {
-    final link = CmarkNode(CmarkNodeType.link);
+  CmarkNode2 _makeAutolink(Subject subj, int startCol, int endCol, String url, bool isEmail) {
+    final link = CmarkNode2(CmarkNodeType.link);
     var cleanedUrl = url.trim();
     if (cleanedUrl.isNotEmpty) {
       if (isEmail) cleanedUrl = 'mailto:$cleanedUrl';
@@ -526,11 +541,11 @@ class InlineParser {
     final textBuf = CmarkStrbuf();
     houdini.HoudiniHtmlUnescape.unescape(textBuf, utf8.encode(url));
     final textContent = utf8.decode(textBuf.detach(), allowMalformed: true);
-    link.appendChild(CmarkNode(CmarkNodeType.text)..content.write(textContent));
+    link.appendChild(CmarkNode2(CmarkNodeType.text)..content.write(textContent));
     return link;
   }
 
-  CmarkNode _handleDelim(Subject subj, int c) {
+  CmarkNode2 _handleDelim(Subject subj, int c) {
     final canOpen = <bool>[false];
     final canClose = <bool>[false];
     final numDelims = _scanDelims(subj, c, canOpen, canClose);
@@ -585,7 +600,7 @@ class InlineParser {
       ob[i * 3 + 1] = stackBottom; // _
       ob[i * 3 + 2] = 0;            // ~
     }
-    Delimiter? candidate = _lastDelim;
+    Delimiter2? candidate = _lastDelim;
     var closer = candidate;
     while (candidate != null && candidate.position >= stackBottom) {
       closer = candidate;
@@ -623,7 +638,7 @@ class InlineParser {
     }
   }
 
-  Delimiter? _insertEmph(Subject subj, Delimiter opener, Delimiter closer) {
+  Delimiter2? _insertEmph(Subject subj, Delimiter2 opener, Delimiter2 closer) {
     final openerInl = opener.inlText;
     final closerInl = closer.inlText;
     var openerNumChars = opener.length;
@@ -648,19 +663,19 @@ class InlineParser {
     var delim = closer.previous;
     while (delim != null && delim != opener) { final tmp = delim.previous; _removeDelimiter(delim); delim = tmp; }
     final emphType = (opener.delimChar == 0x7E) ? CmarkNodeType.strikethrough : (useDelims == 1 ? CmarkNodeType.emph : CmarkNodeType.strong);
-    final emph = CmarkNode(emphType);
+    final emph = CmarkNode2(emphType);
     var tmp = openerInl.next;
     while (tmp != null && tmp != closerInl) { final tmpNext = tmp.next; tmp.unlink(); emph.appendChild(tmp); tmp = tmpNext; }
     openerInl.parent?.insertAfter(openerInl, emph);
     emph.startLine = openerInl.startLine; emph.endLine = closerInl.endLine;
     emph.startColumn = openerInl.startColumn; emph.endColumn = closerInl.endColumn;
     if (openerNumChars == 0) { openerInl.unlink(); _removeDelimiter(opener); }
-    Delimiter? result;
+    Delimiter2? result;
     if (closerNumChars == 0) { closerInl.unlink(); result = closer.next; _removeDelimiter(closer); } else { result = closer; }
     return result;
   }
 
-  CmarkNode? _handleCloseBracket(Subject subj, CmarkNode parent) {
+  CmarkNode2? _handleCloseBracket(Subject subj, CmarkNode2 parent) {
     subj.advance();
     final initialPos = subj.pos;
     final opener = _lastBracket;
@@ -707,7 +722,7 @@ class InlineParser {
       final literal = nextNode.content.toString();
       if (literal.isNotEmpty && literal.startsWith('^') && (literal.length > 1 || nextNode.next != null)) {
         subj.pos = initialPos;
-        final fnref = CmarkNode(CmarkNodeType.footnoteReference);
+        final fnref = CmarkNode2(CmarkNodeType.footnoteReference);
         final fnrefEndColumn = subj.pos + subj.columnOffset + subj.blockOffset;
         final fnrefStartColumn = opener.inlText.startColumn;
         if (refLabel.length > 1) { fnref.content.write(refLabel.substring(1)); }
@@ -716,7 +731,7 @@ class InlineParser {
         fnref.startColumn = fnrefStartColumn; fnref.endColumn = fnrefEndColumn;
         opener.inlText.parent?.insertAfter(opener.inlText.previous ?? opener.inlText, fnref);
         _processEmphasis(subj, opener.position);
-        CmarkNode? current = opener.inlText.next;
+        CmarkNode2? current = opener.inlText.next;
         while (current != null) { final next = current.next; current.unlink(); current = next; }
         opener.inlText.unlink(); _popBracket();
         return null;
@@ -726,8 +741,8 @@ class InlineParser {
     return _makeStr(subj, subj.pos - 1, subj.pos - 1, ']');
   }
 
-  CmarkNode? _createLink(Subject subj, Bracket opener, bool isImage, String url, String title, int afterLinkTextPos) {
-    final link = CmarkNode(isImage ? CmarkNodeType.image : CmarkNodeType.link);
+  CmarkNode2? _createLink(Subject subj, Bracket2 opener, bool isImage, String url, String title, int afterLinkTextPos) {
+    final link = CmarkNode2(isImage ? CmarkNodeType.image : CmarkNodeType.link);
     link.linkData..url = url..title = title;
     link.startLine = link.endLine = subj.line;
     link.startColumn = opener.inlText.startColumn;
@@ -736,7 +751,7 @@ class InlineParser {
     if (openerParent == null) return null;
     if (opener.inlText.previous != null) { openerParent.insertAfter(opener.inlText.previous!, link); }
     else { openerParent.prependChild(link); }
-    CmarkNode? tmp = opener.inlText.next;
+    CmarkNode2? tmp = opener.inlText.next;
     while (tmp != null) { final tmpNext = tmp.next; tmp.unlink(); link.appendChild(tmp); tmp = tmpNext; }
     opener.inlText.unlink();
     _processEmphasis(subj, opener.position); _popBracket();
@@ -744,19 +759,19 @@ class InlineParser {
     return null;
   }
 
-  void _pushDelimiter(Subject subj, int c, bool canOpen, bool canClose, CmarkNode inlText) {
-    final delim = Delimiter(delimChar: c, canOpen: canOpen, canClose: canClose, inlText: inlText, position: subj.pos, length: inlText.content.length, previous: _lastDelim);
+  void _pushDelimiter(Subject subj, int c, bool canOpen, bool canClose, CmarkNode2 inlText) {
+    final delim = Delimiter2(delimChar: c, canOpen: canOpen, canClose: canClose, inlText: inlText, position: subj.pos, length: inlText.content.length, previous: _lastDelim);
     if (delim.previous != null) delim.previous!.next = delim;
     _lastDelim = delim;
   }
 
-  void _removeDelimiter(Delimiter delim) {
+  void _removeDelimiter(Delimiter2 delim) {
     if (delim.next == null) { _lastDelim = delim.previous; } else { delim.next!.previous = delim.previous; }
     if (delim.previous != null) delim.previous!.next = delim.next;
   }
 
-  void _pushBracket(Subject subj, bool image, CmarkNode inlText) {
-    final b = Bracket(image: image, inlText: inlText, position: subj.pos, previous: _lastBracket);
+  void _pushBracket(Subject subj, bool image, CmarkNode2 inlText) {
+    final b = Bracket2(image: image, inlText: inlText, position: subj.pos, previous: _lastBracket);
     if (_lastBracket != null) { _lastBracket!.bracketAfter = true; b.inBracketImage0 = _lastBracket!.inBracketImage0; b.inBracketImage1 = _lastBracket!.inBracketImage1; }
     if (image) { b.inBracketImage1 = true; } else { b.inBracketImage0 = true; }
     _lastBracket = b;

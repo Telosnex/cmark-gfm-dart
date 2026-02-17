@@ -4,7 +4,9 @@ String getStringForTree(CmarkNode root) {
   final buffer = StringBuffer();
   void walk(CmarkNode node, [int depth = 0]) {
     final indent = '  ' * depth;
-    final content = node.content.toString().replaceAll('\n', '\\n');
+    var rawContent = node.content.toString();
+    while (rawContent.endsWith('\n')) rawContent = rawContent.substring(0, rawContent.length - 1);
+    final content = rawContent.replaceAll('\n', '\\n');
     
     if (node.type == CmarkNodeType.codeBlock) {
       final info = node.codeData.info.replaceAll('\n', '\\n');

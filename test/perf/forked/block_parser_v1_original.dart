@@ -11,7 +11,6 @@ import '../houdini/html_unescape.dart' as houdini;
 import '../util/strbuf.dart';
 import 'parser_options.dart';
 
-
 const int kCodeIndent = 4;
 const int kTabStop = 4;
 
@@ -300,7 +299,7 @@ class BlockParser {
     // Finalize all nodes in the tree (both for finish and finishClone)
     _finalizeTreeRecursive(rootToFinalize);
 
-    // Process inlines
+    // Process inlines with V2 parser
     _inlineParser ??= InlineParser(
       referenceMap,
       parserOptions: options,
@@ -1128,30 +1127,19 @@ class BlockParser {
     }
   }
 
-  @pragma('vm:prefer-inline')
   void _addLine(CmarkNode node) {
-    final content = node.content;
     if (partiallyConsumedTab) {
       offset++;
-      if (node.firstContentByte == 0) node.firstContentByte = 0x20;
       final charsToTab = kTabStop - (column % kTabStop);
       for (var i = 0; i < charsToTab; i++) {
-        content.writeCharCode(0x20);
+        node.content.writeCharCode(0x20);
       }
     }
-    final line = _currentLine;
-    if (offset == 0) {
-      if (node.firstContentByte == 0 && line.isNotEmpty) {
-        node.firstContentByte = line.codeUnitAt(0);
-      }
-      content.write(line);
-    } else if (offset < line.length) {
-      if (node.firstContentByte == 0) {
-        node.firstContentByte = line.codeUnitAt(offset);
-      }
-      content.write(line.substring(offset));
+    if (offset < _currentLine.length) {
+      node.content.write(_currentLine.substring(offset));
     }
-    content.writeCharCode(0x0A);
+    // Add newline separator (like cmark's add_line does)
+    node.content.writeCharCode(0x0A);
   }
 
   bool _htmlBlockShouldClose(CmarkNode node) {
@@ -1392,27 +1380,17 @@ class BlockParser {
 
   /// Port of resolve_reference_link_definitions from blocks.c
   bool _resolveReferenceLinkDefinitions(CmarkNode para) {
-    // Fast path: if first byte isn't '[', not a reference definition.
-    // Trailing \n from _addLine is trimmed by inline parser.
-    if (para.firstContentByte != 0 && para.firstContentByte != 0x5B) {
-      return true;
-    }
-
-    var content = para.contentString;
+    var content = para.content.toString();
 
     // Strip trailing newline first (like C does before parsing refs)
-    var strippedNewline = false;
     if (content.endsWith('\n')) {
       content = content.substring(0, content.length - 1);
-      strippedNewline = true;
     }
 
     if (content.isEmpty || content.codeUnitAt(0) != 0x5B) {
-      if (strippedNewline) {
-        para.content
-          ..clear()
-          ..write(content);
-      }
+      para.content
+        ..clear()
+        ..write(content);
       return content.trim().isNotEmpty;
     }
 

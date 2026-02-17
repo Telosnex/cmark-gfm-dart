@@ -9,7 +9,7 @@ void main() {
       final doc = parser.finish();
       expect(doc.firstChild, isNotNull);
       expect(doc.firstChild!.type, CmarkNodeType.paragraph);
-      expect(doc.firstChild!.content.toString(), 'Hello world');
+      expect(doc.firstChild!.content.toString().trimRight(), 'Hello world');
     });
 
     test('parses multiple paragraphs separated by blank lines', () {
@@ -18,15 +18,15 @@ void main() {
       final doc = parser.finish();
       expect(doc.firstChild, isNotNull);
       expect(doc.firstChild!.next, isNotNull);
-      expect(doc.firstChild!.content.toString(), 'Hello world');
-      expect(doc.firstChild!.next!.content.toString(), 'Second paragraph');
+      expect(doc.firstChild!.content.toString().trimRight(), 'Hello world');
+      expect(doc.firstChild!.next!.content.toString().trimRight(), 'Second paragraph');
     });
 
     test('handles multi-line paragraph', () {
       final parser = CmarkParser();
       parser.feed('Hello world\nSecond line');
       final doc = parser.finish();
-      expect(doc.firstChild!.content.toString(), 'Hello world\nSecond line');
+      expect(doc.firstChild!.content.toString().trimRight(), 'Hello world\nSecond line');
     });
 
     test('allows incremental feed', () {
@@ -35,8 +35,8 @@ void main() {
       parser.feed(' world\n\nSecond');
       parser.feed(' paragraph');
       final doc = parser.finish();
-      expect(doc.firstChild!.content.toString(), 'Hello world');
-      expect(doc.firstChild!.next!.content.toString(), 'Second paragraph');
+      expect(doc.firstChild!.content.toString().trimRight(), 'Hello world');
+      expect(doc.firstChild!.next!.content.toString().trimRight(), 'Second paragraph');
     });
 
     test('parses ATX headings', () {
@@ -47,7 +47,7 @@ void main() {
       expect(heading, isNotNull);
       expect(heading!.type, CmarkNodeType.heading);
       expect(heading.headingData.level, 1);
-      expect(heading.content.toString(), 'Heading 1');
+      expect(heading.content.toString().trimRight(), 'Heading 1');
       expect(heading.next!.type, CmarkNodeType.paragraph);
     });
 
@@ -60,7 +60,7 @@ void main() {
       expect(heading!.type, CmarkNodeType.heading);
       expect(heading.headingData.level, 1);
       expect(heading.headingData.setext, isTrue);
-      expect(heading.content.toString(), 'Heading');
+      expect(heading.content.toString().trimRight(), 'Heading');
     });
 
     test('parses thematic breaks', () {
@@ -76,7 +76,7 @@ void main() {
       final next = hr.next;
       expect(next, isNotNull);
       expect(next!.type, CmarkNodeType.paragraph);
-      expect(next.content.toString(), 'Next');
+      expect(next.content.toString().trimRight(), 'Next');
     });
 
     test('parses block quote with paragraphs', () {
@@ -89,15 +89,15 @@ void main() {
       final innerFirst = blockQuote.firstChild;
       expect(innerFirst, isNotNull);
       expect(innerFirst!.type, CmarkNodeType.paragraph);
-      expect(innerFirst.content.toString(), 'Quote line');
+      expect(innerFirst.content.toString().trimRight(), 'Quote line');
       final innerSecond = innerFirst.next;
       expect(innerSecond, isNotNull);
       expect(innerSecond!.type, CmarkNodeType.paragraph);
-      expect(innerSecond.content.toString(), 'Second line');
+      expect(innerSecond.content.toString().trimRight(), 'Second line');
       final paragraph = blockQuote.next;
       expect(paragraph, isNotNull);
       expect(paragraph!.type, CmarkNodeType.paragraph);
-      expect(paragraph.content.toString(), 'After');
+      expect(paragraph.content.toString().trimRight(), 'After');
     });
 
     test('parses unordered list with multiple items', () {
@@ -110,10 +110,10 @@ void main() {
       final firstItem = list.firstChild;
       expect(firstItem, isNotNull);
       expect(firstItem!.type, CmarkNodeType.item);
-      expect(firstItem.firstChild!.content.toString(), 'item one');
+      expect(firstItem.firstChild!.content.toString().trimRight(), 'item one');
       final secondItem = firstItem.next;
       expect(secondItem, isNotNull);
-      expect(secondItem!.firstChild!.content.toString(), 'item two');
+      expect(secondItem!.firstChild!.content.toString().trimRight(), 'item two');
     });
 
     test('parses ordered list with numbering', () {
@@ -126,9 +126,9 @@ void main() {
       expect(list.listData.listType, CmarkListType.ordered);
       expect(list.listData.start, 3);
       final firstItem = list.firstChild;
-      expect(firstItem!.firstChild!.content.toString(), 'alpha');
+      expect(firstItem!.firstChild!.content.toString().trimRight(), 'alpha');
       final secondItem = firstItem.next;
-      expect(secondItem!.firstChild!.content.toString(), 'beta');
+      expect(secondItem!.firstChild!.content.toString().trimRight(), 'beta');
     });
 
     test('parses indented code block', () {

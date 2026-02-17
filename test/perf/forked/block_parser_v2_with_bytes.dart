@@ -1,15 +1,15 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import '../node.dart';
-import '../reference/reference_map.dart';
-import '../reference/reference_parser.dart';
-import '../inline/inline_parser.dart';
-import '../inline/autolink_postprocess.dart';
-import '../util/node_iterator.dart';
-import '../footnote/footnote_map.dart';
-import '../houdini/html_unescape.dart' as houdini;
-import '../util/strbuf.dart';
-import 'parser_options.dart';
+import 'package:cmark_gfm/cmark_gfm.dart';
+import 'node2.dart';
+import 'iter2.dart';
+import 'footnote_map2.dart';
+import 'inline_parser_v2.dart';
+import 'autolink_postprocess_v2.dart';
+import 'package:cmark_gfm/src/houdini/html_unescape.dart' as houdini;
+import 'package:cmark_gfm/src/reference/reference_parser.dart';
+import 'package:cmark_gfm/src/util/node_iterator.dart' show CmarkEventType;
+import 'package:cmark_gfm/src/util/strbuf.dart';
 
 
 const int kCodeIndent = 4;
@@ -82,25 +82,30 @@ const Set<String> _htmlBlockType6Tags = {
 const Set<String> _htmlBlockType7ForbiddenTags = {'script', 'style', 'pre'};
 
 /// Real port of cmark-gfm's block parser with proper container stack.
-class BlockParser {
-  BlockParser({required CmarkParserOptions parserOptions})
+class BlockParserV2 {
+  BlockParserV2({required CmarkParserOptions parserOptions})
       : options = parserOptions,
         referenceMap =
             CmarkReferenceMap(maxRefSize: parserOptions.maxReferenceSize),
-        footnoteMap = CmarkFootnoteMap();
+        footnoteMap = CmarkFootnoteMap2();
 
   final CmarkParserOptions options;
   CmarkMathOptions get mathOptions => options.mathOptions;
 
   final CmarkReferenceMap referenceMap;
-  final CmarkFootnoteMap footnoteMap;
+  final CmarkFootnoteMap2 footnoteMap;
 
-  final CmarkNode root = CmarkNode(CmarkNodeType.document);
-  late CmarkNode current;
+  final CmarkNode2 root = CmarkNode2(CmarkNodeType.document);
+  late CmarkNode2 current;
   bool _initialized = false;
-  InlineParser? _inlineParser;
+  InlineParserV2? _inlineParser;
   bool _sawFootnoteDefinition = false;
   bool _sawFootnoteReference = false;
+
+  // Byte-path: encode feed input once, reference byte ranges in _addLine
+  Uint8List? _feedBytes;
+  bool _feedBytesAscii = false;
+  int _currentLineByteStart = -1;
 
   // Parser state per line
   int offset = 0;
@@ -155,6 +160,10 @@ class BlockParser {
       _pending += text;
     }
 
+    // Encode pending to bytes once — _addLine references byte ranges
+    _feedBytes = utf8.encode(_pending);
+    _feedBytesAscii = _feedBytes!.length == _pending.length;
+
     // Process complete lines
     while (true) {
       final newlineIndex = _findNewlineFrom(_pendingStart);
@@ -172,10 +181,15 @@ class BlockParser {
           newlineLen = 2;
         }
       }
+      _currentLineByteStart = _feedBytesAscii ? _pendingStart : -1;
       _pendingStart = newlineIndex + newlineLen;
 
       _processLine(line);
     }
+
+    // Invalidate byte tracking — _pending may be mutated below
+    _currentLineByteStart = -1;
+    _feedBytes = null;
 
     if (_pendingStart > 0) {
       if (_pendingStart >= _pending.length) {
@@ -189,7 +203,7 @@ class BlockParser {
 
   /// Finish and return the document tree.
   /// After calling this, the parser cannot accept more input.
-  CmarkNode finish() {
+  CmarkNode2 finish() {
     _initialize();
     return _finishInternal(root);
   }
@@ -197,7 +211,7 @@ class BlockParser {
   /// Create a finalized clone of the current tree for rendering,
   /// but keep the parser alive to accept more feed() calls.
   /// Use this for streaming/incremental rendering.
-  CmarkNode finishClone() {
+  CmarkNode2 finishClone() {
     _initialize();
 
     // Save complete parser state
@@ -283,7 +297,7 @@ class BlockParser {
     return finalizedClone;
   }
 
-  CmarkNode _finishInternal(CmarkNode rootToFinalize) {
+  CmarkNode2 _finishInternal(CmarkNode2 rootToFinalize) {
     final isClone = rootToFinalize != root;
 
     if (!isClone) {
@@ -300,8 +314,8 @@ class BlockParser {
     // Finalize all nodes in the tree (both for finish and finishClone)
     _finalizeTreeRecursive(rootToFinalize);
 
-    // Process inlines
-    _inlineParser ??= InlineParser(
+    // Process inlines with V2 parser
+    _inlineParser ??= InlineParserV2(
       referenceMap,
       parserOptions: options,
       footnoteMap: footnoteMap,
@@ -310,7 +324,7 @@ class BlockParser {
     _sawFootnoteReference = false;
     _processInlines(rootToFinalize, _inlineParser!);
     if (options.enableAutolinkExtension) {
-      applyAutolinks(rootToFinalize);
+      applyAutolinks2(rootToFinalize);
     }
 
     // Link footnote references to definitions and set indices
@@ -325,7 +339,7 @@ class BlockParser {
     return rootToFinalize;
   }
 
-  void _finalizeTreeRecursive(CmarkNode node) {
+  void _finalizeTreeRecursive(CmarkNode2 node) {
     // Clear OPEN flag
     node.flags &= ~1;
 
@@ -397,9 +411,9 @@ class BlockParser {
     }
   }
 
-  void _linkFootnotes(CmarkNode root) {
+  void _linkFootnotes(CmarkNode2 root) {
     // First pass: collect all footnote definitions
-    final iter1 = CmarkIter(root);
+    final iter1 = CmarkIter2(root);
     var evType = iter1.next();
     while (evType != CmarkEventType.done) {
       final node = iter1.node;
@@ -412,7 +426,7 @@ class BlockParser {
 
     // Second pass: link references to definitions and assign indices
     var ix = 0;
-    final iter2 = CmarkIter(root);
+    final iter2 = CmarkIter2(root);
     evType = iter2.next();
     while (evType != CmarkEventType.done) {
       final node = iter2.node;
@@ -522,11 +536,11 @@ class BlockParser {
     return _CheckOpenBlocksResult(resultContainer, allMatched);
   }
 
-  bool _isOpen(CmarkNode? node) {
+  bool _isOpen(CmarkNode2? node) {
     return node != null && (node.flags & 1) != 0; // OPEN flag
   }
 
-  bool _checkContinuation(CmarkNode container) {
+  bool _checkContinuation(CmarkNode2 container) {
     switch (container.type) {
       case CmarkNodeType.blockQuote:
         return _parseBlockQuotePrefix();
@@ -574,7 +588,7 @@ class BlockParser {
     return true;
   }
 
-  bool _parseNodeItemPrefix(CmarkNode container) {
+  bool _parseNodeItemPrefix(CmarkNode2 container) {
     final itemData = container.listData;
     final neededIndent = itemData.markerOffset + itemData.padding;
 
@@ -589,7 +603,7 @@ class BlockParser {
     return false;
   }
 
-  bool _parseCodeBlockPrefix(CmarkNode container) {
+  bool _parseCodeBlockPrefix(CmarkNode2 container) {
     if (!container.codeData.isFenced) {
       // Indented code
       if (indent >= kCodeIndent) {
@@ -634,7 +648,7 @@ class BlockParser {
     return false;
   }
 
-  bool _parseMathBlockContinuation(CmarkNode container) {
+  bool _parseMathBlockContinuation(CmarkNode2 container) {
     // Check if this line closes the math block
     final closing = container.mathData.closingDelimiter;
     final line = _currentLine;
@@ -665,7 +679,7 @@ class BlockParser {
     return true;
   }
 
-  bool _parseHtmlBlockPrefix(CmarkNode container) {
+  bool _parseHtmlBlockPrefix(CmarkNode2 container) {
     final type = container.htmlBlockType;
     if (type >= 1 && type <= 5) {
       return true;
@@ -700,7 +714,7 @@ class BlockParser {
     return 0;
   }
 
-  CmarkNode _openNewBlocks(CmarkNode container, bool allMatched) {
+  CmarkNode2 _openNewBlocks(CmarkNode2 container, bool allMatched) {
     var iterations = 0;
     final maybeLazy = current.type == CmarkNodeType.paragraph;
 
@@ -779,7 +793,6 @@ class BlockParser {
             // Convert paragraph to heading
             container.type = CmarkNodeType.heading;
             // Initialize heading data since it wasn't created as a heading
-            container.initializeHeadingData();
             container.headingData
               ..level = setextLevel
               ..setext = true;
@@ -829,7 +842,7 @@ class BlockParser {
           if (headerCells.length == alignments.length &&
               headerCells.isNotEmpty) {
             if (leadingText != null && leadingText.isNotEmpty) {
-              final paragraphNode = CmarkNode(CmarkNodeType.paragraph)
+              final paragraphNode = CmarkNode2(CmarkNodeType.paragraph)
                 ..flags |= 1
                 ..startLine = container.startLine
                 ..startColumn = container.startColumn
@@ -848,7 +861,6 @@ class BlockParser {
             headerRow.tableRowData.isHeader = true;
             for (var i = 0; i < headerCells.length; i++) {
               final cell = _addChild(headerRow, CmarkNodeType.tableCell);
-              cell.initializeTableCellData();
               cell.tableCellData.align = alignments[i];
               cell.content.write(headerCells[i]);
             }
@@ -901,7 +913,7 @@ class BlockParser {
             ..openingDelimiter = mathStart.opening
             ..closingDelimiter = mathStart.closing;
 
-          CmarkNode newContainer;
+          CmarkNode2 newContainer;
           if (mathStart.closed) {
             if (mathStart.content.isNotEmpty) {
               mathNode.content.write(mathStart.content);
@@ -1011,7 +1023,7 @@ class BlockParser {
     return container;
   }
 
-  void _insertNodeBefore(CmarkNode target, CmarkNode newNode) {
+  void _insertNodeBefore(CmarkNode2 target, CmarkNode2 newNode) {
     final parent = target.parent;
     if (parent == null) {
       return;
@@ -1031,7 +1043,7 @@ class BlockParser {
   }
 
   void _addTextToContainer(
-      CmarkNode container, CmarkNode lastMatchedContainer) {
+      CmarkNode2 container, CmarkNode2 lastMatchedContainer) {
     _findFirstNonspace();
 
     final trailingChild = container.lastChild;
@@ -1129,32 +1141,36 @@ class BlockParser {
   }
 
   @pragma('vm:prefer-inline')
-  void _addLine(CmarkNode node) {
-    final content = node.content;
+  void _addLine(CmarkNode2 node) {
     if (partiallyConsumedTab) {
       offset++;
       if (node.firstContentByte == 0) node.firstContentByte = 0x20;
       final charsToTab = kTabStop - (column % kTabStop);
       for (var i = 0; i < charsToTab; i++) {
-        content.writeCharCode(0x20);
+        node.writeContentByte(0x20);
       }
     }
     final line = _currentLine;
-    if (offset == 0) {
-      if (node.firstContentByte == 0 && line.isNotEmpty) {
-        node.firstContentByte = line.codeUnitAt(0);
-      }
-      content.write(line);
-    } else if (offset < line.length) {
+    final lineLen = line.length;
+    if (offset < lineLen) {
       if (node.firstContentByte == 0) {
         node.firstContentByte = line.codeUnitAt(offset);
       }
-      content.write(line.substring(offset));
+      if (_currentLineByteStart >= 0 && _feedBytes != null) {
+        // Fast path: zero-copy view into feed bytes
+        node.writeContentBytes(
+            _feedBytes!, _currentLineByteStart + offset, _currentLineByteStart + lineLen);
+      } else {
+        // Fallback: encode substring
+        final sub = offset == 0 ? line : line.substring(offset);
+        final bytes = utf8.encode(sub);
+        node.writeContentBytes(bytes, 0, bytes.length);
+      }
     }
-    content.writeCharCode(0x0A);
+    node.writeContentByte(0x0A);
   }
 
-  bool _htmlBlockShouldClose(CmarkNode node) {
+  bool _htmlBlockShouldClose(CmarkNode2 node) {
     final type = node.htmlBlockType;
     if (type == 0) {
       return false;
@@ -1181,7 +1197,7 @@ class BlockParser {
     }
   }
 
-  CmarkNode _finalizeMathBlockNode(CmarkNode node) {
+  CmarkNode2 _finalizeMathBlockNode(CmarkNode2 node) {
     var literal = node.content.toString();
     node.content.clear();
     literal = _normalizeMathLiteral(literal);
@@ -1240,13 +1256,13 @@ class BlockParser {
     }
   }
 
-  CmarkNode _addChild(CmarkNode parent, CmarkNodeType type) {
+  CmarkNode2 _addChild(CmarkNode2 parent, CmarkNodeType type) {
     // Find appropriate parent
     while (!parent.canContain(type)) {
       parent = _finalize(parent);
     }
 
-    final child = CmarkNode(type);
+    final child = CmarkNode2(type);
     child.flags |= 1; // OPEN
     child.startLine = lineNumber;
     child.startColumn = column + 1;
@@ -1263,7 +1279,7 @@ class BlockParser {
     return child;
   }
 
-  CmarkNode _finalize(CmarkNode node) {
+  CmarkNode2 _finalize(CmarkNode2 node) {
     node.flags &= ~1; // Clear OPEN flag
 
     final parent = node.parent;
@@ -1357,7 +1373,7 @@ class BlockParser {
     return parent;
   }
 
-  bool _calculateTightness(CmarkNode list) {
+  bool _calculateTightness(CmarkNode2 list) {
     var item = list.firstChild;
     while (item != null) {
       if ((item.flags & 2) != 0 && item.next != null) {
@@ -1376,7 +1392,7 @@ class BlockParser {
     return true;
   }
 
-  bool _endsWithBlank(CmarkNode node) {
+  bool _endsWithBlank(CmarkNode2 node) {
     if ((node.flags & 4) != 0) {
       // LAST_LINE_CHECKED
       return (node.flags & 2) != 0; // LAST_LINE_BLANK
@@ -1391,9 +1407,9 @@ class BlockParser {
   }
 
   /// Port of resolve_reference_link_definitions from blocks.c
-  bool _resolveReferenceLinkDefinitions(CmarkNode para) {
+  bool _resolveReferenceLinkDefinitions(CmarkNode2 para) {
     // Fast path: if first byte isn't '[', not a reference definition.
-    // Trailing \n from _addLine is trimmed by inline parser.
+    // The trailing \n from _addLine is handled by inline parser's trim.
     if (para.firstContentByte != 0 && para.firstContentByte != 0x5B) {
       return true;
     }
@@ -2154,7 +2170,7 @@ class BlockParser {
       c == 0x20 || c == 0x09 || c == 0x0A || c == 0x0D || c == 0x0C;
   bool _isDigit(int c) => c >= 0x30 && c <= 0x39;
 
-  void _processInlines(CmarkNode node, InlineParser inlineParser) {
+  void _processInlines(CmarkNode2 node, InlineParserV2 inlineParser) {
     inlineParser.parseInlines(node);
     var child = node.firstChild;
     while (child != null) {
@@ -2167,7 +2183,7 @@ class BlockParser {
     }
   }
 
-  void _appendFootnotes(CmarkNode root) {
+  void _appendFootnotes(CmarkNode2 root) {
     // Move footnote definitions to end of document (C's create_footnote_list)
     final entries = footnoteMap.entries.toList();
     for (final entry in entries) {
@@ -2179,7 +2195,7 @@ class BlockParser {
     }
   }
 
-  void _convertFootnoteReferenceToText(CmarkNode node, String label) {
+  void _convertFootnoteReferenceToText(CmarkNode2 node, String label) {
     node.type = CmarkNodeType.text;
     node.content
       ..clear()
@@ -2393,7 +2409,7 @@ class BlockParser {
     return false;
   }
 
-  void _addTableRow(CmarkNode table) {
+  void _addTableRow(CmarkNode2 table) {
     final alignments = _currentTableAlignments;
     if (alignments == null) {
       return;
@@ -2408,7 +2424,6 @@ class BlockParser {
     // Add cells from parsed row (up to nColumns)
     for (var i = 0; i < cells.length && i < nColumns; i++) {
       final cell = _addChild(row, CmarkNodeType.tableCell);
-      cell.initializeTableCellData();
       cell.tableCellData.align = alignments[i];
       cell.content.write(cells[i]);
     }
@@ -2416,7 +2431,6 @@ class BlockParser {
     // Auto-complete with empty cells if row is short
     for (var i = cells.length; i < nColumns; i++) {
       final cell = _addChild(row, CmarkNodeType.tableCell);
-      cell.initializeTableCellData();
       cell.tableCellData.align = alignments[i];
       // Leave content empty
     }
@@ -2430,7 +2444,7 @@ class BlockParser {
 
 class _CheckOpenBlocksResult {
   _CheckOpenBlocksResult(this.container, this.allMatched);
-  final CmarkNode? container;
+  final CmarkNode2? container;
   final bool allMatched;
 }
 

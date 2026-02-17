@@ -2,26 +2,29 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cmark_gfm/cmark_gfm.dart';
+import 'node2.dart';
+import 'footnote_map2.dart';
 import 'package:cmark_gfm/src/houdini/html_unescape.dart' as houdini;
-import 'package:cmark_gfm/src/inline/delimiter.dart';
+import 'delimiter2.dart';
 import 'package:cmark_gfm/src/inline/link_parsing.dart';
 import 'package:cmark_gfm/src/inline/subject.dart';
 import 'package:cmark_gfm/src/util/strbuf.dart';
 import 'package:cmark_gfm/src/util/utf8.dart';
 
 
-/// Real port of cmark-gfm's inline parser with delimiter stack.
-/// From inlines.c
+/// Optimized inline parser. Key changes vs V1:
+/// 1. Fused main loop — scans for special chars inline instead of per-call dispatch
+/// 2. Batched text accumulation — one utf8.decode per text run instead of per-fragment
+/// 3. Removed redundant c < 256 check in special char scanning
 class InlineParserV2 {
   InlineParserV2(
     this.refmap, {
-    CmarkFootnoteMap? footnoteMap,
+    CmarkFootnoteMap2? footnoteMap,
     CmarkParserOptions parserOptions = const CmarkParserOptions(),
   })  : options = parserOptions,
         mathOptions = parserOptions.mathOptions,
-        footnoteMap = footnoteMap ?? CmarkFootnoteMap() {
-    _subject = Subject(refmap: refmap, footnoteMap: this.footnoteMap);
-    // Initialize special chars table (only need to do once)
+        footnoteMap = footnoteMap ?? CmarkFootnoteMap2() {
+    _subject = Subject(refmap: refmap, footnoteMap: CmarkFootnoteMap());
     if (!_initialized) {
       Subject.initSpecialChars();
       _initialized = true;
@@ -36,30 +39,28 @@ class InlineParserV2 {
   final CmarkReferenceMap refmap;
   final CmarkParserOptions options;
   final CmarkMathOptions mathOptions;
-  final CmarkFootnoteMap footnoteMap;
+  final CmarkFootnoteMap2 footnoteMap;
 
   late final Subject _subject;
 
+  Delimiter2? _lastDelim;
+  Bracket2? _lastBracket;
+  bool _noLinkOpeners = true;
+
   void reset() {
     _subject.reset();
+    _lastDelim = null;
+    _lastBracket = null;
+    _noLinkOpeners = true;
   }
 
-  void parseInlines(CmarkNode block) {
-    if (block.type.isInline) {
-      return;
-    }
-
-    // Skip blocks that don't contain inlines (tables, footnote_definition, etc.)
-    if (!_containsInlines(block.type)) {
-      return;
-    }
+  void parseInlines(CmarkNode2 block) {
+    if (block.type.isInline) return;
+    if (!_containsInlines(block.type)) return;
 
     final contentStr = block.content.toString();
-
     final content = utf8.encode(contentStr);
-    if (content.isEmpty) {
-      return;
-    }
+    if (content.isEmpty) return;
 
     // Trim trailing whitespace
     var trimmedLen = content.length;
@@ -78,114 +79,142 @@ class InlineParserV2 {
       line: block.startLine,
       blockOffset: block.startColumn - 1,
     );
+    _lastDelim = null;
+    _lastBracket = null;
+    _noLinkOpeners = true;
 
-    var iterations = 0;
-    while (!subj.isEof()) {
-      iterations++;
-      if (iterations > 10000) {
-        throw StateError(
-            'Infinite loop in parseInlines: ${block.type.name} pos=${subj.pos} len=${subj.input.length}');
+    // ---- Fused main loop ----
+    // Instead of calling _parseInline() per iteration (function call + switch),
+    // scan for special chars inline and batch text runs.
+    final input = subj.input;
+    final len = input.length;
+    final specials = Subject.specialChars;
+
+    while (subj.pos < len) {
+      // Scan ahead for next special char (inlined findSpecialChar, no c<256 check)
+      final textStart = subj.pos;
+      var n = textStart;
+      var allAscii = true;
+      while (n < len && !specials[input[n]]) {
+        if (input[n] >= 0x80) allAscii = false;
+        n++;
       }
-      if (!_parseInline(subj, block)) {
-        break;
+
+      // Emit accumulated text as one node
+      if (n > textStart) {
+        subj.pos = n;
+        var textEnd = n;
+        // Trim trailing spaces before newline (like C version)
+        if (n < len) {
+          final next = input[n];
+          if (next == 0x0A || next == 0x0D) {
+            while (textEnd > textStart && input[textEnd - 1] == 0x20) {
+              textEnd--;
+            }
+          }
+        }
+        final text = allAscii
+            ? String.fromCharCodes(input, textStart, textEnd)
+            : utf8.decode(Uint8List.sublistView(input, textStart, textEnd));
+        final textNode = CmarkNode2(CmarkNodeType.text)
+          ..setLiteral(text)
+          ..startLine = subj.line
+          ..endLine = subj.line
+          ..startColumn = textStart + 1 + subj.columnOffset + subj.blockOffset
+          ..endColumn = n + subj.columnOffset + subj.blockOffset;
+        block.appendNewChild(textNode);
+      }
+
+      if (subj.pos >= len) break;
+
+      // Handle the special char
+      final c = input[subj.pos];
+      CmarkNode2? newInl;
+
+      if (options.enableMath && (c == 0x24 || c == 0x5C)) {
+        newInl = _tryParseMath(subj, c);
+      }
+
+      if (newInl == null) {
+        switch (c) {
+          case 0x0D: // \r
+          case 0x0A: // \n
+            {
+              final nlpos = subj.pos;
+              if (input[subj.pos] == 0x0D) subj.pos++;
+              if (subj.pos < len && input[subj.pos] == 0x0A) subj.pos++;
+              subj.line++;
+              subj.columnOffset = -subj.pos;
+              // skipSpaces inline
+              while (subj.pos < len && (input[subj.pos] == 0x20 || input[subj.pos] == 0x09)) subj.pos++;
+              newInl = (nlpos > 1 && input[nlpos - 1] == 0x20 && input[nlpos - 2] == 0x20)
+                  ? CmarkNode2(CmarkNodeType.linebreak)
+                  : CmarkNode2(CmarkNodeType.softbreak);
+            }
+            break;
+          case 0x60: // `
+            newInl = _handleBackticks(subj);
+            break;
+          case 0x5C: // backslash
+            newInl = _handleBackslash(subj);
+            break;
+          case 0x26: // &
+            newInl = _handleEntity(subj);
+            break;
+          case 0x3C: // <
+            newInl = _handlePointyBrace(subj);
+            break;
+          case 0x2A: // *
+          case 0x5F: // _
+          case 0x7E: // ~
+            newInl = _handleDelim(subj, c);
+            break;
+          case 0x5B: // [
+            subj.advance();
+            newInl = _makeStr(subj, subj.pos - 1, subj.pos - 1, '[');
+            _pushBracket(subj, false, newInl);
+            break;
+          case 0x5D: // ]
+            newInl = _handleCloseBracket(subj, block);
+            break;
+          case 0x21: // !
+            subj.advance();
+            if (subj.peekChar() == 0x5B && subj.peekCharN(1) != 0x5E) {
+              subj.advance();
+              newInl = _makeStr(subj, subj.pos - 2, subj.pos - 1, '![');
+              _pushBracket(subj, true, newInl);
+            } else {
+              newInl = _makeStr(subj, subj.pos - 1, subj.pos - 1, '!');
+            }
+            break;
+          default:
+            // Shouldn't reach here — specials table caught it but switch didn't.
+            // Just advance past it as text.
+            subj.advance();
+            newInl = _makeStr(subj, subj.pos - 1, subj.pos - 1,
+                String.fromCharCode(c));
+            break;
+        }
+      }
+
+      if (newInl != null) {
+        block.appendChild(newInl);
       }
     }
 
     _processEmphasis(subj, 0);
 
-    // Free delimiter and bracket stacks
-    while (subj.lastDelim != null) {
-      _removeDelimiter(subj, subj.lastDelim!);
+    while (_lastDelim != null) {
+      _removeDelimiter(_lastDelim!);
     }
-    while (subj.lastBracket != null) {
-      _popBracket(subj);
+    while (_lastBracket != null) {
+      _popBracket();
     }
   }
 
-  /// Main inline parsing dispatcher.
-  /// Returns true if an inline was parsed, false if EOF.
-  bool _parseInline(Subject subj, CmarkNode parent) {
-    final c = subj.peekChar();
-    if (c == 0) {
-      return false;
-    }
+  // ---- Everything below is identical to V1 except for the removed parseInline/findSpecialChar calls ----
 
-    CmarkNode? newInl;
-
-    if (options.enableMath && (c == 0x24 || c == 0x5C)) {
-      newInl = _tryParseMath(subj, c);
-    }
-
-    if (newInl == null) {
-      switch (c) {
-        case 0x0D: // \r
-        case 0x0A: // \n
-          newInl = _handleNewline(subj);
-          break;
-        case 0x60: // `
-          newInl = _handleBackticks(subj);
-          break;
-        case 0x5C: // \
-          newInl = _handleBackslash(subj);
-          break;
-        case 0x26: // &
-          newInl = _handleEntity(subj);
-          break;
-        case 0x3C: // <
-          newInl = _handlePointyBrace(subj);
-          break;
-        case 0x2A: // *
-        case 0x5F: // _
-          newInl = _handleDelim(subj, c);
-          break;
-        case 0x7E: // ~
-          newInl = _handleDelim(subj, c);
-          break;
-        case 0x5B: // [
-          subj.advance();
-          newInl = _makeStr(subj, subj.pos - 1, subj.pos - 1, '[');
-          _pushBracket(subj, false, newInl);
-          break;
-        case 0x5D: // ]
-          newInl = _handleCloseBracket(subj, parent);
-          break;
-        case 0x21: // !
-          subj.advance();
-          if (subj.peekChar() == 0x5B && subj.peekCharN(1) != 0x5E) {
-            subj.advance();
-            newInl = _makeStr(subj, subj.pos - 2, subj.pos - 1, '![');
-            _pushBracket(subj, true, newInl);
-          } else {
-            newInl = _makeStr(subj, subj.pos - 1, subj.pos - 1, '!');
-          }
-          break;
-        default:
-          // Try extension matchers (would go here if we had extensions)
-          // For now, collect text until next special char
-          final startpos = subj.pos;
-          final endpos = subj.findSpecialChar();
-          var text = utf8.decode(subj.input.sublist(startpos, endpos));
-          subj.pos = endpos;
-
-          // if we're at a newline, strip trailing spaces (like C version)
-          final nextChar = subj.peekChar();
-          if (nextChar == 0x0A || nextChar == 0x0D) {
-            text = text.trimRight();
-          }
-
-          newInl = _makeStr(subj, startpos, endpos - 1, text);
-          break;
-      }
-    }
-
-    if (newInl != null) {
-      parent.appendChild(newInl);
-    }
-
-    return true;
-  }
-
-  CmarkNode? _tryParseMath(Subject subj, int leadingChar) {
+  CmarkNode2? _tryParseMath(Subject subj, int leadingChar) {
     if (leadingChar == 0x5C && mathOptions.allowBracketDelimiters) {
       final next = subj.peekCharN(1);
       if (next == 0x28 || next == 0x5B) {
@@ -195,11 +224,9 @@ class InlineParserV2 {
     }
 
     if (leadingChar == 0x24) {
-      // Try double-dollar first (higher precedence)
       if (mathOptions.allowBlockDoubleDollar && subj.peekCharN(1) == 0x24) {
         return _parseDoubleDollarMath(subj);
       }
-      // Try single-dollar with strict "money guard" heuristics
       if (mathOptions.allowSingleDollar) {
         return _parseSingleDollarMath(subj);
       }
@@ -208,10 +235,10 @@ class InlineParserV2 {
     return null;
   }
 
-  CmarkNode? _parseBracketMath(Subject subj, {required bool display}) {
+  CmarkNode2? _parseBracketMath(Subject subj, {required bool display}) {
     final start = subj.pos;
-    subj.advance(); // Consume '\'
-    subj.advance(); // Consume '(' or '['
+    subj.advance();
+    subj.advance();
 
     final closingChar = display ? 0x5D : 0x29;
     final literal = _scanToEscapedDelimiter(subj, closingChar);
@@ -228,271 +255,124 @@ class InlineParserV2 {
 
     final end = subj.pos;
     return _buildInlineMathNode(
-      subj: subj,
-      start: start,
-      end: end,
-      literal: normalized,
+      subj: subj, start: start, end: end, literal: normalized,
       display: display,
       opening: display ? r'\[' : r'\(',
       closing: display ? r'\]' : r'\)',
     );
   }
 
-  CmarkNode? _parseDoubleDollarMath(Subject subj) {
+  CmarkNode2? _parseDoubleDollarMath(Subject subj) {
     final start = subj.pos;
     subj.advance();
     subj.advance();
-
     final contentStart = subj.pos;
     while (!subj.isEof()) {
       final ch = subj.peekChar();
-      if (ch == 0x0A || ch == 0x0D) {
-        subj.pos = start;
-        return null;
-      }
+      if (ch == 0x0A || ch == 0x0D) { subj.pos = start; return null; }
       if (ch == 0x24 && subj.peekCharN(1) == 0x24) {
-        final bytes = subj.input.sublist(contentStart, subj.pos);
+        final bytes = Uint8List.sublistView(subj.input, contentStart, subj.pos);
         final literal = utf8.decode(bytes, allowMalformed: true);
         final normalized = _normalizeInlineMathLiteral(literal);
-        if (normalized.isEmpty) {
-          subj.pos = start;
-          return null;
-        }
-        subj.advance();
-        subj.advance();
+        if (normalized.isEmpty) { subj.pos = start; return null; }
+        subj.advance(); subj.advance();
         return _buildInlineMathNode(
-          subj: subj,
-          start: start,
-          end: subj.pos,
-          literal: normalized,
-          display: true,
-          opening: r'$$',
-          closing: r'$$',
+          subj: subj, start: start, end: subj.pos, literal: normalized,
+          display: true, opening: r'$$', closing: r'$$',
         );
       }
       subj.advance();
     }
-
     subj.pos = start;
     return null;
   }
 
-  /// Parse single-dollar inline math with strict "money guard" heuristics.
-  ///
-  /// Rules to avoid false positives like "$20 times two is $40":
-  /// 1. Opening `$` must NOT be preceded by a word character (a-z, A-Z, 0-9)
-  /// 2. Opening `$` must NOT be followed by whitespace
-  /// 3. Closing `$` must NOT be preceded by whitespace
-  /// 4. Closing `$` must NOT be followed by a digit
-  /// 5. If content starts with a digit AND contains whitespace, must have a
-  ///    letter or math symbol (^ _ \ { }) BEFORE that whitespace
-  ///
-  /// Rule 5 catches cross-span currency like "$20 times two is $40" while
-  /// allowing tight numeric spans like "$1,048,576$" (no whitespace).
-  CmarkNode? _parseSingleDollarMath(Subject subj) {
+  CmarkNode2? _parseSingleDollarMath(Subject subj) {
     final start = subj.pos;
-
-    // Rule 1: Opening $ must NOT be preceded by a word character
     if (start > 0) {
       final before = subj.peekAt(start - 1);
-      if (_isWordChar(before)) {
-        return null;
-      }
+      if (_isWordChar(before)) return null;
     }
-
-    subj.advance(); // consume opening $
-
-    // Rule 2: Opening $ must NOT be followed by whitespace
+    subj.advance();
     final firstContentChar = subj.peekChar();
-    if (firstContentChar == 0 ||
-        firstContentChar == 0x20 ||
-        firstContentChar == 0x09 ||
-        firstContentChar == 0x0A || 
-        firstContentChar == 0x0D) {
-      subj.pos = start;
-      return null;
+    if (firstContentChar == 0 || firstContentChar == 0x20 ||
+        firstContentChar == 0x09 || firstContentChar == 0x0A ||
+        firstContentChar == 0x0D || firstContentChar == 0x24) {
+      subj.pos = start; return null;
     }
-
-    // Also reject if followed by another $ (that's $$, not single-dollar)
-    if (firstContentChar == 0x24) {
-      subj.pos = start;
-      return null;
-    }
-
-    // Rule 5: If first char is a digit, require a letter before any closer.
-    // This catches currency like $20 but allows math like $5x$ or $2^n$.
     final startsWithDigit = _isDigit(firstContentChar);
-
     final contentStart = subj.pos;
     var seenWhitespace = false;
-    var hasEarlyMathIndicator = false; // letter/symbol BEFORE whitespace
-    var hasOperator = false; // operator ANYWHERE
-
-    // Scan for closing $
+    var hasEarlyMathIndicator = false;
+    var hasOperator = false;
     while (!subj.isEof()) {
       final ch = subj.peekChar();
-
-      // Track whitespace (for Rule 5)
-      if (ch == 0x20 || ch == 0x09) {
-        seenWhitespace = true;
-      }
-
-      // Track letters/LaTeX symbols BEFORE whitespace.
-      // These suggest the content is math, not currency.
-      // e.g., "$x + 2$" has 'x' before the space.
-      if (!seenWhitespace &&
-          (_isLetter(ch) ||
-              ch == 0x5C || // \
-              ch == 0x7B || // {
-              ch == 0x7D)) { // }
+      if (ch == 0x20 || ch == 0x09) seenWhitespace = true;
+      if (!seenWhitespace && (_isLetter(ch) || ch == 0x5C || ch == 0x7B || ch == 0x7D)) {
         hasEarlyMathIndicator = true;
       }
-
-      // Track binary operators ANYWHERE - these connect parts of an expression.
-      // e.g., "$1048576 = 2^{20}$" - the '=' ties it together.
-      // Note: ^ and _ are modifiers, not connectors, so they don't count here.
-      // They're already covered by hasEarlyMathIndicator if they appear early.
-      if (ch == 0x3D || // =
-          ch == 0x2B || // +
-          ch == 0x3C || // <
-          ch == 0x3E) { // >
-        hasOperator = true;
-      }
-
-      // No newlines in inline math
-      if (ch == 0x0A || ch == 0x0D) {
-        subj.pos = start;
-        return null;
-      }
-
+      if (ch == 0x3D || ch == 0x2B || ch == 0x3C || ch == 0x3E) hasOperator = true;
+      if (ch == 0x0A || ch == 0x0D) { subj.pos = start; return null; }
       if (ch == 0x24) {
-        // Found potential closing $
         final contentEnd = subj.pos;
-
-        // Rule 3: Closing $ must NOT be preceded by whitespace or /
-        // (math expressions don't end with forward slash - catches $id/$schema)
         if (contentEnd > contentStart) {
           final before = subj.peekAt(contentEnd - 1);
-          if (before == 0x20 || before == 0x09 || before == 0x2F) {
-            // Whitespace or / before closing $ - not valid, keep scanning
-            subj.advance();
-            continue;
-          }
-        } else {
-          // Empty content - not valid
-          subj.pos = start;
-          return null;
-        }
-
-        // Rule 4: Closing $ must NOT be followed by a digit
+          if (before == 0x20 || before == 0x09 || before == 0x2F) { subj.advance(); continue; }
+        } else { subj.pos = start; return null; }
         final after = subj.peekCharN(1);
-        if (_isDigit(after)) {
-          // Digit after closing $ - not valid math (e.g., "$20..." pattern)
-          subj.advance();
-          continue;
+        if (_isDigit(after)) { subj.advance(); continue; }
+        if (startsWithDigit && seenWhitespace && !hasEarlyMathIndicator && !hasOperator) {
+          subj.advance(); continue;
         }
-
-        // Rule 5: If started with digit AND content has whitespace, require
-        // either a letter/symbol BEFORE whitespace, or an operator ANYWHERE.
-        // This catches "$20 times two is $40" (cross-span currency)
-        // but allows "$1048576 = 2^{20}$" (operator ties it together)
-        // and "$5x + 2$" (letter before whitespace).
-        if (startsWithDigit &&
-            seenWhitespace &&
-            !hasEarlyMathIndicator &&
-            !hasOperator) {
-          subj.advance();
-          continue;
-        }
-
-        // All rules pass - we have valid math!
-        final bytes = subj.input.sublist(contentStart, contentEnd);
+        final bytes = Uint8List.sublistView(subj.input, contentStart, contentEnd);
         final literal = utf8.decode(bytes, allowMalformed: true);
         final normalized = _normalizeInlineMathLiteral(literal);
-        if (normalized.isEmpty) {
-          subj.pos = start;
-          return null;
-        }
-
-        subj.advance(); // consume closing $
+        if (normalized.isEmpty) { subj.pos = start; return null; }
+        subj.advance();
         return _buildInlineMathNode(
-          subj: subj,
-          start: start,
-          end: subj.pos,
-          literal: normalized,
-          display: false,
-          opening: r'$',
-          closing: r'$',
+          subj: subj, start: start, end: subj.pos, literal: normalized,
+          display: false, opening: r'$', closing: r'$',
         );
       }
-
       subj.advance();
     }
-
-    // No valid closing $ found
     subj.pos = start;
     return null;
   }
 
-  /// Returns true if the byte is a word character (a-z, A-Z, 0-9).
-  bool _isWordChar(int ch) {
-    return (ch >= 0x30 && ch <= 0x39) || // 0-9
-        (ch >= 0x41 && ch <= 0x5A) || // A-Z
-        (ch >= 0x61 && ch <= 0x7A); // a-z
-  }
-
-  /// Returns true if the byte is a digit (0-9).
-  bool _isDigit(int ch) {
-    return ch >= 0x30 && ch <= 0x39;
-  }
-
-  /// Returns true if the byte is a letter (a-z, A-Z).
-  bool _isLetter(int ch) {
-    return (ch >= 0x41 && ch <= 0x5A) || // A-Z
-        (ch >= 0x61 && ch <= 0x7A); // a-z
-  }
+  bool _isWordChar(int ch) => (ch >= 0x30 && ch <= 0x39) || (ch >= 0x41 && ch <= 0x5A) || (ch >= 0x61 && ch <= 0x7A);
+  bool _isDigit(int ch) => ch >= 0x30 && ch <= 0x39;
+  bool _isLetter(int ch) => (ch >= 0x41 && ch <= 0x5A) || (ch >= 0x61 && ch <= 0x7A);
 
   String? _scanToEscapedDelimiter(Subject subj, int closingChar) {
     final start = subj.pos;
     while (!subj.isEof()) {
       final current = subj.peekChar();
       if (current == 0x5C && subj.peekCharN(1) == closingChar) {
-        final bytes = subj.input.sublist(start, subj.pos);
+        final bytes = Uint8List.sublistView(subj.input, start, subj.pos);
         final literal = utf8.decode(bytes, allowMalformed: true);
-        subj.advance();
-        subj.advance();
+        subj.advance(); subj.advance();
         return literal;
       }
-      if (current == 0x0A || current == 0x0D) {
-        subj.pos = start;
-        return null;
-      }
+      if (current == 0x0A || current == 0x0D) { subj.pos = start; return null; }
       subj.advance();
     }
     subj.pos = start;
     return null;
   }
 
-  CmarkNode _buildInlineMathNode({
-    required Subject subj,
-    required int start,
-    required int end,
-    required String literal,
-    required bool display,
-    required String opening,
-    required String closing,
+  CmarkNode2 _buildInlineMathNode({
+    required Subject subj, required int start, required int end,
+    required String literal, required bool display,
+    required String opening, required String closing,
   }) {
-    final raw = utf8.decode(
-      subj.input.sublist(start, end),
-      allowMalformed: true,
-    );
-    final node = CmarkNode(CmarkNodeType.math)
+    final raw = utf8.decode(Uint8List.sublistView(subj.input, start, end), allowMalformed: true);
+    final node = CmarkNode2(CmarkNodeType.math)
       ..content.write(raw)
       ..startLine = subj.line
       ..endLine = subj.line
       ..startColumn = start + 1 + subj.columnOffset + subj.blockOffset
       ..endColumn = end + subj.columnOffset + subj.blockOffset;
-
     node.mathData
       ..literal = literal
       ..display = display
@@ -503,9 +383,9 @@ class InlineParserV2 {
 
   String _normalizeInlineMathLiteral(String literal) => literal.trim();
 
-  CmarkNode _makeStr(Subject subj, int startCol, int endCol, String text) {
-    final node = CmarkNode(CmarkNodeType.text)
-      ..content.write(text)
+  CmarkNode2 _makeStr(Subject subj, int startCol, int endCol, String text) {
+    final node = CmarkNode2(CmarkNodeType.text)
+      ..setLiteral(text)
       ..startLine = subj.line
       ..endLine = subj.line
       ..startColumn = startCol + 1 + subj.columnOffset + subj.blockOffset
@@ -513,815 +393,397 @@ class InlineParserV2 {
     return node;
   }
 
-  CmarkNode _handleNewline(Subject subj) {
+  CmarkNode2 _handleNewline(Subject subj) {
     final nlpos = subj.pos;
-    if (subj.peekAt(subj.pos) == 0x0D) {
-      subj.advance();
-    }
-    if (subj.peekAt(subj.pos) == 0x0A) {
-      subj.advance();
-    }
+    if (subj.peekAt(subj.pos) == 0x0D) subj.advance();
+    if (subj.peekAt(subj.pos) == 0x0A) subj.advance();
     subj.line++;
     subj.columnOffset = -subj.pos;
     subj.skipSpaces();
-
-    // Hard break if preceded by two spaces
-    if (nlpos > 1 &&
-        subj.peekAt(nlpos - 1) == 0x20 &&
-        subj.peekAt(nlpos - 2) == 0x20) {
-      return CmarkNode(CmarkNodeType.linebreak);
-    } else {
-      return CmarkNode(CmarkNodeType.softbreak);
+    if (nlpos > 1 && subj.peekAt(nlpos - 1) == 0x20 && subj.peekAt(nlpos - 2) == 0x20) {
+      return CmarkNode2(CmarkNodeType.linebreak);
     }
+    return CmarkNode2(CmarkNodeType.softbreak);
   }
 
-  CmarkNode _handleBackticks(Subject subj) {
+  CmarkNode2 _handleBackticks(Subject subj) {
     final startpos = subj.pos;
     var numticks = 0;
-    while (subj.peekChar() == 0x60) {
-      subj.advance();
-      numticks++;
-    }
-    final afterTicksPos = subj.pos; // Position after opening backticks
-
+    while (subj.peekChar() == 0x60) { subj.advance(); numticks++; }
+    final afterTicksPos = subj.pos;
     final endpos = _scanToClosingBackticks(subj, numticks);
     if (endpos == 0) {
-      // Not found - reset position and return literal backticks
-      subj.pos = afterTicksPos; // Reset so rest of line can be parsed
+      subj.pos = afterTicksPos;
       return _makeStr(subj, startpos, afterTicksPos - 1, '`' * numticks);
     } else {
-      // Found closing - extract code content
-      final codeBytes =
-          subj.input.sublist(startpos + numticks, endpos - numticks);
+      final codeBytes = Uint8List.sublistView(subj.input, startpos + numticks, endpos - numticks);
       var code = utf8.decode(codeBytes, allowMalformed: true);
-
-      // Normalize: newlines → spaces, trim single leading/trailing space
       code = code.replaceAll(RegExp(r'[\r\n]+'), ' ');
       if (code.isNotEmpty && code.trim().isNotEmpty) {
         if (code.startsWith(' ') && code.endsWith(' ') && code.length > 2) {
           code = code.substring(1, code.length - 1);
         }
       }
-
-      return CmarkNode(CmarkNodeType.code)
+      return CmarkNode2(CmarkNodeType.code)
         ..content.write(code)
-        ..startLine = subj.line
-        ..endLine = subj.line
-        ..startColumn = startpos + 1
-        ..endColumn = endpos - 1;
+        ..startLine = subj.line ..endLine = subj.line
+        ..startColumn = startpos + 1 ..endColumn = endpos - 1;
     }
   }
 
   int _scanToClosingBackticks(Subject subj, int openLen) {
-    if (openLen > maxBackticks) {
-      return 0;
-    }
-    if (subj.scannedForBackticks && subj.backticks[openLen] <= subj.pos) {
-      return 0;
-    }
-
-    final startPos = subj.pos;
-    var iterations = 0;
-
+    if (openLen > maxBackticks) return 0;
+    if (subj.scannedForBackticks && subj.backticks[openLen] <= subj.pos) return 0;
     while (!subj.isEof()) {
-      iterations++;
-      if (iterations > 100000) {
-        throw StateError(
-            'Infinite loop in _scanToClosingBackticks: openLen=$openLen startPos=$startPos pos=${subj.pos}');
-      }
-
-      // Read non-backticks
-      while (subj.peekChar() != 0x60 && !subj.isEof()) {
-        subj.advance();
-      }
-      if (subj.isEof()) {
-        break;
-      }
-
+      while (subj.peekChar() != 0x60 && !subj.isEof()) subj.advance();
+      if (subj.isEof()) break;
       var numticks = 0;
-      while (subj.peekChar() == 0x60) {
-        subj.advance();
-        numticks++;
-      }
-
-      if (numticks <= maxBackticks) {
-        subj.recordBacktickRun(numticks, subj.pos - numticks);
-      }
-
-      if (numticks == openLen) {
-        return subj.pos;
-      }
+      while (subj.peekChar() == 0x60) { subj.advance(); numticks++; }
+      if (numticks <= maxBackticks) subj.recordBacktickRun(numticks, subj.pos - numticks);
+      if (numticks == openLen) return subj.pos;
     }
-
     subj.scannedForBackticks = true;
     return 0;
   }
 
-  CmarkNode _handleBackslash(Subject subj) {
+  CmarkNode2 _handleBackslash(Subject subj) {
     subj.advance();
     final nextchar = subj.peekChar();
     if (_isPunct(nextchar)) {
       subj.advance();
-      return _makeStr(
-          subj, subj.pos - 2, subj.pos - 1, String.fromCharCode(nextchar));
+      return _makeStr(subj, subj.pos - 2, subj.pos - 1, String.fromCharCode(nextchar));
     } else if (!subj.isEof() && subj.skipLineEnd()) {
-      // Must have actual newline, not just EOF
-      return CmarkNode(CmarkNodeType.linebreak);
-    } else {
-      return _makeStr(subj, subj.pos - 1, subj.pos - 1, '\\');
+      return CmarkNode2(CmarkNodeType.linebreak);
     }
+    return _makeStr(subj, subj.pos - 1, subj.pos - 1, '\\');
   }
 
-  CmarkNode _handleEntity(Subject subj) {
+  CmarkNode2 _handleEntity(Subject subj) {
     subj.advance();
     final buf = CmarkStrbuf();
-    final consumed =
-        houdini.HoudiniHtmlUnescape.unescapeEntity(buf, subj.input, subj.pos);
-    if (consumed == 0) {
-      return _makeStr(subj, subj.pos - 1, subj.pos - 1, '&');
-    }
+    final consumed = houdini.HoudiniHtmlUnescape.unescapeEntity(buf, subj.input, subj.pos);
+    if (consumed == 0) return _makeStr(subj, subj.pos - 1, subj.pos - 1, '&');
     subj.pos += consumed;
     final output = utf8.decode(buf.detach(), allowMalformed: true);
     return _makeStr(subj, (subj.pos - 1 - consumed), subj.pos - 1, output);
   }
 
-  CmarkNode _handlePointyBrace(Subject subj) {
-    subj.advance(); // past <
+  CmarkNode2 _handlePointyBrace(Subject subj) {
+    subj.advance();
     final tagStart = subj.pos - 1;
-
-    // Try URL autolink <http://...>
     final urlMatch = _scanAutolinkUri(subj.input, subj.pos);
     if (urlMatch > 0) {
       try {
-        final url =
-            utf8.decode(subj.input.sublist(subj.pos, subj.pos + urlMatch - 1));
+        final url = utf8.decode(Uint8List.sublistView(subj.input, subj.pos, subj.pos + urlMatch - 1));
         subj.pos += urlMatch;
-        return _makeAutolink(
-            subj, subj.pos - 1 - urlMatch, subj.pos - 1, url, false);
-      } catch (e) {
-        // Invalid UTF-8 - not an autolink, return literal <
-        return _makeStr(subj, subj.pos - 1, subj.pos - 1, '<');
-      }
+        return _makeAutolink(subj, subj.pos - 1 - urlMatch, subj.pos - 1, url, false);
+      } catch (_) { return _makeStr(subj, subj.pos - 1, subj.pos - 1, '<'); }
     }
-
-    // Try email autolink <user@example.com>
     final emailMatch = _scanAutolinkEmail(subj.input, subj.pos);
     if (emailMatch > 0) {
       try {
-        final email = utf8
-            .decode(subj.input.sublist(subj.pos, subj.pos + emailMatch - 1));
+        final email = utf8.decode(Uint8List.sublistView(subj.input, subj.pos, subj.pos + emailMatch - 1));
         subj.pos += emailMatch;
-        return _makeAutolink(
-            subj, subj.pos - 1 - emailMatch, subj.pos - 1, email, true);
-      } catch (e) {
-        // Invalid UTF-8 - not an autolink, return literal <
-        return _makeStr(subj, subj.pos - 1, subj.pos - 1, '<');
-      }
+        return _makeAutolink(subj, subj.pos - 1 - emailMatch, subj.pos - 1, email, true);
+      } catch (_) { return _makeStr(subj, subj.pos - 1, subj.pos - 1, '<'); }
     }
-
-    // Try HTML tag, comment, declaration, etc.
     final htmlLen = _scanHtmlTag(subj.input, tagStart);
     if (htmlLen > 0) {
       final end = tagStart + htmlLen;
-      final raw = utf8.decode(
-        subj.input.sublist(tagStart, end),
-        allowMalformed: true,
-      );
+      final raw = utf8.decode(Uint8List.sublistView(subj.input, tagStart, end), allowMalformed: true);
       subj.pos = end;
-      final node = CmarkNode(CmarkNodeType.htmlInline)
+      return CmarkNode2(CmarkNodeType.htmlInline)
         ..content.write(raw)
-        ..startLine = subj.line
-        ..endLine = subj.line
+        ..startLine = subj.line ..endLine = subj.line
         ..startColumn = tagStart + 1 + subj.columnOffset + subj.blockOffset
         ..endColumn = end + subj.columnOffset + subj.blockOffset;
-      return node;
     }
-
-    // Not an autolink or HTML tag - return literal <
     return _makeStr(subj, subj.pos - 1, subj.pos - 1, '<');
   }
 
+  static final _autolinkUriRe = RegExp(r'^[A-Za-z][A-Za-z0-9.+-]{1,31}:[^\x00-\x20<>]*>');
+  static final _autolinkEmailRe = RegExp(
+    r'^[a-zA-Z0-9.!#$%&' "'" r'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*>',
+  );
+
   int _scanAutolinkUri(Uint8List data, int pos) {
-    // Port of scan_autolink_uri from scanners.re
-    // scheme = [A-Za-z][A-Za-z0-9.+-]{1,31}:  followed by non-space/< /control chars, ended by >
-    final remaining = utf8.decode(data.sublist(pos), allowMalformed: true);
-    final match = RegExp(r'^[A-Za-z][A-Za-z0-9.+-]{1,31}:[^\x00-\x20<>]*>')
-        .firstMatch(remaining);
-    return match?.group(0)?.length ?? 0;
+    if (pos >= data.length) return 0;
+    // URI autolink must start with [A-Za-z]
+    final first = data[pos];
+    if (!((first >= 0x41 && first <= 0x5A) || (first >= 0x61 && first <= 0x7A))) return 0;
+    final remaining = utf8.decode(Uint8List.sublistView(data, pos), allowMalformed: true);
+    return _autolinkUriRe.firstMatch(remaining)?.group(0)?.length ?? 0;
   }
 
   int _scanAutolinkEmail(Uint8List data, int pos) {
-    final remaining = utf8.decode(data.sublist(pos), allowMalformed: true);
-    final pattern = r'^[a-zA-Z0-9.!#$%&'
-        "'"
-        r'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*>';
-    final match = RegExp(pattern).firstMatch(remaining);
-    return match?.group(0)?.length ?? 0;
+    if (pos >= data.length) return 0;
+    // Email must start with [a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]
+    final first = data[pos];
+    if (first < 0x21 || first > 0x7E) return 0;
+    final remaining = utf8.decode(Uint8List.sublistView(data, pos), allowMalformed: true);
+    return _autolinkEmailRe.firstMatch(remaining)?.group(0)?.length ?? 0;
   }
 
-  CmarkNode _makeAutolink(
-      Subject subj, int startCol, int endCol, String url, bool isEmail) {
-    // Port of make_autolink from inlines.c
-    final link = CmarkNode(CmarkNodeType.link);
-
-    // Clean autolink URL (cmark_clean_autolink)
+  CmarkNode2 _makeAutolink(Subject subj, int startCol, int endCol, String url, bool isEmail) {
+    final link = CmarkNode2(CmarkNodeType.link);
     var cleanedUrl = url.trim();
-    if (cleanedUrl.isEmpty) {
-      cleanedUrl = '';
-    } else {
-      if (isEmail) {
-        cleanedUrl = 'mailto:$cleanedUrl';
-      }
-      // HTML unescape the URL
+    if (cleanedUrl.isNotEmpty) {
+      if (isEmail) cleanedUrl = 'mailto:$cleanedUrl';
       final buf = CmarkStrbuf();
       houdini.HoudiniHtmlUnescape.unescape(buf, utf8.encode(cleanedUrl));
       cleanedUrl = utf8.decode(buf.detach(), allowMalformed: true);
     }
-
     link.linkData.url = cleanedUrl;
     link.linkData.title = '';
     link.startLine = link.endLine = subj.line;
     link.startColumn = startCol + 1;
     link.endColumn = endCol + 1;
-
-    // Text content (with entity unescaping)
     final textBuf = CmarkStrbuf();
     houdini.HoudiniHtmlUnescape.unescape(textBuf, utf8.encode(url));
     final textContent = utf8.decode(textBuf.detach(), allowMalformed: true);
-
-    final text = CmarkNode(CmarkNodeType.text)..content.write(textContent);
-    link.appendChild(text);
-
+    link.appendChild(CmarkNode2(CmarkNodeType.text)..content.write(textContent));
     return link;
   }
 
-  CmarkNode _handleDelim(Subject subj, int c) {
+  CmarkNode2 _handleDelim(Subject subj, int c) {
     final canOpen = <bool>[false];
     final canClose = <bool>[false];
     final numDelims = _scanDelims(subj, c, canOpen, canClose);
-
     final delims = String.fromCharCodes(List.filled(numDelims, c));
     final inlText = _makeStr(subj, subj.pos - numDelims, subj.pos - 1, delims);
-
-    if (canOpen[0] || canClose[0]) {
-      _pushDelimiter(subj, c, canOpen[0], canClose[0], inlText);
-    }
-
+    if (canOpen[0] || canClose[0]) _pushDelimiter(subj, c, canOpen[0], canClose[0], inlText);
     return inlText;
   }
 
   int _codePointAt(Uint8List data, int pos) {
     final first = data[pos];
-    if (first < 0x80) {
-      return first;
-    } else if ((first & 0xE0) == 0xC0 && pos + 1 < data.length) {
-      final second = data[pos + 1] & 0x3F;
-      return ((first & 0x1F) << 6) | second;
-    } else if ((first & 0xF0) == 0xE0 && pos + 2 < data.length) {
-      final second = data[pos + 1] & 0x3F;
-      final third = data[pos + 2] & 0x3F;
-      return ((first & 0x0F) << 12) | (second << 6) | third;
-    } else if ((first & 0xF8) == 0xF0 && pos + 3 < data.length) {
-      final second = data[pos + 1] & 0x3F;
-      final third = data[pos + 2] & 0x3F;
-      final fourth = data[pos + 3] & 0x3F;
-      return ((first & 0x07) << 18) | (second << 12) | (third << 6) | fourth;
-    }
+    if (first < 0x80) return first;
+    if ((first & 0xE0) == 0xC0 && pos + 1 < data.length) return ((first & 0x1F) << 6) | (data[pos + 1] & 0x3F);
+    if ((first & 0xF0) == 0xE0 && pos + 2 < data.length) return ((first & 0x0F) << 12) | ((data[pos + 1] & 0x3F) << 6) | (data[pos + 2] & 0x3F);
+    if ((first & 0xF8) == 0xF0 && pos + 3 < data.length) return ((first & 0x07) << 18) | ((data[pos + 1] & 0x3F) << 12) | ((data[pos + 2] & 0x3F) << 6) | (data[pos + 3] & 0x3F);
     return first;
   }
 
-  int _scanDelims(
-      Subject subj, int c, List<bool> canOpen, List<bool> canClose) {
+  int _scanDelims(Subject subj, int c, List<bool> canOpen, List<bool> canClose) {
     var numDelims = 0;
-    var beforeChar = 0x0A; // newline if at start
+    var beforeChar = 0x0A;
     var afterChar = 0x0A;
-
     final startPos = subj.pos;
-
     if (startPos > 0) {
       var beforePos = startPos - 1;
-      while (beforePos > 0 && (subj.input[beforePos] >> 6) == 2) {
-        beforePos--;
-      }
+      while (beforePos > 0 && (subj.input[beforePos] >> 6) == 2) beforePos--;
       beforeChar = _codePointAt(subj.input, beforePos);
     }
-
-    // Count delimiters
-    while (subj.peekChar() == c) {
-      numDelims++;
-      subj.advance();
-    }
-
-    if (subj.pos < subj.input.length) {
-      afterChar = _codePointAt(subj.input, subj.pos);
-    }
-
-    final leftFlanking = numDelims > 0 &&
-        !_isSpace(afterChar) &&
-        (!_isUnicodePunct(afterChar) ||
-            _isSpace(beforeChar) ||
-            _isUnicodePunct(beforeChar));
-    final rightFlanking = numDelims > 0 &&
-        !_isSpace(beforeChar) &&
-        (!_isUnicodePunct(beforeChar) ||
-            _isSpace(afterChar) ||
-            _isUnicodePunct(afterChar));
-
+    while (subj.peekChar() == c) { numDelims++; subj.advance(); }
+    if (subj.pos < subj.input.length) afterChar = _codePointAt(subj.input, subj.pos);
+    final leftFlanking = numDelims > 0 && !_isSpace(afterChar) && (!_isUnicodePunct(afterChar) || _isSpace(beforeChar) || _isUnicodePunct(beforeChar));
+    final rightFlanking = numDelims > 0 && !_isSpace(beforeChar) && (!_isUnicodePunct(beforeChar) || _isSpace(afterChar) || _isUnicodePunct(afterChar));
     if (c == 0x5F) {
-      // _
       canOpen[0] = leftFlanking && (!rightFlanking || _isPunct(beforeChar));
       canClose[0] = rightFlanking && (!leftFlanking || _isPunct(afterChar));
     } else {
       canOpen[0] = leftFlanking;
       canClose[0] = rightFlanking;
     }
-
     return numDelims;
   }
 
+  // Flat array for _processEmphasis: 3 length-mod-3 slots × 3 delim chars.
+  // charIdx: * → 0, _ → 1, ~ → 2
+  static int _charIdx(int c) => c == 0x2A ? 0 : (c == 0x5F ? 1 : 2);
+
   void _processEmphasis(Subject subj, int stackBottom) {
-    // From process_emphasis() in inlines.c
-    // openers_bottom[3][128] tracks minimum position for each delim type
-    final openersBottom = <int, Map<int, int>>{
-      0: {},
-      1: {},
-      2: {},
-    };
-
-    // Initialize for common delimiters
+    // 9-element flat array replaces Map<int, Map<int, int>>
+    final ob = List<int>.filled(9, 0);
     for (var i = 0; i < 3; i++) {
-      openersBottom[i]![0x2A] = stackBottom; // *
-      openersBottom[i]![0x5F] = stackBottom; // _
-      // Note: ~ (tilde) is NOT initialized to stackBottom in C
-      // It's zero-initialized because it's a GFM extension delimiter
-      openersBottom[i]![0x7E] = 0; // ~
+      ob[i * 3 + 0] = stackBottom; // *
+      ob[i * 3 + 1] = stackBottom; // _
+      ob[i * 3 + 2] = 0;            // ~
     }
-
-    Delimiter? candidate = subj.lastDelim;
+    Delimiter2? candidate = _lastDelim;
     var closer = candidate;
-
-    // Move back to first relevant delim
     while (candidate != null && candidate.position >= stackBottom) {
       closer = candidate;
       candidate = candidate.previous;
     }
-
-    // Now move forward, looking for closers
-    var emphIterations = 0;
     while (closer != null) {
-      emphIterations++;
-      if (emphIterations > 10000) {
-        throw StateError('Infinite loop in _processEmphasis');
-      }
-
       if (closer.canClose) {
-        // Look for matching opener
         var opener = closer.previous;
         var openerFound = false;
-
-        final bottomPos =
-            openersBottom[closer.length % 3]![closer.delimChar] ?? stackBottom;
-
-        while (opener != null &&
-            opener.position >= stackBottom &&
-            opener.position >= bottomPos) {
+        final bottomPos = ob[(closer.length % 3) * 3 + _charIdx(closer.delimChar)];
+        while (opener != null && opener.position >= stackBottom && opener.position >= bottomPos) {
           if (opener.canOpen && opener.delimChar == closer.delimChar) {
-            // Check for valid match
-            if (!(closer.canOpen || opener.canClose) ||
-                closer.length % 3 == 0 ||
-                (opener.length + closer.length) % 3 != 0) {
-              openerFound = true;
-              break;
+            if (!(closer.canOpen || opener.canClose) || closer.length % 3 == 0 || (opener.length + closer.length) % 3 != 0) {
+              openerFound = true; break;
             }
           }
           opener = opener.previous;
         }
-
         final oldCloser = closer;
-
         if (openerFound && opener != null) {
           closer = _insertEmph(subj, opener, closer);
         } else {
           closer = closer.next;
         }
-
-        // Set lower bound for future searches
         if (!openerFound) {
-          openersBottom[oldCloser.length % 3]![oldCloser.delimChar] =
-              oldCloser.position;
-          // Only remove if we're at the top level (stackBottom=0)
-          // Nested calls might not see all openers, so keep closers for later
-          if (!oldCloser.canOpen && stackBottom == 0) {
-            // Remove closer that can't be opener
-            _removeDelimiter(subj, oldCloser);
-          }
+          ob[(oldCloser.length % 3) * 3 + _charIdx(oldCloser.delimChar)] = oldCloser.position;
+          if (!oldCloser.canOpen && stackBottom == 0) _removeDelimiter(oldCloser);
         }
       } else {
         closer = closer.next;
       }
     }
-
-    // Free delimiters below stack bottom
-    while (subj.lastDelim != null && subj.lastDelim!.position >= stackBottom) {
-      _removeDelimiter(subj, subj.lastDelim!);
+    while (_lastDelim != null && _lastDelim!.position >= stackBottom) {
+      _removeDelimiter(_lastDelim!);
     }
   }
 
-  Delimiter? _insertEmph(Subject subj, Delimiter opener, Delimiter closer) {
+  Delimiter2? _insertEmph(Subject subj, Delimiter2 opener, Delimiter2 closer) {
     final openerInl = opener.inlText;
     final closerInl = closer.inlText;
     var openerNumChars = opener.length;
     var closerNumChars = closer.length;
-
-    // For strikethrough (~), only allow 1 or 2 tildes (from GFM strikethrough extension)
     if (opener.delimChar == 0x7E) {
-      // If singleTildeStrikethrough is false, require exactly 2 tildes
       final minTildes = options.singleTildeStrikethrough ? 1 : 2;
-      if (openerNumChars > 2 ||
-          closerNumChars > 2 ||
-          openerNumChars < minTildes ||
-          closerNumChars < minTildes ||
-          openerNumChars != closerNumChars) {
-        return closer.next; // No match - continue
+      if (openerNumChars > 2 || closerNumChars > 2 || openerNumChars < minTildes || closerNumChars < minTildes || openerNumChars != closerNumChars) {
+        return closer.next;
       }
     }
-
-    // Use 2 chars if both have >= 2, else 1
-    final useDelims = (opener.delimChar == 0x7E)
-        ? openerNumChars // Use all tildes for strikethrough (1 or 2)
-        : ((closerNumChars >= 2 && openerNumChars >= 2) ? 2 : 1);
-
+    final useDelims = (opener.delimChar == 0x7E) ? openerNumChars : ((closerNumChars >= 2 && openerNumChars >= 2) ? 2 : 1);
     openerNumChars -= useDelims;
     closerNumChars -= useDelims;
     opener.length = openerNumChars;
     closer.length = closerNumChars;
-
-    // Update literal in opener/closer text nodes
     final openerText = openerInl.content.toString();
     openerInl.content.clear();
-    if (openerNumChars > 0) {
-      openerInl.content.write(openerText.substring(0, openerNumChars));
-    }
-
+    if (openerNumChars > 0) openerInl.content.write(openerText.substring(0, openerNumChars));
     final closerText = closerInl.content.toString();
     closerInl.content.clear();
-    if (closerNumChars > 0) {
-      closerInl.content.write(closerText.substring(0, closerNumChars));
-    }
-
-    // Free delimiters between opener and closer
+    if (closerNumChars > 0) closerInl.content.write(closerText.substring(0, closerNumChars));
     var delim = closer.previous;
-    while (delim != null && delim != opener) {
-      final tmpDelim = delim.previous;
-      _removeDelimiter(subj, delim);
-      delim = tmpDelim;
-    }
-
-    // Create emph or strong node
-    final emphType = (opener.delimChar == 0x7E) // ~
-        ? CmarkNodeType.strikethrough
-        : (useDelims == 1 ? CmarkNodeType.emph : CmarkNodeType.strong);
-    final emph = CmarkNode(emphType);
-
-    // Move nodes between opener and closer into emph
+    while (delim != null && delim != opener) { final tmp = delim.previous; _removeDelimiter(delim); delim = tmp; }
+    final emphType = (opener.delimChar == 0x7E) ? CmarkNodeType.strikethrough : (useDelims == 1 ? CmarkNodeType.emph : CmarkNodeType.strong);
+    final emph = CmarkNode2(emphType);
     var tmp = openerInl.next;
-    while (tmp != null && tmp != closerInl) {
-      final tmpNext = tmp.next;
-      tmp.unlink();
-      emph.appendChild(tmp);
-      tmp = tmpNext;
-    }
-
-    // Insert emph after opener
+    while (tmp != null && tmp != closerInl) { final tmpNext = tmp.next; tmp.unlink(); emph.appendChild(tmp); tmp = tmpNext; }
     openerInl.parent?.insertAfter(openerInl, emph);
-
-    emph.startLine = openerInl.startLine;
-    emph.endLine = closerInl.endLine;
-    emph.startColumn = openerInl.startColumn;
-    emph.endColumn = closerInl.endColumn;
-
-    // Remove empty opener
-    if (openerNumChars == 0) {
-      openerInl.unlink();
-      _removeDelimiter(subj, opener);
-    }
-
-    // Remove empty closer
-    Delimiter? result;
-    if (closerNumChars == 0) {
-      closerInl.unlink();
-      result = closer.next;
-      _removeDelimiter(subj, closer);
-    } else {
-      result = closer;
-    }
-
+    emph.startLine = openerInl.startLine; emph.endLine = closerInl.endLine;
+    emph.startColumn = openerInl.startColumn; emph.endColumn = closerInl.endColumn;
+    if (openerNumChars == 0) { openerInl.unlink(); _removeDelimiter(opener); }
+    Delimiter2? result;
+    if (closerNumChars == 0) { closerInl.unlink(); result = closer.next; _removeDelimiter(closer); } else { result = closer; }
     return result;
   }
 
-  CmarkNode? _handleCloseBracket(Subject subj, CmarkNode parent) {
-    subj.advance(); // past ]
+  CmarkNode2? _handleCloseBracket(Subject subj, CmarkNode2 parent) {
+    subj.advance();
     final initialPos = subj.pos;
-
-    // Get last [ or ![
-    final opener = subj.lastBracket;
-    if (opener == null) {
-      return _makeStr(subj, subj.pos - 1, subj.pos - 1, ']');
-    }
-
+    final opener = _lastBracket;
+    if (opener == null) return _makeStr(subj, subj.pos - 1, subj.pos - 1, ']');
     final isImage = opener.image;
-
-    // If no link openers and not image, bail
-    if (!isImage && subj.noLinkOpeners) {
-      _popBracket(subj);
-      return _makeStr(subj, subj.pos - 1, subj.pos - 1, ']');
-    }
-
+    if (!isImage && _noLinkOpeners) { _popBracket(); return _makeStr(subj, subj.pos - 1, subj.pos - 1, ']'); }
     final afterLinkTextPos = subj.pos;
-
-    // Try inline link (url "title")
-    // Matches C: if (peek_char(subj) == '(' && scan_spacechars(...) && manual_scan_link_url(...))
     if (subj.peekChar() == 0x28) {
-      // (
-      // Scan spaces after ( without advancing yet
       final sps = subj.scanSpacecharsAt(subj.pos + 1);
-
       if (sps >= 0) {
         final urlResult = LinkUrlResult();
         final n = scanLinkUrl(subj.input, subj.pos + 1 + sps, urlResult);
-
         if (n >= 0) {
-          // 0 is valid (empty URL)
-          // Match found - now advance
           final endurl = subj.pos + 1 + sps + n;
           final starttitle = endurl + subj.scanSpacecharsAt(endurl);
-
-          // ensure there are spaces btw url and title
-          final endtitle = (starttitle == endurl)
-              ? starttitle
-              : starttitle + _scanLinkTitleAt(subj.input, starttitle);
-
+          final endtitle = (starttitle == endurl) ? starttitle : starttitle + _scanLinkTitleAt(subj.input, starttitle);
           final endall = endtitle + subj.scanSpacecharsAt(endtitle);
-
           if (subj.peekAt(endall) == 0x29) {
             subj.pos = endall + 1;
-
-            // Extract and clean title
             var titleStr = '';
-            if (endtitle > starttitle) {
-              titleStr = utf8.decode(
-                subj.input.sublist(starttitle, endtitle),
-                allowMalformed: true,
-              );
-            }
-
-            final cleanedUrl = cleanUrl(urlResult.url);
-            final cleanedTitle = cleanTitle(titleStr);
-
-            // Found inline link - goto match
-            return _createLink(subj, opener, isImage, cleanedUrl, cleanedTitle,
-                afterLinkTextPos);
-          } else {
-            // Could still be shortcut reference - rewind
-            subj.pos = afterLinkTextPos;
-          }
-        } else {
-          // No URL found - rewind
-          subj.pos = afterLinkTextPos;
-        }
+            if (endtitle > starttitle) titleStr = utf8.decode(Uint8List.sublistView(subj.input, starttitle, endtitle), allowMalformed: true);
+            return _createLink(subj, opener, isImage, cleanUrl(urlResult.url), cleanTitle(titleStr), afterLinkTextPos);
+          } else { subj.pos = afterLinkTextPos; }
+        } else { subj.pos = afterLinkTextPos; }
       }
     }
-
-    // Try reference link [ref]
     final labelResult = LinkLabelResult();
     final foundLabel = linkLabel(subj.input, subj.pos, labelResult);
-
     String refLabel;
     if (foundLabel && labelResult.label.isNotEmpty) {
-      // Explicit reference [foo][bar]
-      refLabel = labelResult.label;
-      subj.pos = labelResult.endPos;
+      refLabel = labelResult.label; subj.pos = labelResult.endPos;
     } else if (foundLabel) {
-      // Empty reference [foo][] - use link text as label
-      refLabel = utf8
-          .decode(
-            subj.input.sublist(opener.position, initialPos - 1),
-            allowMalformed: true,
-          )
-          .trim();
-      subj.pos = labelResult.endPos; // Advance past the []
+      refLabel = utf8.decode(Uint8List.sublistView(subj.input, opener.position, initialPos - 1), allowMalformed: true).trim();
+      subj.pos = labelResult.endPos;
     } else if (!opener.bracketAfter) {
-      // Shortcut reference - use link text as label
-      refLabel = utf8
-          .decode(
-            subj.input.sublist(opener.position, initialPos - 1),
-            allowMalformed: true,
-          )
-          .trim();
-    } else {
-      // No match
-      _popBracket(subj);
-      subj.pos = initialPos;
-      return _makeStr(subj, subj.pos - 1, subj.pos - 1, ']');
-    }
-
-    // Look up in reference map
-    final ref = refmap.lookupString(refLabel);
+      refLabel = utf8.decode(Uint8List.sublistView(subj.input, opener.position, initialPos - 1), allowMalformed: true).trim();
+    } else { _popBracket(); subj.pos = initialPos; return _makeStr(subj, subj.pos - 1, subj.pos - 1, ']'); }
+    final ref = refmap.size == 0 ? null : refmap.lookupString(refLabel);
     if (ref != null) {
-      final urlStr = utf8.decode(ref.url.data, allowMalformed: true);
-      final titleStr = utf8.decode(ref.title.data, allowMalformed: true);
-      return _createLink(
-          subj, opener, isImage, urlStr, titleStr, afterLinkTextPos);
+      return _createLink(subj, opener, isImage, utf8.decode(ref.url.data, allowMalformed: true), utf8.decode(ref.title.data, allowMalformed: true), afterLinkTextPos);
     }
-
-    // Check for footnote reference [^label]
     final nextNode = opener.inlText.next;
     if (nextNode != null && nextNode.type == CmarkNodeType.text) {
       final literal = nextNode.content.toString();
-
-      // Check if starts with ^ and has more content
-      if (literal.isNotEmpty &&
-          literal.startsWith('^') &&
-          (literal.length > 1 || nextNode.next != null)) {
-        // Rewind to initial position (before looking for link label)
+      if (literal.isNotEmpty && literal.startsWith('^') && (literal.length > 1 || nextNode.next != null)) {
         subj.pos = initialPos;
-
-        // Create footnote reference node
-        final fnref = CmarkNode(CmarkNodeType.footnoteReference);
-
+        final fnref = CmarkNode2(CmarkNodeType.footnoteReference);
         final fnrefEndColumn = subj.pos + subj.columnOffset + subj.blockOffset;
         final fnrefStartColumn = opener.inlText.startColumn;
-
-        if (refLabel.length > 1) {
-          fnref.content.write(refLabel.substring(1));
-        } else if (literal.length > 1) {
-          fnref.content.write(literal.substring(1));
-        }
-
+        if (refLabel.length > 1) { fnref.content.write(refLabel.substring(1)); }
+        else if (literal.length > 1) { fnref.content.write(literal.substring(1)); }
         fnref.startLine = fnref.endLine = subj.line;
-        fnref.startColumn = fnrefStartColumn;
-        fnref.endColumn = fnrefEndColumn;
-
-        // Insert before opener
-        opener.inlText.parent?.insertAfter(
-          opener.inlText.previous ?? opener.inlText,
-          fnref,
-        );
-
-        // Process emphasis before this point
+        fnref.startColumn = fnrefStartColumn; fnref.endColumn = fnrefEndColumn;
+        opener.inlText.parent?.insertAfter(opener.inlText.previous ?? opener.inlText, fnref);
         _processEmphasis(subj, opener.position);
-
-        // Free nodes after opener
-        var current = opener.inlText.next;
-        while (current != null) {
-          final next = current.next;
-          current.unlink();
-          current = next;
-        }
-
-        opener.inlText.unlink();
-        _popBracket(subj);
+        CmarkNode2? current = opener.inlText.next;
+        while (current != null) { final next = current.next; current.unlink(); current = next; }
+        opener.inlText.unlink(); _popBracket();
         return null;
       }
     }
-
-    // No match
-    _popBracket(subj);
-    subj.pos = initialPos;
+    _popBracket(); subj.pos = initialPos;
     return _makeStr(subj, subj.pos - 1, subj.pos - 1, ']');
   }
 
-  CmarkNode? _createLink(Subject subj, Bracket opener, bool isImage, String url,
-      String title, int afterLinkTextPos) {
-    final link = CmarkNode(isImage ? CmarkNodeType.image : CmarkNodeType.link);
-    link.linkData
-      ..url = url
-      ..title = title;
+  CmarkNode2? _createLink(Subject subj, Bracket2 opener, bool isImage, String url, String title, int afterLinkTextPos) {
+    final link = CmarkNode2(isImage ? CmarkNodeType.image : CmarkNodeType.link);
+    link.linkData..url = url..title = title;
     link.startLine = link.endLine = subj.line;
     link.startColumn = opener.inlText.startColumn;
     link.endColumn = subj.pos + subj.columnOffset + subj.blockOffset;
-
-    // Insert link node in place of opener
     final openerParent = opener.inlText.parent;
-    if (openerParent == null) {
-      return null;
-    }
-
-    // Insert before opener's position
-    if (opener.inlText.previous != null) {
-      openerParent.insertAfter(opener.inlText.previous!, link);
-    } else {
-      // Opener is first child - prepend
-      openerParent.prependChild(link);
-    }
-
-    // Move nodes between opener and current position into link
-    var tmp = opener.inlText.next;
-    while (tmp != null) {
-      final tmpNext = tmp.next;
-      tmp.unlink();
-      link.appendChild(tmp);
-      tmp = tmpNext;
-    }
-
-    // Free the opener [ text
+    if (openerParent == null) return null;
+    if (opener.inlText.previous != null) { openerParent.insertAfter(opener.inlText.previous!, link); }
+    else { openerParent.prependChild(link); }
+    CmarkNode2? tmp = opener.inlText.next;
+    while (tmp != null) { final tmpNext = tmp.next; tmp.unlink(); link.appendChild(tmp); tmp = tmpNext; }
     opener.inlText.unlink();
-
-    // Process emphasis before this point
-    _processEmphasis(subj, opener.position);
-    _popBracket(subj);
-
-    // Deactivate link openers (no links in links)
-    if (!isImage) {
-      subj.noLinkOpeners = true;
-    }
-
-    return null; // Link inserted, don't append
+    _processEmphasis(subj, opener.position); _popBracket();
+    if (!isImage) _noLinkOpeners = true;
+    return null;
   }
 
-  void _pushDelimiter(
-      Subject subj, int c, bool canOpen, bool canClose, CmarkNode inlText) {
-    final delim = Delimiter(
-      delimChar: c,
-      canOpen: canOpen,
-      canClose: canClose,
-      inlText: inlText,
-      position: subj.pos,
-      length: inlText.content.length,
-      previous: subj.lastDelim,
-    );
-
-    if (delim.previous != null) {
-      delim.previous!.next = delim;
-    }
-    subj.lastDelim = delim;
+  void _pushDelimiter(Subject subj, int c, bool canOpen, bool canClose, CmarkNode2 inlText) {
+    final delim = Delimiter2(delimChar: c, canOpen: canOpen, canClose: canClose, inlText: inlText, position: subj.pos, length: inlText.content.length, previous: _lastDelim);
+    if (delim.previous != null) delim.previous!.next = delim;
+    _lastDelim = delim;
   }
 
-  void _removeDelimiter(Subject subj, Delimiter delim) {
-    if (delim.next == null) {
-      // End of list
-      subj.lastDelim = delim.previous;
-    } else {
-      delim.next!.previous = delim.previous;
-    }
-    if (delim.previous != null) {
-      delim.previous!.next = delim.next;
-    }
+  void _removeDelimiter(Delimiter2 delim) {
+    if (delim.next == null) { _lastDelim = delim.previous; } else { delim.next!.previous = delim.previous; }
+    if (delim.previous != null) delim.previous!.next = delim.next;
   }
 
-  void _pushBracket(Subject subj, bool image, CmarkNode inlText) {
-    final b = Bracket(
-      image: image,
-      inlText: inlText,
-      position: subj.pos,
-      previous: subj.lastBracket,
-    );
-
-    if (subj.lastBracket != null) {
-      subj.lastBracket!.bracketAfter = true;
-      b.inBracketImage0 = subj.lastBracket!.inBracketImage0;
-      b.inBracketImage1 = subj.lastBracket!.inBracketImage1;
-    }
-
-    if (image) {
-      b.inBracketImage1 = true;
-    } else {
-      b.inBracketImage0 = true;
-    }
-
-    subj.lastBracket = b;
-    if (!image) {
-      subj.noLinkOpeners = false;
-    }
+  void _pushBracket(Subject subj, bool image, CmarkNode2 inlText) {
+    final b = Bracket2(image: image, inlText: inlText, position: subj.pos, previous: _lastBracket);
+    if (_lastBracket != null) { _lastBracket!.bracketAfter = true; b.inBracketImage0 = _lastBracket!.inBracketImage0; b.inBracketImage1 = _lastBracket!.inBracketImage1; }
+    if (image) { b.inBracketImage1 = true; } else { b.inBracketImage0 = true; }
+    _lastBracket = b;
+    if (!image) _noLinkOpeners = false;
   }
 
-  void _popBracket(Subject subj) {
-    if (subj.lastBracket == null) {
-      return;
-    }
-    subj.lastBracket = subj.lastBracket!.previous;
-  }
+  void _popBracket() { if (_lastBracket != null) _lastBracket = _lastBracket!.previous; }
 
   bool _containsInlines(CmarkNodeType type) {
-    // From cmark: blocks that accept inline content
     switch (type) {
-      case CmarkNodeType.paragraph:
-      case CmarkNodeType.heading:
-      case CmarkNodeType.tableCell:
-        return true;
-      case CmarkNodeType.table:
-      case CmarkNodeType.tableRow:
-      case CmarkNodeType.footnoteDefinition:
-      case CmarkNodeType.document:
-      case CmarkNodeType.blockQuote:
-      case CmarkNodeType.list:
-      case CmarkNodeType.item:
-      case CmarkNodeType.codeBlock:
-      case CmarkNodeType.htmlBlock:
-      case CmarkNodeType.thematicBreak:
-        return false;
-      default:
-        return false;
+      case CmarkNodeType.paragraph: case CmarkNodeType.heading: case CmarkNodeType.tableCell: return true;
+      default: return false;
     }
   }
 
@@ -1330,21 +792,8 @@ class InlineParserV2 {
     return scanLinkTitle(input, offset, result);
   }
 
-  bool _isSpace(int ch) =>
-      ch == 0x20 ||
-      ch == 0x09 ||
-      ch == 0x0A ||
-      ch == 0x0B ||
-      ch == 0x0C ||
-      ch == 0x0D ||
-      ch == 0xA0;
-  bool _isPunct(int ch) {
-    return (ch >= 0x21 && ch <= 0x2F) ||
-        (ch >= 0x3A && ch <= 0x40) ||
-        (ch >= 0x5B && ch <= 0x60) ||
-        (ch >= 0x7B && ch <= 0x7E);
-  }
-
+  bool _isSpace(int ch) => ch == 0x20 || ch == 0x09 || ch == 0x0A || ch == 0x0B || ch == 0x0C || ch == 0x0D || ch == 0xA0;
+  bool _isPunct(int ch) => (ch >= 0x21 && ch <= 0x2F) || (ch >= 0x3A && ch <= 0x40) || (ch >= 0x5B && ch <= 0x60) || (ch >= 0x7B && ch <= 0x7E);
   bool _isUnicodePunct(int ch) => CmarkUtf8.isPunctuation(ch);
 }
 
@@ -1354,163 +803,53 @@ int _scanHtmlTag(Uint8List data, int offset) {
   var i = offset + 1;
   if (i >= len) return 0;
   final ch = data[i];
-
   if (ch == 0x21) {
     if (i + 2 < len && data[i + 1] == 0x2D && data[i + 2] == 0x2D) {
       var j = i + 1;
-      while (j + 2 < len) {
-        if (data[j] == 0x2D && data[j + 1] == 0x2D && data[j + 2] == 0x3E) {
-          return j + 3 - offset;
-        }
-        j++;
-      }
+      while (j + 2 < len) { if (data[j] == 0x2D && data[j + 1] == 0x2D && data[j + 2] == 0x3E) return j + 3 - offset; j++; }
       return 0;
     }
-    if (i + 7 < len &&
-        data[i + 1] == 0x5B &&
-        data[i + 2] == 0x43 &&
-        data[i + 3] == 0x44 &&
-        data[i + 4] == 0x41 &&
-        data[i + 5] == 0x54 &&
-        data[i + 6] == 0x41 &&
-        data[i + 7] == 0x5B) {
+    if (i + 7 < len && data[i + 1] == 0x5B && data[i + 2] == 0x43 && data[i + 3] == 0x44 && data[i + 4] == 0x41 && data[i + 5] == 0x54 && data[i + 6] == 0x41 && data[i + 7] == 0x5B) {
       var j = i + 8;
-      while (j + 2 < len) {
-        if (data[j] == 0x5D && data[j + 1] == 0x5D && data[j + 2] == 0x3E) {
-          return j + 3 - offset;
-        }
-        j++;
-      }
+      while (j + 2 < len) { if (data[j] == 0x5D && data[j + 1] == 0x5D && data[j + 2] == 0x3E) return j + 3 - offset; j++; }
       return 0;
     }
-    var j = i + 1;
-    while (j < len && data[j] != 0x3E) {
-      j++;
-    }
-    if (j == len) return 0;
-    return j + 1 - offset;
+    var j = i + 1; while (j < len && data[j] != 0x3E) j++;
+    if (j == len) return 0; return j + 1 - offset;
   } else if (ch == 0x3F) {
-    var j = i + 1;
-    while (j + 1 < len) {
-      if (data[j] == 0x3F && data[j + 1] == 0x3E) {
-        return j + 2 - offset;
-      }
-      j++;
-    }
-    return 0;
+    var j = i + 1; while (j + 1 < len) { if (data[j] == 0x3F && data[j + 1] == 0x3E) return j + 2 - offset; j++; } return 0;
   } else {
-    var j = i;
-    var isClosing = false;
-    if (data[j] == 0x2F) {
-      isClosing = true;
-      j++;
-      if (j >= len) return 0;
-    }
-    if (!_isAlphaByte(data[j])) return 0;
-    j++;
-    while (j < len && _isAlnumHyphenByte(data[j])) {
-      j++;
-    }
-
-    if (isClosing) {
-      while (j < len && _isHtmlSpace(data[j])) {
-        j++;
-      }
-      if (j < len && data[j] == 0x3E) {
-        return j + 1 - offset;
-      }
-      return 0;
-    }
-
+    var j = i; var isClosing = false;
+    if (data[j] == 0x2F) { isClosing = true; j++; if (j >= len) return 0; }
+    if (!_isAlphaByte(data[j])) return 0; j++;
+    while (j < len && _isAlnumHyphenByte(data[j])) j++;
+    if (isClosing) { while (j < len && _isHtmlSpace(data[j])) j++; if (j < len && data[j] == 0x3E) return j + 1 - offset; return 0; }
     while (j < len) {
       var sawWhitespace = false;
-      while (j < len && _isHtmlSpace(data[j])) {
-        sawWhitespace = true;
-        j++;
-      }
+      while (j < len && _isHtmlSpace(data[j])) { sawWhitespace = true; j++; }
       if (j >= len) return 0;
       final current = data[j];
-      if (current == 0x3E) {
-        return j + 1 - offset;
-      }
-      if (current == 0x2F) {
-        j++;
-        if (j < len && data[j] == 0x3E) {
-          return j + 1 - offset;
-        }
-        return 0;
-      }
-      if (!sawWhitespace) {
-        return 0;
-      }
-      if (!_isAttrNameStart(current)) return 0;
-      j++;
-      while (j < len && _isAttrNameChar(data[j])) {
-        j++;
-      }
-      final whitespaceStart = j;
-      var afterWhitespace = j;
-      while (afterWhitespace < len && _isHtmlSpace(data[afterWhitespace])) {
-        afterWhitespace++;
-      }
+      if (current == 0x3E) return j + 1 - offset;
+      if (current == 0x2F) { j++; if (j < len && data[j] == 0x3E) return j + 1 - offset; return 0; }
+      if (!sawWhitespace) return 0;
+      if (!_isAttrNameStart(current)) return 0; j++;
+      while (j < len && _isAttrNameChar(data[j])) j++;
+      final whitespaceStart = j; var afterWhitespace = j;
+      while (afterWhitespace < len && _isHtmlSpace(data[afterWhitespace])) afterWhitespace++;
       if (afterWhitespace < len && data[afterWhitespace] == 0x3D) {
-        j = afterWhitespace + 1;
-        while (j < len && _isHtmlSpace(data[j])) {
-          j++;
-        }
+        j = afterWhitespace + 1; while (j < len && _isHtmlSpace(data[j])) j++;
         if (j >= len) return 0;
         final quote = data[j];
-        if (quote == 0x22 || quote == 0x27) {
-          j++;
-          while (j < len && data[j] != quote) {
-            j++;
-          }
-          if (j == len) return 0;
-          j++;
-        } else {
-          var hasValue = false;
-          while (j < len) {
-            final valueChar = data[j];
-            if (_isHtmlSpace(valueChar) || valueChar == 0x3E) {
-              break;
-            }
-            if (valueChar == 0x22 ||
-                valueChar == 0x27 ||
-                valueChar == 0x3C ||
-                valueChar == 0x3D ||
-                valueChar == 0x60) {
-              return 0;
-            }
-            hasValue = true;
-            j++;
-          }
-          if (!hasValue) {
-            return 0;
-          }
-        }
-      } else {
-        j = whitespaceStart;
-      }
+        if (quote == 0x22 || quote == 0x27) { j++; while (j < len && data[j] != quote) j++; if (j == len) return 0; j++; }
+        else { var hasValue = false; while (j < len) { final v = data[j]; if (_isHtmlSpace(v) || v == 0x3E) break; if (v == 0x22 || v == 0x27 || v == 0x3C || v == 0x3D || v == 0x60) return 0; hasValue = true; j++; } if (!hasValue) return 0; }
+      } else { j = whitespaceStart; }
     }
   }
   return 0;
 }
 
-bool _isAlphaByte(int byte) =>
-    (byte >= 0x41 && byte <= 0x5A) || (byte >= 0x61 && byte <= 0x7A);
-
-bool _isAlnumHyphenByte(int byte) =>
-    _isAlphaByte(byte) || (byte >= 0x30 && byte <= 0x39) || byte == 0x2D;
-
-bool _isHtmlSpace(int byte) =>
-    byte == 0x20 ||
-    byte == 0x09 ||
-    byte == 0x0A ||
-    byte == 0x0D ||
-    byte == 0x0C;
-
-bool _isAttrNameStart(int byte) =>
-    _isAlphaByte(byte) || byte == 0x5F || byte == 0x3A || byte == 0x2D;
-
-bool _isAttrNameChar(int byte) =>
-    _isAttrNameStart(byte) || (byte >= 0x30 && byte <= 0x39) || byte == 0x2E;
+bool _isAlphaByte(int byte) => (byte >= 0x41 && byte <= 0x5A) || (byte >= 0x61 && byte <= 0x7A);
+bool _isAlnumHyphenByte(int byte) => _isAlphaByte(byte) || (byte >= 0x30 && byte <= 0x39) || byte == 0x2D;
+bool _isHtmlSpace(int byte) => byte == 0x20 || byte == 0x09 || byte == 0x0A || byte == 0x0D || byte == 0x0C;
+bool _isAttrNameStart(int byte) => _isAlphaByte(byte) || byte == 0x5F || byte == 0x3A || byte == 0x2D;
+bool _isAttrNameChar(int byte) => _isAttrNameStart(byte) || (byte >= 0x30 && byte <= 0x39) || byte == 0x2E;

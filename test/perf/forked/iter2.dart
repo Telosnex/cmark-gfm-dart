@@ -1,25 +1,20 @@
-import '../node.dart';
+import 'package:cmark_gfm/cmark_gfm.dart' show CmarkNodeType;
+import 'package:cmark_gfm/src/util/node_iterator.dart' show CmarkEventType;
+import 'node2.dart';
 
-enum CmarkEventType {
-  none,
-  done,
-  enter,
-  exit,
-}
-
-/// Iterator for walking a tree with ENTER/EXIT events.
-class CmarkIter {
-  CmarkIter(CmarkNode root)
+/// CmarkIter ported for CmarkNode2 trees.
+class CmarkIter2 {
+  CmarkIter2(CmarkNode2 root)
       : _root = root,
         _curNode = root,
         _curEventType = CmarkEventType.none,
         _nextNode = root,
         _nextEventType = CmarkEventType.enter;
 
-  final CmarkNode _root;
-  CmarkNode _curNode;
+  final CmarkNode2 _root;
+  CmarkNode2 _curNode;
   CmarkEventType _curEventType;
-  CmarkNode _nextNode;
+  CmarkNode2 _nextNode;
   CmarkEventType _nextEventType;
 
   CmarkEventType next() {
@@ -51,7 +46,7 @@ class CmarkIter {
     return evType;
   }
 
-  bool _isLeaf(CmarkNode node) {
+  bool _isLeaf(CmarkNode2 node) {
     switch (node.type) {
       case CmarkNodeType.htmlBlock:
       case CmarkNodeType.thematicBreak:
@@ -67,6 +62,6 @@ class CmarkIter {
     }
   }
 
-  CmarkNode get node => _curNode;
+  CmarkNode2 get node => _curNode;
   CmarkEventType get eventType => _curEventType;
 }

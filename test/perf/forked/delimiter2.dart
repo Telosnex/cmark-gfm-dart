@@ -1,8 +1,9 @@
-import '../node.dart';
+import 'node2.dart';
 
 /// Delimiter in the delimiter stack (for emphasis/strong/strikethrough matching).
-class Delimiter {
-  Delimiter({
+/// Forked from package delimiter.dart for CmarkNode2.
+class Delimiter2 {
+  Delimiter2({
     required this.delimChar,
     required this.canOpen,
     required this.canClose,
@@ -16,17 +17,18 @@ class Delimiter {
   final int delimChar;
   bool canOpen;
   bool canClose;
-  final CmarkNode inlText;
+  final CmarkNode2 inlText;
   final int position;
   int length;
-  Delimiter? previous;
-  Delimiter? next;
+  Delimiter2? previous;
+  Delimiter2? next;
   bool active = true;
 }
 
 /// Bracket in the bracket stack (for link/image matching).
-class Bracket {
-  Bracket({
+/// Forked from package delimiter.dart for CmarkNode2.
+class Bracket2 {
+  Bracket2({
     required this.image,
     required this.inlText,
     required this.position,
@@ -34,11 +36,11 @@ class Bracket {
   });
 
   final bool image;
-  final CmarkNode inlText;
+  final CmarkNode2 inlText;
   final int position;
   bool active = true;
   bool bracketAfter = false;
   bool inBracketImage0 = false;
   bool inBracketImage1 = false;
-  Bracket? previous;
+  Bracket2? previous;
 }

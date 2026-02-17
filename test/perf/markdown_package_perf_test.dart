@@ -10,11 +10,11 @@ import 'package:test/test.dart';
 
 import 'perf_tester.dart';
 
-Future<void> main(List<String> args) async {
-  if (args.contains('--bench')) {
-    await runMarkdownPackagePerfTest();
-    return;
-  }
+Future<void> main() async {
+  // if (args.contains('--bench')) {
+  //   await runMarkdownPackagePerfTest();
+  //   return;
+  // }
 
   test('dart markdown vs cmark_gfm performance', skip: true, () async {
     await runMarkdownPackagePerfTest();
@@ -49,7 +49,7 @@ Future<void> runMarkdownPackagePerfTest() async {
       return document.parseLines(input.split('\n'));
     },
     implementation2: (input) {
-      final parser = BlockParserV2(
+      final parser = BlockParser(
         parserOptions: const CmarkParserOptions(enableMath: true),
       );
       parser.feed(input);
