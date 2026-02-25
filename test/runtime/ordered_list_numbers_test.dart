@@ -79,8 +79,6 @@ List<int> _collectListItemNumbers(CmarkNode node) {
 
 void _walkForItems(CmarkNode node, List<int> numbers) {
   if (node.type == CmarkNodeType.item) {
-    // TODO: This will fail until we add originalNumber field
-    // For now, this accesses listData.start which is only the list's start
     numbers.add(node.listData.start);
   }
   var child = node.firstChild;
