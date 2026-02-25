@@ -35,6 +35,39 @@ void main() {
       expect(html, '<p>Hello <code>code</code> world</p>\n');
     });
 
+    test('backtick cache not poisoned by failed long-backtick scan', () {
+      // A failed 4-backtick scan records all single-backtick positions.
+      // A successful 1-backtick scan must not overwrite those positions
+      // with lower values, or later 1-backtick pairs silently fail.
+      final parser = CmarkParser();
+      parser.feed(r'````a`b`c`d`e');
+      final doc = parser.finish();
+      final html = HtmlRenderer().render(doc);
+      expect(html, '<p>````a<code>b</code>c<code>d</code>e</p>\n');
+    });
+
+    test('backtick cache: code spans in table after unmatched 4-backtick', () {
+      // Real-world case: a table cell containing ````lua` plus later
+      // `code` spans. The 4-backtick run fails to match, then the
+      // first 1-backtick match must not poison the cache so that
+      // subsequent 1-backtick pairs still work.
+      final parser = CmarkParser();
+      parser.feed(
+        '| # | Fix |\n'
+        '|---|-----|\n'
+        '| 2 | Restored content in ````lua` block + response. '
+            'Restored `Icons.calculate` icon and `"Code"` fallback label |\n',
+      );
+      final doc = parser.finish();
+      final html = HtmlRenderer().render(doc);
+      // Three code spans: "block + response. Restored", "icon and", and the
+      // unmatched trailing backtick stays literal.
+      expect(html, contains('<code>block + response. Restored</code>'));
+      expect(html, contains('<code>icon and</code>'));
+      expect(html, contains('Icons.calculate'));
+      expect(html, isNot(contains('<code>Icons.calculate</code>')));
+    });
+
     test('renders heading', () {
       final parser = CmarkParser();
       parser.feed('# Heading');

@@ -48,7 +48,11 @@ class Subject {
 
   void recordBacktickRun(int len, int position) {
     if (len <= maxBackticks) {
-      backticks[len] = position;
+      // Only update if further forward — a successful early-terminating scan
+      // must not overwrite a higher position recorded by a prior full scan.
+      if (position > backticks[len]) {
+        backticks[len] = position;
+      }
       if (len > _maxBacktickLen) {
         _maxBacktickLen = len;
       }
