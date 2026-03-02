@@ -10,6 +10,10 @@ class HtmlRenderer {
   final StringBuffer _output = StringBuffer();
   bool _inTableHeader = false;
   bool _needClosingTableBody = false;
+  // GFM tables require a header row. Sometimes it is odd to the LLM to include
+  // labels on them, so it renders as empty. If the header cells are empty,
+  // skip rendering.
+  bool _skipTableHeader = false;
   CmarkNode?
       _plainTextMode; // When set, render children as plain text (for image alt)
   bool _inFootnoteSection = false;
@@ -19,6 +23,7 @@ class HtmlRenderer {
     _output.clear();
     _inTableHeader = false;
     _needClosingTableBody = false;
+    _skipTableHeader = false;
     _plainTextMode = null;
     _footnotesWithInlineBackrefs.clear();
     _inFootnoteSection = false;
@@ -230,6 +235,17 @@ class HtmlRenderer {
       case CmarkNodeType.tableRow:
         if (entering) {
           if (node.tableRowData.isHeader) {
+            // Skip empty header rows (all cells have no content)
+            var allEmpty = true;
+            var cell = node.firstChild;
+            while (cell != null) {
+              if (cell.firstChild != null) { allEmpty = false; break; }
+              cell = cell.next;
+            }
+            if (allEmpty) {
+              _skipTableHeader = true;
+              break;
+            }
             _inTableHeader = true;
             _output.write('<thead>\n');
           } else if (!_needClosingTableBody) {
@@ -238,6 +254,10 @@ class HtmlRenderer {
           }
           _output.write('<tr>\n');
         } else {
+          if (_skipTableHeader) {
+            _skipTableHeader = false;
+            break;
+          }
           _output.write('</tr>\n');
           if (node.tableRowData.isHeader) {
             _output.write('</thead>\n');
@@ -246,6 +266,7 @@ class HtmlRenderer {
         }
         break;
       case CmarkNodeType.tableCell:
+        if (_skipTableHeader) break;
         if (entering) {
           final align = node.tableCellData.align;
           final tag = _inTableHeader ? 'th' : 'td';
