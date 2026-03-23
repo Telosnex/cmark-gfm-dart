@@ -217,8 +217,16 @@ class InlineParser {
   CmarkNode? _tryParseMath(Subject subj, int leadingChar) {
     if (leadingChar == 0x5C && mathOptions.allowBracketDelimiters) {
       final next = subj.peekCharN(1);
-      if (next == 0x28 || next == 0x5B) {
-        return _parseBracketMath(subj, display: next == 0x5B);
+      if (next == 0x28) {
+        // \( inline math — works anywhere
+        return _parseBracketMath(subj, display: false);
+      }
+      if (next == 0x5B) {
+        // \[ display math — only at start of content (like real LaTeX)
+        if (_isAtStartOfContent(subj)) {
+          return _parseBracketMath(subj, display: true);
+        }
+        return null;
       }
       return null;
     }
@@ -383,6 +391,18 @@ class InlineParser {
   }
 
   String _normalizeInlineMathLiteral(String literal) => literal.trim();
+
+  /// Returns true if [subj] is at position 0 or preceded only by whitespace.
+  /// Used to restrict \[...\] display math to start-of-line, matching LaTeX.
+  bool _isAtStartOfContent(Subject subj) {
+    final pos = subj.pos;
+    if (pos == 0) return true;
+    for (var i = 0; i < pos; i++) {
+      final ch = subj.input[i];
+      if (ch != 0x20 && ch != 0x09) return false;
+    }
+    return true;
+  }
 
   CmarkNode _makeStr(Subject subj, int startCol, int endCol, String text) {
     final node = CmarkNode(CmarkNodeType.text)
