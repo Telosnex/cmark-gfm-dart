@@ -326,7 +326,8 @@ class InlineParser {
         if (contentEnd > contentStart) {
           final before = subj.peekAt(contentEnd - 1);
           if (before == 0x20 || before == 0x09 || before == 0x2F ||
-              before == 0x3F || before == 0x3D || before == 0x26) { subj.advance(); continue; }
+              before == 0x3F || before == 0x3D || before == 0x26 ||
+              before == 0x22) { subj.advance(); continue; }
         } else { subj.pos = start; return null; }
         final after = subj.peekCharN(1);
         if (_isDigit(after)) { subj.advance(); continue; }

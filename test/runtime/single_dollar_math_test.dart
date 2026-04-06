@@ -127,6 +127,15 @@ void main() {
       expect(html, isNot(contains('class="math')));
     });
 
+    test('rejects: shell variables in quotes "\$VAR"', () {
+      final html = render(
+        r'"$JAVA_BIN" -XX:+UseParallelGC -cp "$TLA_JAR" tlc2.TLC',
+      );
+      expect(html, isNot(contains('class="math')));
+      expect(html, contains(r'$JAVA_BIN'));
+      expect(html, contains(r'$TLA_JAR'));
+    });
+
     test('mixed: currency and math in same line', () {
       final html = render(r'For $20, you get $x^2$ calculations.');
       // $20 should stay as text (digit after closing would need another $)
