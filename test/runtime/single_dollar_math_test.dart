@@ -136,6 +136,27 @@ void main() {
       expect(html, contains(r'$TLA_JAR'));
     });
 
+    test('rejects: Dart string interpolation and generated class names', () {
+      final html = render(r'''
+loggy.warning('🚪 Channel subscription closed for $channelName');
+'❌ Channel subscription error for $channelName: $error',
+callback: (payload) => _handleBroadcastEvent('UPDATE', payload),
+.onBroadcast(
+  event: '${tableName}_delete',
+  callback: (payload) => _handleBroadcastEvent('DELETE', payload),
+);
+loggy.info('[rt] ✅ Successfully subscribed to channel $channelName');
+loggy.error('[rt] ⏰ Channel subscription timed out for $channelName');
+loggy.warning('[rt] 🚪 Channel subscription closed for $channelName');
+class SupaBroadcastNotifier extends _$SupaBroadcastNotifier with UiLoggy {}
+''');
+      expect(html, isNot(contains('class="math')));
+      expect(html, contains(r'$channelName'));
+      expect(html, contains(r'$error'));
+      expect(html, contains(r'${tableName}_delete'));
+      expect(html, contains(r'_$SupaBroadcastNotifier'));
+    });
+
     test('mixed: currency and math in same line', () {
       final html = render(r'For $20, you get $x^2$ calculations.');
       // $20 should stay as text (digit after closing would need another $)

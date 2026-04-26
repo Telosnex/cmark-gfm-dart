@@ -327,7 +327,10 @@ class InlineParser {
           final before = subj.peekAt(contentEnd - 1);
           if (before == 0x20 || before == 0x09 || before == 0x2F ||
               before == 0x3F || before == 0x3D || before == 0x26 ||
-              before == 0x22) { subj.advance(); continue; }
+              before == 0x22 || before == 0x27 || before == 0x5F) { 
+                subj.advance(); 
+                continue; 
+              }
         } else { subj.pos = start; return null; }
         final after = subj.peekCharN(1);
         if (_isDigit(after)) { subj.advance(); continue; }
@@ -350,7 +353,7 @@ class InlineParser {
     return null;
   }
 
-  bool _isWordChar(int ch) => (ch >= 0x30 && ch <= 0x39) || (ch >= 0x41 && ch <= 0x5A) || (ch >= 0x61 && ch <= 0x7A);
+  bool _isWordChar(int ch) => ch == 0x5F || (ch >= 0x30 && ch <= 0x39) || (ch >= 0x41 && ch <= 0x5A) || (ch >= 0x61 && ch <= 0x7A);
   bool _isDigit(int ch) => ch >= 0x30 && ch <= 0x39;
   bool _isLetter(int ch) => (ch >= 0x41 && ch <= 0x5A) || (ch >= 0x61 && ch <= 0x7A);
 
