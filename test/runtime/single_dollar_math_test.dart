@@ -136,6 +136,19 @@ void main() {
       expect(html, contains(r'$TLA_JAR'));
     });
 
+    test('accepts known ambiguity: shell cache path is valid-enough TeX', () {
+      final html = render(
+        r'Path Description$HOME/.pub-cache Dart cache$HOME/.gradle/caches '
+        r'Gradle cache. Note: do not cache $HOME/.gradle$HOME/Library/'
+        r'Caches/CocoaPods CocoaPods cache',
+      );
+
+      // Deliberately document that `$HOME/.gradle$` is parsed as math. Avoid
+      // shell-path heuristics that would also reject valid TeX expressions.
+      expect(html, contains('class="math math-inline"'));
+      expect(html, contains('data-latex="HOME/.gradle"'));
+    });
+
     test('rejects: Dart string interpolation and generated class names', () {
       final html = render(r'''
 loggy.warning('🚪 Channel subscription closed for $channelName');
