@@ -704,9 +704,15 @@ class BlockParser {
     var iterations = 0;
     final maybeLazy = current.type == CmarkNodeType.paragraph;
 
+    // A math block owns every non-closing line, even when that line happens
+    // to look like another block opener (for example, a standalone `+` is a
+    // valid LaTeX operator but also a potential bullet-list marker). The
+    // continuation check already handled the closing delimiter, so do not
+    // open nested Markdown blocks while a math block remains active.
     while (container.type != CmarkNodeType.codeBlock &&
         container.type != CmarkNodeType.htmlBlock &&
-        container.type != CmarkNodeType.table) {
+        container.type != CmarkNodeType.table &&
+        container.type != CmarkNodeType.mathBlock) {
       iterations++;
       if (iterations > 50) {
         throw StateError('Infinite loop in _openNewBlocks');
