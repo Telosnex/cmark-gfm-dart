@@ -313,11 +313,17 @@ class InlineParser {
     var seenWhitespace = false;
     var hasEarlyMathIndicator = false;
     var hasOperator = false;
+    var hasLatexCommand = false;
     while (!subj.isEof()) {
       final ch = subj.peekChar();
       if (ch == 0x20 || ch == 0x09) seenWhitespace = true;
       if (!seenWhitespace && (_isLetter(ch) || ch == 0x5C || ch == 0x7B || ch == 0x7D)) {
         hasEarlyMathIndicator = true;
+      }
+      // A TeX control word is decisive even when numeric content and spaces
+      // would otherwise resemble a pair of currency amounts.
+      if (ch == 0x5C && _isLetter(subj.peekCharN(1))) {
+        hasLatexCommand = true;
       }
       if (ch == 0x3D || ch == 0x2B || ch == 0x3C || ch == 0x3E) hasOperator = true;
       if (ch == 0x0A || ch == 0x0D) { subj.pos = start; return null; }
@@ -334,7 +340,8 @@ class InlineParser {
         } else { subj.pos = start; return null; }
         final after = subj.peekCharN(1);
         if (_isDigit(after)) { subj.advance(); continue; }
-        if (startsWithDigit && seenWhitespace && !hasEarlyMathIndicator && !hasOperator) {
+        if (startsWithDigit && seenWhitespace && !hasEarlyMathIndicator &&
+            !hasOperator && !hasLatexCommand) {
           subj.advance(); continue;
         }
         final bytes = Uint8List.sublistView(subj.input, contentStart, contentEnd);

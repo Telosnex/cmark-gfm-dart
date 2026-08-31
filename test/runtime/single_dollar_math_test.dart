@@ -220,6 +220,21 @@ class SupaBroadcastNotifier extends _$SupaBroadcastNotifier with UiLoggy {}
       expect(html, contains(r'1048576 = 2^{20}'));
     });
 
+    test('numeric math with a LaTeX command after whitespace', () {
+      final html = render(
+        r'2. **Curvilinear Organic Filigree**: Each binary module is shaped '
+        r'as a contoured petal ribbon that tapers smoothly toward its edges '
+        r'($1.0 - 0.25 \sin(\pi \cdot \text{localRing})$), with inter-element '
+        r'spacing controlled dynamically by `uWeaveSpacing`.',
+      );
+
+      expect(html, contains('class="math math-inline"'));
+      expect(
+        html,
+        contains(r'data-latex="1.0 - 0.25 \sin(\pi \cdot \text{localRing})"'),
+      );
+    });
+
     test('preserves double-dollar precedence', () {
       final html = render(r'Display $$E=mc^2$$ math.');
       expect(html, contains('math-display'));
