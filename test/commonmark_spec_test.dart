@@ -4,6 +4,13 @@ import 'package:test/test.dart';
 // Generated from cmark-gfm/test/spec.txt
 // DO NOT EDIT - regenerate with tool/generate_spec_tests.dart
 
+// The upstream CommonMark spec does not enable GFM autolinks.
+CmarkParser _createCommonmarkParser() => CmarkParser(
+      options: const CmarkParserOptions(
+        enableAutolinkExtension: false,
+      ),
+    );
+
 void main() {
   group('CommonMark Spec Tests', () {
     test('Tabs - Example 1', () {
@@ -11,7 +18,7 @@ void main() {
       final expected = '''<pre><code>foo	baz		bim
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -24,7 +31,7 @@ void main() {
       final expected = '''<pre><code>foo	baz		bim
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -39,7 +46,7 @@ void main() {
 ὐ	a
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -58,7 +65,7 @@ void main() {
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -78,7 +85,7 @@ void main() {
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -93,7 +100,7 @@ void main() {
 </code></pre>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -110,7 +117,7 @@ void main() {
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -125,7 +132,7 @@ void main() {
 bar
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -149,7 +156,7 @@ bar
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -161,7 +168,7 @@ bar
       final markdown = '''#	Foo''';
       final expected = '''<h1>Foo</h1>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -173,7 +180,7 @@ bar
       final markdown = '''*	*	*	''';
       final expected = '''<hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -189,7 +196,7 @@ bar
 <li>two`</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -205,7 +212,7 @@ ___''';
 <hr />
 <hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -217,7 +224,7 @@ ___''';
       final markdown = '''+++''';
       final expected = '''<p>+++</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -229,7 +236,7 @@ ___''';
       final markdown = '''===''';
       final expected = '''<p>===</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -245,7 +252,7 @@ __''';
 **
 __</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -261,7 +268,7 @@ __</p>''';
 <hr />
 <hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -274,7 +281,7 @@ __</p>''';
       final expected = '''<pre><code>***
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -288,7 +295,7 @@ __</p>''';
       final expected = '''<p>Foo
 ***</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -300,7 +307,7 @@ __</p>''';
       final markdown = '''_____________________________________''';
       final expected = '''<hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -312,7 +319,7 @@ __</p>''';
       final markdown = ''' - - -''';
       final expected = '''<hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -324,7 +331,7 @@ __</p>''';
       final markdown = ''' **  * ** * ** * **''';
       final expected = '''<hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -336,7 +343,7 @@ __</p>''';
       final markdown = '''-     -      -      -''';
       final expected = '''<hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -348,7 +355,7 @@ __</p>''';
       final markdown = '''- - - -    ''';
       final expected = '''<hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -366,7 +373,7 @@ a------
 <p>a------</p>
 <p>---a---</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -378,7 +385,7 @@ a------
       final markdown = ''' *-*''';
       final expected = '''<p><em>-</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -398,7 +405,7 @@ a------
 <li>bar</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -414,7 +421,7 @@ bar''';
 <hr />
 <p>bar</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -429,7 +436,7 @@ bar''';
       final expected = '''<h2>Foo</h2>
 <p>bar</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -449,7 +456,7 @@ bar''';
 <li>Bar</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -467,7 +474,7 @@ bar''';
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -489,7 +496,7 @@ bar''';
 <h5>foo</h5>
 <h6>foo</h6>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -501,7 +508,7 @@ bar''';
       final markdown = '''####### foo''';
       final expected = '''<p>####### foo</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -516,7 +523,7 @@ bar''';
       final expected = '''<p>#5 bolt</p>
 <p>#hashtag</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -528,7 +535,7 @@ bar''';
       final markdown = '''\\## foo''';
       final expected = '''<p>## foo</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -540,7 +547,7 @@ bar''';
       final markdown = '''# foo *bar* \\*baz\\*''';
       final expected = '''<h1>foo <em>bar</em> *baz*</h1>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -552,7 +559,7 @@ bar''';
       final markdown = '''#                  foo                     ''';
       final expected = '''<h1>foo</h1>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -568,7 +575,7 @@ bar''';
 <h2>foo</h2>
 <h1>foo</h1>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -581,7 +588,7 @@ bar''';
       final expected = '''<pre><code># foo
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -595,7 +602,7 @@ bar''';
       final expected = '''<p>foo
 # bar</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -609,7 +616,7 @@ bar''';
       final expected = '''<h2>foo</h2>
 <h3>bar</h3>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -623,7 +630,7 @@ bar''';
       final expected = '''<h1>foo</h1>
 <h5>foo</h5>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -635,7 +642,7 @@ bar''';
       final markdown = '''### foo ###     ''';
       final expected = '''<h3>foo</h3>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -647,7 +654,7 @@ bar''';
       final markdown = '''### foo ### b''';
       final expected = '''<h3>foo ### b</h3>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -659,7 +666,7 @@ bar''';
       final markdown = '''# foo#''';
       final expected = '''<h1>foo#</h1>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -675,7 +682,7 @@ bar''';
 <h2>foo ###</h2>
 <h1>foo #</h1>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -691,7 +698,7 @@ bar''';
 <h2>foo</h2>
 <hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -707,7 +714,7 @@ Bar foo''';
 <h1>baz</h1>
 <p>Bar foo</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -723,7 +730,7 @@ Bar foo''';
 <h1></h1>
 <h3></h3>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -740,7 +747,7 @@ Foo *bar*
       final expected = '''<h1>Foo <em>bar</em></h1>
 <h2>Foo <em>bar</em></h2>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -755,7 +762,7 @@ baz*
       final expected = '''<h1>Foo <em>bar
 baz</em></h1>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -770,7 +777,7 @@ baz*
       final expected = '''<h1>Foo <em>bar
 baz</em></h1>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -787,7 +794,7 @@ Foo
       final expected = '''<h2>Foo</h2>
 <h1>Foo</h1>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -808,7 +815,7 @@ Foo
 <h2>Foo</h2>
 <h1>Foo</h1>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -829,7 +836,7 @@ Foo
 </code></pre>
 <hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -842,7 +849,7 @@ Foo
    ----      ''';
       final expected = '''<h2>Foo</h2>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -856,7 +863,7 @@ Foo
       final expected = '''<p>Foo
 ---</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -875,7 +882,7 @@ Foo
 <p>Foo</p>
 <hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -888,7 +895,7 @@ Foo
 -----''';
       final expected = '''<h2>Foo</h2>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -901,7 +908,7 @@ Foo
 ----''';
       final expected = '''<h2>Foo\\</h2>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -922,7 +929,7 @@ of dashes"/>''';
 <h2>&lt;a title=&quot;a lot</h2>
 <p>of dashes&quot;/&gt;</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -938,7 +945,7 @@ of dashes"/>''';
 </blockquote>
 <hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -956,7 +963,7 @@ bar
 ===</p>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -972,7 +979,7 @@ bar
 </ul>
 <hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -987,7 +994,7 @@ Bar
       final expected = '''<h2>Foo
 Bar</h2>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1007,7 +1014,7 @@ Baz''';
 <h2>Bar</h2>
 <p>Baz</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1020,7 +1027,7 @@ Baz''';
 ====''';
       final expected = '''<p>====</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1034,7 +1041,7 @@ Baz''';
       final expected = '''<hr />
 <hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1050,7 +1057,7 @@ Baz''';
 </ul>
 <hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1065,7 +1072,7 @@ Baz''';
 </code></pre>
 <hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1081,7 +1088,7 @@ Baz''';
 </blockquote>
 <hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1094,7 +1101,7 @@ Baz''';
 ------''';
       final expected = '''<h2>&gt; foo</h2>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1112,7 +1119,7 @@ baz''';
 <h2>bar</h2>
 <p>baz</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1132,7 +1139,7 @@ bar</p>
 <hr />
 <p>baz</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1150,7 +1157,7 @@ bar</p>
 <hr />
 <p>baz</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1168,7 +1175,7 @@ bar
 ---
 baz</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1183,7 +1190,7 @@ baz</p>''';
   indented code block
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1202,7 +1209,7 @@ baz</p>''';
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1223,7 +1230,7 @@ baz</p>''';
 </li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1242,7 +1249,7 @@ baz</p>''';
 - one
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1267,7 +1274,7 @@ chunk2
 chunk3
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1284,7 +1291,7 @@ chunk3
   chunk2
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1299,7 +1306,7 @@ chunk3
       final expected = '''<p>Foo
 bar</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1314,7 +1321,7 @@ bar''';
 </code></pre>
 <p>bar</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1337,7 +1344,7 @@ Heading
 </code></pre>
 <hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1352,7 +1359,7 @@ Heading
 bar
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1369,7 +1376,7 @@ bar
       final expected = '''<pre><code>foo
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1382,7 +1389,7 @@ bar
       final expected = '''<pre><code>foo  
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1399,7 +1406,7 @@ bar
  &gt;
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1416,7 +1423,7 @@ bar
  &gt;
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1430,7 +1437,7 @@ foo
 ``''';
       final expected = '''<p><code>foo</code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1447,7 +1454,7 @@ aaa
 ~~~
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1464,7 +1471,7 @@ aaa
 ```
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1481,7 +1488,7 @@ aaa
 ```
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1498,7 +1505,7 @@ aaa
 ~~~
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1510,7 +1517,7 @@ aaa
       final markdown = '''```''';
       final expected = '''<pre><code></code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1528,7 +1535,7 @@ aaa''';
 aaa
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1547,7 +1554,7 @@ bbb''';
 </blockquote>
 <p>bbb</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1564,7 +1571,7 @@ bbb''';
   
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1577,7 +1584,7 @@ bbb''';
 ```''';
       final expected = '''<pre><code></code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1594,7 +1601,7 @@ aaa
 aaa
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1613,7 +1620,7 @@ aaa
 aaa
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1632,7 +1639,7 @@ aaa
 aaa
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1649,7 +1656,7 @@ aaa
 ```
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1664,7 +1671,7 @@ aaa
       final expected = '''<pre><code>aaa
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1679,7 +1686,7 @@ aaa
       final expected = '''<pre><code>aaa
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1695,7 +1702,7 @@ aaa
     ```
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1709,7 +1716,7 @@ aaa''';
       final expected = '''<p><code> </code>
 aaa</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1725,7 +1732,7 @@ aaa
 ~~~ ~~
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1744,7 +1751,7 @@ baz''';
 </code></pre>
 <p>baz</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1764,7 +1771,7 @@ bar
 </code></pre>
 <h1>baz</h1>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1783,7 +1790,7 @@ end
 end
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1802,7 +1809,7 @@ end
 end
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1815,7 +1822,7 @@ end
 ````''';
       final expected = '''<pre><code class="language-;"></code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1829,7 +1836,7 @@ foo''';
       final expected = '''<p><code>aa</code>
 foo</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1844,7 +1851,7 @@ foo
       final expected = '''<pre><code class="language-aa">foo
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1859,7 +1866,7 @@ foo
       final expected = '''<pre><code>``` aaa
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1882,7 +1889,7 @@ _world_.
 </pre></p>
 </td></tr></table>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1909,7 +1916,7 @@ okay.''';
 </table>
 <p>okay.</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1925,7 +1932,7 @@ okay.''';
   *hello*
          <foo><a>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1939,7 +1946,7 @@ okay.''';
       final expected = '''</div>
 *foo*''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1957,7 +1964,7 @@ okay.''';
 <p><em>Markdown</em></p>
 </DIV>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1973,7 +1980,7 @@ okay.''';
   class="bar">
 </div>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -1989,7 +1996,7 @@ okay.''';
   baz">
 </div>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2006,7 +2013,7 @@ okay.''';
 *foo*
 <p><em>bar</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2020,7 +2027,7 @@ okay.''';
       final expected = '''<div id="foo"
 *hi*''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2034,7 +2041,7 @@ foo''';
       final expected = '''<div class
 foo''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2048,7 +2055,7 @@ foo''';
       final expected = '''<div *???-&&&-<---
 *foo*''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2060,7 +2067,7 @@ foo''';
       final markdown = '''<div><a href="bar">*foo*</a></div>''';
       final expected = '''<div><a href="bar">*foo*</a></div>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2076,7 +2083,7 @@ foo
 foo
 </td></tr></table>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2094,7 +2101,7 @@ int x = 33;
 int x = 33;
 ```''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2110,7 +2117,7 @@ int x = 33;
 *bar*
 </a>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2126,7 +2133,7 @@ int x = 33;
 *bar*
 </Warning>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2142,7 +2149,7 @@ int x = 33;
 *bar*
 </i>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2156,7 +2163,7 @@ int x = 33;
       final expected = '''</ins>
 *bar*''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2172,7 +2179,7 @@ int x = 33;
 *foo*
 </del>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2190,7 +2197,7 @@ int x = 33;
 <p><em>foo</em></p>
 </del>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2202,7 +2209,7 @@ int x = 33;
       final markdown = '''<del>*foo*</del>''';
       final expected = '''<p><del><em>foo</em></del></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2226,7 +2233,7 @@ main = print \$ parseTags tags
 </code></pre>
 <p>okay</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2248,7 +2255,7 @@ document.getElementById("demo").innerHTML = "Hello JavaScript!";
 </script>
 <p>okay</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2272,7 +2279,7 @@ p {color:blue;}
 </style>
 <p>okay</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2290,7 +2297,7 @@ foo''';
 
 foo''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2309,7 +2316,7 @@ foo
 </blockquote>
 <p>bar</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2327,7 +2334,7 @@ foo
 <li>foo</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2341,7 +2348,7 @@ foo
       final expected = '''<style>p{color:red;}</style>
 <p><em>foo</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2355,7 +2362,7 @@ foo
       final expected = '''<!-- foo -->*bar*
 <p><em>baz</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2371,7 +2378,7 @@ foo
 foo
 </script>1. *bar*''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2391,7 +2398,7 @@ bar
    baz -->
 <p>okay</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2413,7 +2420,7 @@ okay''';
 ?>
 <p>okay</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2425,7 +2432,7 @@ okay''';
       final markdown = '''<!DOCTYPE html>''';
       final expected = '''<!DOCTYPE html>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2461,7 +2468,7 @@ function matchwo(a,b)
 ]]>
 <p>okay</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2477,7 +2484,7 @@ function matchwo(a,b)
 <pre><code>&lt;!-- foo --&gt;
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2493,7 +2500,7 @@ function matchwo(a,b)
 <pre><code>&lt;div&gt;
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2511,7 +2518,7 @@ bar
 bar
 </div>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2529,7 +2536,7 @@ bar
 </div>
 *foo*''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2545,7 +2552,7 @@ baz''';
 <a href="bar">
 baz</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2563,7 +2570,7 @@ baz</p>''';
 <p><em>Emphasized</em> text.</p>
 </div>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2579,7 +2586,7 @@ baz</p>''';
 *Emphasized* text.
 </div>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2607,7 +2614,7 @@ Hi
 </tr>
 </table>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2636,7 +2643,7 @@ Hi
   </tr>
 </table>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2650,7 +2657,7 @@ Hi
 [foo]''';
       final expected = '''<p><a href="/url" title="title">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2666,7 +2673,7 @@ Hi
 [foo]''';
       final expected = '''<p><a href="/url" title="the title">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2680,7 +2687,7 @@ Hi
 [Foo*bar\\]]''';
       final expected = '''<p><a href="my_(url)" title="title (with parens)">Foo*bar]</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2696,7 +2703,7 @@ Hi
 [Foo bar]''';
       final expected = '''<p><a href="my%20url" title="title">Foo bar</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2718,7 +2725,7 @@ line1
 line2
 ">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2736,7 +2743,7 @@ with blank line'
 <p>with blank line'</p>
 <p>[foo]</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2751,7 +2758,7 @@ with blank line'
 [foo]''';
       final expected = '''<p><a href="/url">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2766,7 +2773,7 @@ with blank line'
       final expected = '''<p>[foo]:</p>
 <p>[foo]</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2780,7 +2787,7 @@ with blank line'
 [foo]''';
       final expected = '''<p><a href="">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2795,7 +2802,7 @@ with blank line'
       final expected = '''<p>[foo]: <bar>(baz)</p>
 <p>[foo]</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2809,7 +2816,7 @@ with blank line'
 [foo]''';
       final expected = '''<p><a href="/url%5Cbar*baz" title="foo&quot;bar\\baz">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2823,7 +2830,7 @@ with blank line'
 [foo]: url''';
       final expected = '''<p><a href="url">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2838,7 +2845,7 @@ with blank line'
 [foo]: second''';
       final expected = '''<p><a href="first">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2852,7 +2859,7 @@ with blank line'
 [Foo]''';
       final expected = '''<p><a href="/url">Foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2866,7 +2873,7 @@ with blank line'
 [αγω]''';
       final expected = '''<p><a href="/%CF%86%CE%BF%CF%85">αγω</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2878,7 +2885,7 @@ with blank line'
       final markdown = '''[foo]: /url''';
       final expected = '''''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2893,7 +2900,7 @@ foo
 bar''';
       final expected = '''<p>bar</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2905,7 +2912,7 @@ bar''';
       final markdown = '''[foo]: /url "title" ok''';
       final expected = '''<p>[foo]: /url &quot;title&quot; ok</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2918,7 +2925,7 @@ bar''';
 "title" ok''';
       final expected = '''<p>&quot;title&quot; ok</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2934,7 +2941,7 @@ bar''';
 </code></pre>
 <p>[foo]</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2952,7 +2959,7 @@ bar''';
 </code></pre>
 <p>[foo]</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2969,7 +2976,7 @@ bar''';
 [bar]: /baz</p>
 <p>[bar]</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -2986,7 +2993,7 @@ bar''';
 <p>bar</p>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3002,7 +3009,7 @@ bar
       final expected = '''<h1>bar</h1>
 <p><a href="/url">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3017,7 +3024,7 @@ bar
       final expected = '''<p>===
 <a href="/url">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3038,7 +3045,7 @@ bar
 <a href="/bar-url" title="bar">bar</a>,
 <a href="/baz-url">baz</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3054,7 +3061,7 @@ bar
 <blockquote>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3066,7 +3073,7 @@ bar
       final markdown = '''[foo]: /url''';
       final expected = '''''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3081,7 +3088,7 @@ bbb''';
       final expected = '''<p>aaa</p>
 <p>bbb</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3100,7 +3107,7 @@ bbb</p>
 <p>ccc
 ddd</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3116,7 +3123,7 @@ bbb''';
       final expected = '''<p>aaa</p>
 <p>bbb</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3130,7 +3137,7 @@ bbb''';
       final expected = '''<p>aaa
 bbb</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3146,7 +3153,7 @@ bbb</p>''';
 bbb
 ccc</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3160,7 +3167,7 @@ bbb''';
       final expected = '''<p>aaa
 bbb</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3175,7 +3182,7 @@ bbb''';
 </code></pre>
 <p>bbb</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3189,7 +3196,7 @@ bbb     ''';
       final expected = '''<p>aaa<br />
 bbb</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3209,7 +3216,7 @@ aaa
       final expected = '''<p>aaa</p>
 <h1>aaa</h1>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3227,7 +3234,7 @@ aaa
 baz</p>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3245,7 +3252,7 @@ baz</p>
 baz</p>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3263,7 +3270,7 @@ baz</p>
 baz</p>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3280,7 +3287,7 @@ baz</p>
 &gt; baz
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3298,7 +3305,7 @@ baz''';
 baz</p>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3316,7 +3323,7 @@ baz
 foo</p>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3332,7 +3339,7 @@ foo</p>
 </blockquote>
 <hr />''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3352,7 +3359,7 @@ foo</p>
 <li>bar</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3370,7 +3377,7 @@ foo</p>
 <pre><code>bar
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3388,7 +3395,7 @@ foo
 <p>foo</p>
 <pre><code></code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3404,7 +3411,7 @@ foo
 - bar</p>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3417,7 +3424,7 @@ foo
       final expected = '''<blockquote>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3432,7 +3439,7 @@ foo
       final expected = '''<blockquote>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3448,7 +3455,7 @@ foo
 <p>foo</p>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3467,7 +3474,7 @@ foo
 <p>bar</p>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3483,7 +3490,7 @@ foo
 bar</p>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3500,7 +3507,7 @@ bar</p>
 <p>bar</p>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3516,7 +3523,7 @@ bar</p>
 <p>bar</p>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3536,7 +3543,7 @@ bar</p>
 <p>bbb</p>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3552,7 +3559,7 @@ baz''';
 baz</p>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3569,7 +3576,7 @@ baz''';
 </blockquote>
 <p>baz</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3586,7 +3593,7 @@ baz''';
 </blockquote>
 <p>baz</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3606,7 +3613,7 @@ bar</p>
 </blockquote>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3628,7 +3635,7 @@ baz</p>
 </blockquote>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3648,7 +3655,7 @@ baz</p>
 <p>not code</p>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3671,7 +3678,7 @@ with two lines.</p>
 <p>A block quote.</p>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3698,7 +3705,7 @@ with two lines.</p>
 </li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3715,7 +3722,7 @@ with two lines.</p>
 </ul>
 <p>two</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3734,7 +3741,7 @@ with two lines.</p>
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3752,7 +3759,7 @@ with two lines.</p>
 <pre><code> two
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3771,7 +3778,7 @@ with two lines.</p>
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3794,7 +3801,7 @@ with two lines.</p>
 </blockquote>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3815,7 +3822,7 @@ with two lines.</p>
 </blockquote>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3830,7 +3837,7 @@ with two lines.</p>
       final expected = '''<p>-one</p>
 <p>2.two</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3850,7 +3857,7 @@ with two lines.</p>
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3880,7 +3887,7 @@ with two lines.</p>
 </li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3906,7 +3913,7 @@ baz
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3920,7 +3927,7 @@ baz
 <li>ok</li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3932,7 +3939,7 @@ baz
       final markdown = '''1234567890. not ok''';
       final expected = '''<p>1234567890. not ok</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3946,7 +3953,7 @@ baz
 <li>ok</li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3960,7 +3967,7 @@ baz
 <li>ok</li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3972,7 +3979,7 @@ baz
       final markdown = '''-1. not ok''';
       final expected = '''<p>-1. not ok</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -3992,7 +3999,7 @@ baz
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4012,7 +4019,7 @@ baz
 </li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4032,7 +4039,7 @@ paragraph
 <pre><code>more code
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4056,7 +4063,7 @@ paragraph
 </li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4080,7 +4087,7 @@ paragraph
 </li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4095,7 +4102,7 @@ bar''';
       final expected = '''<p>foo</p>
 <p>bar</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4112,7 +4119,7 @@ bar''';
 </ul>
 <p>bar</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4131,7 +4138,7 @@ bar''';
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4160,7 +4167,7 @@ bar''';
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4175,7 +4182,7 @@ bar''';
 <li>foo</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4192,7 +4199,7 @@ bar''';
 </ul>
 <p>foo</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4210,7 +4217,7 @@ bar''';
 <li>bar</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4228,7 +4235,7 @@ bar''';
 <li>bar</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4246,7 +4253,7 @@ bar''';
 <li>bar</li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4260,7 +4267,7 @@ bar''';
 <li></li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4279,7 +4286,7 @@ foo
 <p>foo
 1.</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4306,7 +4313,7 @@ with two lines.</p>
 </li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4333,7 +4340,7 @@ with two lines.</p>
 </li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4360,7 +4367,7 @@ with two lines.</p>
 </li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4383,7 +4390,7 @@ with two lines.</p>
     &gt; A block quote.
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4410,7 +4417,7 @@ with two lines.</p>
 </li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4426,7 +4433,7 @@ with two lines.</p>
 with two lines.</li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4448,7 +4455,7 @@ continued here.</p>
 </ol>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4470,7 +4477,7 @@ continued here.</p>
 </ol>
 </blockquote>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4499,7 +4506,7 @@ continued here.</p>
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4519,7 +4526,7 @@ continued here.</p>
 <li>boo</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4538,7 +4545,7 @@ continued here.</p>
 </li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4556,7 +4563,7 @@ continued here.</p>
 <li>bar</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4574,7 +4581,7 @@ continued here.</p>
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4596,7 +4603,7 @@ continued here.</p>
 </li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4618,7 +4625,7 @@ continued here.</p>
 baz</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4638,7 +4645,7 @@ baz</li>
 <li>baz</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4658,7 +4665,7 @@ baz</li>
 <li>baz</li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4676,7 +4683,7 @@ baz</li>
 <li>baz</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4690,7 +4697,7 @@ baz</li>
       final expected = '''<p>The number of windows in my house is
 14.  The number of doors is 6.</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4706,7 +4713,7 @@ baz</li>
 <li>The number of doors is 6.</li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4733,7 +4740,7 @@ baz</li>
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4763,7 +4770,7 @@ baz</li>
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4789,7 +4796,7 @@ baz</li>
 <li>bim</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4820,7 +4827,7 @@ baz</li>
 <pre><code>code
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4846,7 +4853,7 @@ baz</li>
 <li>g</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4872,7 +4879,7 @@ baz</li>
 </li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4894,7 +4901,7 @@ baz</li>
 - e</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4919,7 +4926,7 @@ baz</li>
 <pre><code>3. c
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4944,7 +4951,7 @@ baz</li>
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4967,7 +4974,7 @@ baz</li>
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -4994,7 +5001,7 @@ baz</li>
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5020,7 +5027,7 @@ baz</li>
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5047,7 +5054,7 @@ baz</li>
 <li>c</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5073,7 +5080,7 @@ baz</li>
 <li>d</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5095,7 +5102,7 @@ baz</li>
 <li>c</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5121,7 +5128,7 @@ baz</li>
 <li>d</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5135,7 +5142,7 @@ baz</li>
 <li>a</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5154,7 +5161,7 @@ baz</li>
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5176,7 +5183,7 @@ baz</li>
 </li>
 </ol>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5199,7 +5206,7 @@ baz</li>
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5232,7 +5239,7 @@ baz</li>
 </li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5244,7 +5251,7 @@ baz</li>
       final markdown = '''`hi`lo`''';
       final expected = '''<p><code>hi</code>lo`</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5256,7 +5263,7 @@ baz</li>
       final markdown = '''\\!\\"\\#\\\$\\%\\&\\'\\(\\)\\*\\+\\,\\-\\.\\/\\:\\;\\<\\=\\>\\?\\@\\[\\\\\\]\\^\\_\\`\\{\\|\\}\\~''';
       final expected = '''<p>!&quot;#\$%&amp;'()*+,-./:;&lt;=&gt;?@[\\]^_`{|}~</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5268,7 +5275,7 @@ baz</li>
       final markdown = '''\\	\\A\\a\\ \\3\\φ\\«''';
       final expected = '''<p>\\	\\A\\a\\ \\3\\φ\\«</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5296,7 +5303,7 @@ baz</li>
 [foo]: /url &quot;not a reference&quot;
 &amp;ouml; not a character entity</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5308,7 +5315,7 @@ baz</li>
       final markdown = '''\\\\*emphasis*''';
       final expected = '''<p>\\<em>emphasis</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5322,7 +5329,7 @@ bar''';
       final expected = '''<p>foo<br />
 bar</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5334,7 +5341,7 @@ bar</p>''';
       final markdown = '''`` \\[\\` ``''';
       final expected = '''<p><code>\\[\\`</code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5347,7 +5354,7 @@ bar</p>''';
       final expected = '''<pre><code>\\[\\]
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5362,7 +5369,7 @@ bar</p>''';
       final expected = '''<pre><code>\\[\\]
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5374,7 +5381,7 @@ bar</p>''';
       final markdown = '''<http://example.com?find=\\*>''';
       final expected = '''<p><a href="http://example.com?find=%5C*">http://example.com?find=\\*</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5386,7 +5393,7 @@ bar</p>''';
       final markdown = '''<a href="/bar\\/)">''';
       final expected = '''<a href="/bar\\/)">''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5398,7 +5405,7 @@ bar</p>''';
       final markdown = '''[foo](/bar\\* "ti\\*tle")''';
       final expected = '''<p><a href="/bar*" title="ti*tle">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5412,7 +5419,7 @@ bar</p>''';
 [foo]: /bar\\* "ti\\*tle"''';
       final expected = '''<p><a href="/bar*" title="ti*tle">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5427,7 +5434,7 @@ foo
       final expected = '''<pre><code class="language-foo+bar">foo
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5443,7 +5450,7 @@ foo
 ¾ ℋ ⅆ
 ∲ ≧̸</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5455,7 +5462,7 @@ foo
       final markdown = '''&#35; &#1234; &#992; &#0;''';
       final expected = '''<p># Ӓ Ϡ �</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5467,7 +5474,7 @@ foo
       final markdown = '''&#X22; &#XD06; &#xcab;''';
       final expected = '''<p>&quot; ആ ಫ</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5485,7 +5492,7 @@ foo
 &amp;#abcdef0;
 &amp;ThisIsNotDefined; &amp;hi?;</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5497,7 +5504,7 @@ foo
       final markdown = '''&copy''';
       final expected = '''<p>&amp;copy</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5509,7 +5516,7 @@ foo
       final markdown = '''&MadeUpEntity;''';
       final expected = '''<p>&amp;MadeUpEntity;</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5521,7 +5528,7 @@ foo
       final markdown = '''<a href="&ouml;&ouml;.html">''';
       final expected = '''<a href="&ouml;&ouml;.html">''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5533,7 +5540,7 @@ foo
       final markdown = '''[foo](/f&ouml;&ouml; "f&ouml;&ouml;")''';
       final expected = '''<p><a href="/f%C3%B6%C3%B6" title="föö">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5547,7 +5554,7 @@ foo
 [foo]: /f&ouml;&ouml; "f&ouml;&ouml;"''';
       final expected = '''<p><a href="/f%C3%B6%C3%B6" title="föö">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5562,7 +5569,7 @@ foo
       final expected = '''<pre><code class="language-föö">foo
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5574,7 +5581,7 @@ foo
       final markdown = '''`f&ouml;&ouml;`''';
       final expected = '''<p><code>f&amp;ouml;&amp;ouml;</code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5587,7 +5594,7 @@ foo
       final expected = '''<pre><code>f&amp;ouml;f&amp;ouml;
 </code></pre>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5601,7 +5608,7 @@ foo
       final expected = '''<p>*foo*
 <em>foo</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5618,7 +5625,7 @@ foo
 <li>foo</li>
 </ul>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5632,7 +5639,7 @@ foo
 
 bar</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5644,7 +5651,7 @@ bar</p>''';
       final markdown = '''&#9;foo''';
       final expected = '''<p>	foo</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5656,7 +5663,7 @@ bar</p>''';
       final markdown = '''[a](url &quot;tit&quot;)''';
       final expected = '''<p>[a](url &quot;tit&quot;)</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5668,7 +5675,7 @@ bar</p>''';
       final markdown = '''`foo`''';
       final expected = '''<p><code>foo</code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5680,7 +5687,7 @@ bar</p>''';
       final markdown = '''`` foo ` bar ``''';
       final expected = '''<p><code>foo ` bar</code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5692,7 +5699,7 @@ bar</p>''';
       final markdown = '''` `` `''';
       final expected = '''<p><code>``</code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5704,7 +5711,7 @@ bar</p>''';
       final markdown = '''`  ``  `''';
       final expected = '''<p><code> `` </code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5716,7 +5723,7 @@ bar</p>''';
       final markdown = '''` a`''';
       final expected = '''<p><code> a</code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5728,7 +5735,7 @@ bar</p>''';
       final markdown = '''` b `''';
       final expected = '''<p><code> b </code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5742,7 +5749,7 @@ bar</p>''';
       final expected = '''<p><code> </code>
 <code>  </code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5758,7 +5765,7 @@ baz
 ``''';
       final expected = '''<p><code>foo bar   baz</code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5772,7 +5779,7 @@ foo
 ``''';
       final expected = '''<p><code>foo </code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5785,7 +5792,7 @@ foo
 baz`''';
       final expected = '''<p><code>foo   bar  baz</code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5797,7 +5804,7 @@ baz`''';
       final markdown = '''`foo\\`bar`''';
       final expected = '''<p><code>foo\\</code>bar`</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5809,7 +5816,7 @@ baz`''';
       final markdown = '''``foo`bar``''';
       final expected = '''<p><code>foo`bar</code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5821,7 +5828,7 @@ baz`''';
       final markdown = '''` foo `` bar `''';
       final expected = '''<p><code>foo `` bar</code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5833,7 +5840,7 @@ baz`''';
       final markdown = '''*foo`*`''';
       final expected = '''<p>*foo<code>*</code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5845,7 +5852,7 @@ baz`''';
       final markdown = '''[not a `link](/foo`)''';
       final expected = '''<p>[not a <code>link](/foo</code>)</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5857,7 +5864,7 @@ baz`''';
       final markdown = '''`<a href="`">`''';
       final expected = '''<p><code>&lt;a href=&quot;</code>&quot;&gt;`</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5869,7 +5876,7 @@ baz`''';
       final markdown = '''<a href="`">`''';
       final expected = '''<p><a href="`">`</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5881,7 +5888,7 @@ baz`''';
       final markdown = '''`<http://foo.bar.`baz>`''';
       final expected = '''<p><code>&lt;http://foo.bar.</code>baz&gt;`</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5893,7 +5900,7 @@ baz`''';
       final markdown = '''<http://foo.bar.`baz>`''';
       final expected = '''<p><a href="http://foo.bar.%60baz">http://foo.bar.`baz</a>`</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5905,7 +5912,7 @@ baz`''';
       final markdown = '''```foo``''';
       final expected = '''<p>```foo``</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5917,7 +5924,7 @@ baz`''';
       final markdown = '''`foo''';
       final expected = '''<p>`foo</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5929,7 +5936,7 @@ baz`''';
       final markdown = '''`foo``bar``''';
       final expected = '''<p>`foo<code>bar</code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5941,7 +5948,7 @@ baz`''';
       final markdown = '''*foo bar*''';
       final expected = '''<p><em>foo bar</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5953,7 +5960,7 @@ baz`''';
       final markdown = '''a * foo bar*''';
       final expected = '''<p>a * foo bar*</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5965,7 +5972,7 @@ baz`''';
       final markdown = '''a*"foo"*''';
       final expected = '''<p>a*&quot;foo&quot;*</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5977,7 +5984,7 @@ baz`''';
       final markdown = '''* a *''';
       final expected = '''<p>* a *</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -5989,7 +5996,7 @@ baz`''';
       final markdown = '''foo*bar*''';
       final expected = '''<p>foo<em>bar</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6001,7 +6008,7 @@ baz`''';
       final markdown = '''5*6*78''';
       final expected = '''<p>5<em>6</em>78</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6013,7 +6020,7 @@ baz`''';
       final markdown = '''_foo bar_''';
       final expected = '''<p><em>foo bar</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6025,7 +6032,7 @@ baz`''';
       final markdown = '''_ foo bar_''';
       final expected = '''<p>_ foo bar_</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6037,7 +6044,7 @@ baz`''';
       final markdown = '''a_"foo"_''';
       final expected = '''<p>a_&quot;foo&quot;_</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6049,7 +6056,7 @@ baz`''';
       final markdown = '''foo_bar_''';
       final expected = '''<p>foo_bar_</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6061,7 +6068,7 @@ baz`''';
       final markdown = '''5_6_78''';
       final expected = '''<p>5_6_78</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6073,7 +6080,7 @@ baz`''';
       final markdown = '''пристаням_стремятся_''';
       final expected = '''<p>пристаням_стремятся_</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6085,7 +6092,7 @@ baz`''';
       final markdown = '''aa_"bb"_cc''';
       final expected = '''<p>aa_&quot;bb&quot;_cc</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6097,7 +6104,7 @@ baz`''';
       final markdown = '''foo-_(bar)_''';
       final expected = '''<p>foo-<em>(bar)</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6109,7 +6116,7 @@ baz`''';
       final markdown = '''_foo*''';
       final expected = '''<p>_foo*</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6121,7 +6128,7 @@ baz`''';
       final markdown = '''*foo bar *''';
       final expected = '''<p>*foo bar *</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6135,7 +6142,7 @@ baz`''';
       final expected = '''<p>*foo bar
 *</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6147,7 +6154,7 @@ baz`''';
       final markdown = '''*(*foo)''';
       final expected = '''<p>*(*foo)</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6159,7 +6166,7 @@ baz`''';
       final markdown = '''*(*foo*)*''';
       final expected = '''<p><em>(<em>foo</em>)</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6171,7 +6178,7 @@ baz`''';
       final markdown = '''*foo*bar''';
       final expected = '''<p><em>foo</em>bar</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6183,7 +6190,7 @@ baz`''';
       final markdown = '''_foo bar _''';
       final expected = '''<p>_foo bar _</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6195,7 +6202,7 @@ baz`''';
       final markdown = '''_(_foo)''';
       final expected = '''<p>_(_foo)</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6207,7 +6214,7 @@ baz`''';
       final markdown = '''_(_foo_)_''';
       final expected = '''<p><em>(<em>foo</em>)</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6219,7 +6226,7 @@ baz`''';
       final markdown = '''_foo_bar''';
       final expected = '''<p>_foo_bar</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6231,7 +6238,7 @@ baz`''';
       final markdown = '''_пристаням_стремятся''';
       final expected = '''<p>_пристаням_стремятся</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6243,7 +6250,7 @@ baz`''';
       final markdown = '''_foo_bar_baz_''';
       final expected = '''<p><em>foo_bar_baz</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6255,7 +6262,7 @@ baz`''';
       final markdown = '''_(bar)_.''';
       final expected = '''<p><em>(bar)</em>.</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6267,7 +6274,7 @@ baz`''';
       final markdown = '''**foo bar**''';
       final expected = '''<p><strong>foo bar</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6279,7 +6286,7 @@ baz`''';
       final markdown = '''** foo bar**''';
       final expected = '''<p>** foo bar**</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6291,7 +6298,7 @@ baz`''';
       final markdown = '''a**"foo"**''';
       final expected = '''<p>a**&quot;foo&quot;**</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6303,7 +6310,7 @@ baz`''';
       final markdown = '''foo**bar**''';
       final expected = '''<p>foo<strong>bar</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6315,7 +6322,7 @@ baz`''';
       final markdown = '''__foo bar__''';
       final expected = '''<p><strong>foo bar</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6327,7 +6334,7 @@ baz`''';
       final markdown = '''__ foo bar__''';
       final expected = '''<p>__ foo bar__</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6341,7 +6348,7 @@ foo bar__''';
       final expected = '''<p>__
 foo bar__</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6353,7 +6360,7 @@ foo bar__</p>''';
       final markdown = '''a__"foo"__''';
       final expected = '''<p>a__&quot;foo&quot;__</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6365,7 +6372,7 @@ foo bar__</p>''';
       final markdown = '''foo__bar__''';
       final expected = '''<p>foo__bar__</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6377,7 +6384,7 @@ foo bar__</p>''';
       final markdown = '''5__6__78''';
       final expected = '''<p>5__6__78</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6389,7 +6396,7 @@ foo bar__</p>''';
       final markdown = '''пристаням__стремятся__''';
       final expected = '''<p>пристаням__стремятся__</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6401,7 +6408,7 @@ foo bar__</p>''';
       final markdown = '''__foo, __bar__, baz__''';
       final expected = '''<p><strong>foo, bar, baz</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6413,7 +6420,7 @@ foo bar__</p>''';
       final markdown = '''foo-__(bar)__''';
       final expected = '''<p>foo-<strong>(bar)</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6425,7 +6432,7 @@ foo bar__</p>''';
       final markdown = '''**foo bar **''';
       final expected = '''<p>**foo bar **</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6437,7 +6444,7 @@ foo bar__</p>''';
       final markdown = '''**(**foo)''';
       final expected = '''<p>**(**foo)</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6449,7 +6456,7 @@ foo bar__</p>''';
       final markdown = '''*(**foo**)*''';
       final expected = '''<p><em>(<strong>foo</strong>)</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6463,7 +6470,7 @@ foo bar__</p>''';
       final expected = '''<p><strong>Gomphocarpus (<em>Gomphocarpus physocarpus</em>, syn.
 <em>Asclepias physocarpa</em>)</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6475,7 +6482,7 @@ foo bar__</p>''';
       final markdown = '''**foo "*bar*" foo**''';
       final expected = '''<p><strong>foo &quot;<em>bar</em>&quot; foo</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6487,7 +6494,7 @@ foo bar__</p>''';
       final markdown = '''**foo**bar''';
       final expected = '''<p><strong>foo</strong>bar</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6499,7 +6506,7 @@ foo bar__</p>''';
       final markdown = '''__foo bar __''';
       final expected = '''<p>__foo bar __</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6511,7 +6518,7 @@ foo bar__</p>''';
       final markdown = '''__(__foo)''';
       final expected = '''<p>__(__foo)</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6523,7 +6530,7 @@ foo bar__</p>''';
       final markdown = '''_(__foo__)_''';
       final expected = '''<p><em>(<strong>foo</strong>)</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6535,7 +6542,7 @@ foo bar__</p>''';
       final markdown = '''__foo__bar''';
       final expected = '''<p>__foo__bar</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6547,7 +6554,7 @@ foo bar__</p>''';
       final markdown = '''__пристаням__стремятся''';
       final expected = '''<p>__пристаням__стремятся</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6559,7 +6566,7 @@ foo bar__</p>''';
       final markdown = '''__foo__bar__baz__''';
       final expected = '''<p><strong>foo__bar__baz</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6571,7 +6578,7 @@ foo bar__</p>''';
       final markdown = '''__(bar)__.''';
       final expected = '''<p><strong>(bar)</strong>.</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6583,7 +6590,7 @@ foo bar__</p>''';
       final markdown = '''*foo [bar](/url)*''';
       final expected = '''<p><em>foo <a href="/url">bar</a></em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6597,7 +6604,7 @@ bar*''';
       final expected = '''<p><em>foo
 bar</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6609,7 +6616,7 @@ bar</em></p>''';
       final markdown = '''_foo __bar__ baz_''';
       final expected = '''<p><em>foo <strong>bar</strong> baz</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6621,7 +6628,7 @@ bar</em></p>''';
       final markdown = '''_foo _bar_ baz_''';
       final expected = '''<p><em>foo <em>bar</em> baz</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6633,7 +6640,7 @@ bar</em></p>''';
       final markdown = '''__foo_ bar_''';
       final expected = '''<p><em><em>foo</em> bar</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6645,7 +6652,7 @@ bar</em></p>''';
       final markdown = '''*foo *bar**''';
       final expected = '''<p><em>foo <em>bar</em></em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6657,7 +6664,7 @@ bar</em></p>''';
       final markdown = '''*foo **bar** baz*''';
       final expected = '''<p><em>foo <strong>bar</strong> baz</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6669,7 +6676,7 @@ bar</em></p>''';
       final markdown = '''*foo**bar**baz*''';
       final expected = '''<p><em>foo<strong>bar</strong>baz</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6681,7 +6688,7 @@ bar</em></p>''';
       final markdown = '''*foo**bar*''';
       final expected = '''<p><em>foo**bar</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6693,7 +6700,7 @@ bar</em></p>''';
       final markdown = '''***foo** bar*''';
       final expected = '''<p><em><strong>foo</strong> bar</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6705,7 +6712,7 @@ bar</em></p>''';
       final markdown = '''*foo **bar***''';
       final expected = '''<p><em>foo <strong>bar</strong></em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6717,7 +6724,7 @@ bar</em></p>''';
       final markdown = '''*foo**bar***''';
       final expected = '''<p><em>foo<strong>bar</strong></em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6729,7 +6736,7 @@ bar</em></p>''';
       final markdown = '''foo***bar***baz''';
       final expected = '''<p>foo<em><strong>bar</strong></em>baz</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6741,7 +6748,7 @@ bar</em></p>''';
       final markdown = '''foo******bar*********baz''';
       final expected = '''<p>foo<strong>bar</strong>***baz</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6753,7 +6760,7 @@ bar</em></p>''';
       final markdown = '''*foo **bar *baz* bim** bop*''';
       final expected = '''<p><em>foo <strong>bar <em>baz</em> bim</strong> bop</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6765,7 +6772,7 @@ bar</em></p>''';
       final markdown = '''*foo [*bar*](/url)*''';
       final expected = '''<p><em>foo <a href="/url"><em>bar</em></a></em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6777,7 +6784,7 @@ bar</em></p>''';
       final markdown = '''** is not an empty emphasis''';
       final expected = '''<p>** is not an empty emphasis</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6789,7 +6796,7 @@ bar</em></p>''';
       final markdown = '''**** is not an empty strong emphasis''';
       final expected = '''<p>**** is not an empty strong emphasis</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6801,7 +6808,7 @@ bar</em></p>''';
       final markdown = '''**foo [bar](/url)**''';
       final expected = '''<p><strong>foo <a href="/url">bar</a></strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6815,7 +6822,7 @@ bar**''';
       final expected = '''<p><strong>foo
 bar</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6827,7 +6834,7 @@ bar</strong></p>''';
       final markdown = '''__foo _bar_ baz__''';
       final expected = '''<p><strong>foo <em>bar</em> baz</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6839,7 +6846,7 @@ bar</strong></p>''';
       final markdown = '''__foo __bar__ baz__''';
       final expected = '''<p><strong>foo bar baz</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6851,7 +6858,7 @@ bar</strong></p>''';
       final markdown = '''____foo__ bar__''';
       final expected = '''<p><strong>foo bar</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6863,7 +6870,7 @@ bar</strong></p>''';
       final markdown = '''**foo **bar****''';
       final expected = '''<p><strong>foo bar</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6875,7 +6882,7 @@ bar</strong></p>''';
       final markdown = '''**foo *bar* baz**''';
       final expected = '''<p><strong>foo <em>bar</em> baz</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6887,7 +6894,7 @@ bar</strong></p>''';
       final markdown = '''**foo*bar*baz**''';
       final expected = '''<p><strong>foo<em>bar</em>baz</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6899,7 +6906,7 @@ bar</strong></p>''';
       final markdown = '''***foo* bar**''';
       final expected = '''<p><strong><em>foo</em> bar</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6911,7 +6918,7 @@ bar</strong></p>''';
       final markdown = '''**foo *bar***''';
       final expected = '''<p><strong>foo <em>bar</em></strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6925,7 +6932,7 @@ bim* bop**''';
       final expected = '''<p><strong>foo <em>bar <strong>baz</strong>
 bim</em> bop</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6937,7 +6944,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''**foo [*bar*](/url)**''';
       final expected = '''<p><strong>foo <a href="/url"><em>bar</em></a></strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6949,7 +6956,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''__ is not an empty emphasis''';
       final expected = '''<p>__ is not an empty emphasis</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6961,7 +6968,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''____ is not an empty strong emphasis''';
       final expected = '''<p>____ is not an empty strong emphasis</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6973,7 +6980,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''foo ***''';
       final expected = '''<p>foo ***</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6985,7 +6992,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''foo *\\**''';
       final expected = '''<p>foo <em>*</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -6997,7 +7004,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''foo *_*''';
       final expected = '''<p>foo <em>_</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7009,7 +7016,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''foo *****''';
       final expected = '''<p>foo *****</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7021,7 +7028,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''foo **\\***''';
       final expected = '''<p>foo <strong>*</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7033,7 +7040,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''foo **_**''';
       final expected = '''<p>foo <strong>_</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7045,7 +7052,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''**foo*''';
       final expected = '''<p>*<em>foo</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7057,7 +7064,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''*foo**''';
       final expected = '''<p><em>foo</em>*</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7069,7 +7076,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''***foo**''';
       final expected = '''<p>*<strong>foo</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7081,7 +7088,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''****foo*''';
       final expected = '''<p>***<em>foo</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7093,7 +7100,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''**foo***''';
       final expected = '''<p><strong>foo</strong>*</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7105,7 +7112,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''*foo****''';
       final expected = '''<p><em>foo</em>***</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7117,7 +7124,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''foo ___''';
       final expected = '''<p>foo ___</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7129,7 +7136,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''foo _\\__''';
       final expected = '''<p>foo <em>_</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7141,7 +7148,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''foo _*_''';
       final expected = '''<p>foo <em>*</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7153,7 +7160,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''foo _____''';
       final expected = '''<p>foo _____</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7165,7 +7172,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''foo __\\___''';
       final expected = '''<p>foo <strong>_</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7177,7 +7184,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''foo __*__''';
       final expected = '''<p>foo <strong>*</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7189,7 +7196,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''__foo_''';
       final expected = '''<p>_<em>foo</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7201,7 +7208,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''_foo__''';
       final expected = '''<p><em>foo</em>_</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7213,7 +7220,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''___foo__''';
       final expected = '''<p>_<strong>foo</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7225,7 +7232,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''____foo_''';
       final expected = '''<p>___<em>foo</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7237,7 +7244,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''__foo___''';
       final expected = '''<p><strong>foo</strong>_</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7249,7 +7256,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''_foo____''';
       final expected = '''<p><em>foo</em>___</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7261,7 +7268,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''**foo**''';
       final expected = '''<p><strong>foo</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7273,7 +7280,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''*_foo_*''';
       final expected = '''<p><em><em>foo</em></em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7285,7 +7292,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''__foo__''';
       final expected = '''<p><strong>foo</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7297,7 +7304,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''_*foo*_''';
       final expected = '''<p><em><em>foo</em></em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7309,7 +7316,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''****foo****''';
       final expected = '''<p><strong>foo</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7321,7 +7328,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''____foo____''';
       final expected = '''<p><strong>foo</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7333,7 +7340,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''******foo******''';
       final expected = '''<p><strong>foo</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7345,7 +7352,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''***foo***''';
       final expected = '''<p><em><strong>foo</strong></em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7357,7 +7364,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''_____foo_____''';
       final expected = '''<p><em><strong>foo</strong></em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7369,7 +7376,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''*foo _bar* baz_''';
       final expected = '''<p><em>foo _bar</em> baz_</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7381,7 +7388,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''*foo __bar *baz bim__ bam*''';
       final expected = '''<p><em>foo <strong>bar *baz bim</strong> bam</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7393,7 +7400,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''**foo **bar baz**''';
       final expected = '''<p>**foo <strong>bar baz</strong></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7405,7 +7412,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''*foo *bar baz*''';
       final expected = '''<p>*foo <em>bar baz</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7417,7 +7424,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''*[bar*](/url)''';
       final expected = '''<p>*<a href="/url">bar*</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7429,7 +7436,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''_foo [bar_](/url)''';
       final expected = '''<p>_foo <a href="/url">bar_</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7441,7 +7448,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''*<img src="foo" title="*"/>''';
       final expected = '''<p>*<img src="foo" title="*"/></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7453,7 +7460,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''**<a href="**">''';
       final expected = '''<p>**<a href="**"></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7465,7 +7472,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''__<a href="__">''';
       final expected = '''<p>__<a href="__"></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7477,7 +7484,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''*a `*`*''';
       final expected = '''<p><em>a <code>*</code></em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7489,7 +7496,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''_a `_`_''';
       final expected = '''<p><em>a <code>_</code></em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7501,7 +7508,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''**a<http://foo.bar/?q=**>''';
       final expected = '''<p>**a<a href="http://foo.bar/?q=**">http://foo.bar/?q=**</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7513,7 +7520,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''__a<http://foo.bar/?q=__>''';
       final expected = '''<p>__a<a href="http://foo.bar/?q=__">http://foo.bar/?q=__</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7525,7 +7532,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''[link](/uri "title")''';
       final expected = '''<p><a href="/uri" title="title">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7537,7 +7544,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''[link](/uri)''';
       final expected = '''<p><a href="/uri">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7549,7 +7556,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''[link]()''';
       final expected = '''<p><a href="">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7561,7 +7568,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''[link](<>)''';
       final expected = '''<p><a href="">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7573,7 +7580,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''[link](/my uri)''';
       final expected = '''<p>[link](/my uri)</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7585,7 +7592,7 @@ bim</em> bop</strong></p>''';
       final markdown = '''[link](</my uri>)''';
       final expected = '''<p><a href="/my%20uri">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7599,7 +7606,7 @@ bar)''';
       final expected = '''<p>[link](foo
 bar)</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7613,7 +7620,7 @@ bar>)''';
       final expected = '''<p>[link](<foo
 bar>)</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7625,7 +7632,7 @@ bar>)</p>''';
       final markdown = '''[a](<b)c>)''';
       final expected = '''<p><a href="b)c">a</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7637,7 +7644,7 @@ bar>)</p>''';
       final markdown = '''[link](<foo\\>)''';
       final expected = '''<p>[link](&lt;foo&gt;)</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7653,7 +7660,7 @@ bar>)</p>''';
 [a](&lt;b)c&gt;
 [a](<b>c)</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7665,7 +7672,7 @@ bar>)</p>''';
       final markdown = '''[link](\\(foo\\))''';
       final expected = '''<p><a href="(foo)">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7677,7 +7684,7 @@ bar>)</p>''';
       final markdown = '''[link](foo(and(bar)))''';
       final expected = '''<p><a href="foo(and(bar))">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7689,7 +7696,7 @@ bar>)</p>''';
       final markdown = '''[link](foo\\(and\\(bar\\))''';
       final expected = '''<p><a href="foo(and(bar)">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7701,7 +7708,7 @@ bar>)</p>''';
       final markdown = '''[link](<foo(and(bar)>)''';
       final expected = '''<p><a href="foo(and(bar)">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7713,7 +7720,7 @@ bar>)</p>''';
       final markdown = '''[link](foo\\)\\:)''';
       final expected = '''<p><a href="foo):">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7731,7 +7738,7 @@ bar>)</p>''';
 <p><a href="http://example.com#fragment">link</a></p>
 <p><a href="http://example.com?foo=3#frag">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7743,7 +7750,7 @@ bar>)</p>''';
       final markdown = '''[link](foo\\bar)''';
       final expected = '''<p><a href="foo%5Cbar">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7755,7 +7762,7 @@ bar>)</p>''';
       final markdown = '''[link](foo%20b&auml;)''';
       final expected = '''<p><a href="foo%20b%C3%A4">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7767,7 +7774,7 @@ bar>)</p>''';
       final markdown = '''[link]("title")''';
       final expected = '''<p><a href="%22title%22">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7783,7 +7790,7 @@ bar>)</p>''';
 <a href="/url" title="title">link</a>
 <a href="/url" title="title">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7795,7 +7802,7 @@ bar>)</p>''';
       final markdown = '''[link](/url "title \\"&quot;")''';
       final expected = '''<p><a href="/url" title="title &quot;&quot;">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7807,7 +7814,7 @@ bar>)</p>''';
       final markdown = '''[link](/url "title")''';
       final expected = '''<p><a href="/url%C2%A0%22title%22">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7819,7 +7826,7 @@ bar>)</p>''';
       final markdown = '''[link](/url "title "and" title")''';
       final expected = '''<p>[link](/url &quot;title &quot;and&quot; title&quot;)</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7831,7 +7838,7 @@ bar>)</p>''';
       final markdown = '''[link](/url 'title "and" title')''';
       final expected = '''<p><a href="/url" title="title &quot;and&quot; title">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7844,7 +7851,7 @@ bar>)</p>''';
   "title"  )''';
       final expected = '''<p><a href="/uri" title="title">link</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7856,7 +7863,7 @@ bar>)</p>''';
       final markdown = '''[link] (/uri)''';
       final expected = '''<p>[link] (/uri)</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7868,7 +7875,7 @@ bar>)</p>''';
       final markdown = '''[link [foo [bar]]](/uri)''';
       final expected = '''<p><a href="/uri">link [foo [bar]]</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7880,7 +7887,7 @@ bar>)</p>''';
       final markdown = '''[link] bar](/uri)''';
       final expected = '''<p>[link] bar](/uri)</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7892,7 +7899,7 @@ bar>)</p>''';
       final markdown = '''[link [bar](/uri)''';
       final expected = '''<p>[link <a href="/uri">bar</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7904,7 +7911,7 @@ bar>)</p>''';
       final markdown = '''[link \\[bar](/uri)''';
       final expected = '''<p><a href="/uri">link [bar</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7916,7 +7923,7 @@ bar>)</p>''';
       final markdown = '''[link *foo **bar** `#`*](/uri)''';
       final expected = '''<p><a href="/uri">link <em>foo <strong>bar</strong> <code>#</code></em></a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7928,7 +7935,7 @@ bar>)</p>''';
       final markdown = '''[![moon](moon.jpg)](/uri)''';
       final expected = '''<p><a href="/uri"><img src="moon.jpg" alt="moon" /></a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7940,7 +7947,7 @@ bar>)</p>''';
       final markdown = '''[foo [bar](/uri)](/uri)''';
       final expected = '''<p>[foo <a href="/uri">bar</a>](/uri)</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7952,7 +7959,7 @@ bar>)</p>''';
       final markdown = '''[foo *[bar [baz](/uri)](/uri)*](/uri)''';
       final expected = '''<p>[foo <em>[bar <a href="/uri">baz</a>](/uri)</em>](/uri)</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7964,7 +7971,7 @@ bar>)</p>''';
       final markdown = '''![[[foo](uri1)](uri2)](uri3)''';
       final expected = '''<p><img src="uri3" alt="[foo](uri2)" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7976,7 +7983,7 @@ bar>)</p>''';
       final markdown = '''*[foo*](/uri)''';
       final expected = '''<p>*<a href="/uri">foo*</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -7988,7 +7995,7 @@ bar>)</p>''';
       final markdown = '''[foo *bar](baz*)''';
       final expected = '''<p><a href="baz*">foo *bar</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8000,7 +8007,7 @@ bar>)</p>''';
       final markdown = '''*foo [bar* baz]''';
       final expected = '''<p><em>foo [bar</em> baz]</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8012,7 +8019,7 @@ bar>)</p>''';
       final markdown = '''[foo <bar attr="](baz)">''';
       final expected = '''<p>[foo <bar attr="](baz)"></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8024,7 +8031,7 @@ bar>)</p>''';
       final markdown = '''[foo`](/uri)`''';
       final expected = '''<p>[foo<code>](/uri)</code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8036,7 +8043,7 @@ bar>)</p>''';
       final markdown = '''[foo<http://example.com/?search=](uri)>''';
       final expected = '''<p>[foo<a href="http://example.com/?search=%5D(uri)">http://example.com/?search=](uri)</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8050,7 +8057,7 @@ bar>)</p>''';
 [bar]: /url "title"''';
       final expected = '''<p><a href="/url" title="title">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8064,7 +8071,7 @@ bar>)</p>''';
 [ref]: /uri''';
       final expected = '''<p><a href="/uri">link [foo [bar]]</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8078,7 +8085,7 @@ bar>)</p>''';
 [ref]: /uri''';
       final expected = '''<p><a href="/uri">link [bar</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8092,7 +8099,7 @@ bar>)</p>''';
 [ref]: /uri''';
       final expected = '''<p><a href="/uri">link <em>foo <strong>bar</strong> <code>#</code></em></a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8106,7 +8113,7 @@ bar>)</p>''';
 [ref]: /uri''';
       final expected = '''<p><a href="/uri"><img src="moon.jpg" alt="moon" /></a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8120,7 +8127,7 @@ bar>)</p>''';
 [ref]: /uri''';
       final expected = '''<p>[foo <a href="/uri">bar</a>]<a href="/uri">ref</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8134,7 +8141,7 @@ bar>)</p>''';
 [ref]: /uri''';
       final expected = '''<p>[foo <em>bar <a href="/uri">baz</a></em>]<a href="/uri">ref</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8148,7 +8155,7 @@ bar>)</p>''';
 [ref]: /uri''';
       final expected = '''<p>*<a href="/uri">foo*</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8162,7 +8169,7 @@ bar>)</p>''';
 [ref]: /uri''';
       final expected = '''<p><a href="/uri">foo *bar</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8176,7 +8183,7 @@ bar>)</p>''';
 [ref]: /uri''';
       final expected = '''<p>[foo <bar attr="][ref]"></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8190,7 +8197,7 @@ bar>)</p>''';
 [ref]: /uri''';
       final expected = '''<p>[foo<code>][ref]</code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8204,7 +8211,7 @@ bar>)</p>''';
 [ref]: /uri''';
       final expected = '''<p>[foo<a href="http://example.com/?search=%5D%5Bref%5D">http://example.com/?search=][ref]</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8218,7 +8225,7 @@ bar>)</p>''';
 [bar]: /url "title"''';
       final expected = '''<p><a href="/url" title="title">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8232,7 +8239,7 @@ bar>)</p>''';
 [ТОЛПОЙ]: /url''';
       final expected = '''<p><a href="/url">Толпой</a> is a Russian word.</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8247,7 +8254,7 @@ bar>)</p>''';
 [Baz][Foo bar]''';
       final expected = '''<p><a href="/url">Baz</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8261,7 +8268,7 @@ bar>)</p>''';
 [bar]: /url "title"''';
       final expected = '''<p>[foo] <a href="/url" title="title">bar</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8277,7 +8284,7 @@ bar>)</p>''';
       final expected = '''<p>[foo]
 <a href="/url" title="title">bar</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8293,7 +8300,7 @@ bar>)</p>''';
 [bar][foo]''';
       final expected = '''<p><a href="/url1">bar</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8307,7 +8314,7 @@ bar>)</p>''';
 [foo!]: /url''';
       final expected = '''<p>[bar][foo!]</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8322,7 +8329,7 @@ bar>)</p>''';
       final expected = '''<p>[foo][ref[]</p>
 <p>[ref[]: /uri</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8337,7 +8344,7 @@ bar>)</p>''';
       final expected = '''<p>[foo][ref[bar]]</p>
 <p>[ref[bar]]: /uri</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8352,7 +8359,7 @@ bar>)</p>''';
       final expected = '''<p>[[[foo]]]</p>
 <p>[[[foo]]]: /url</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8366,7 +8373,7 @@ bar>)</p>''';
 [ref\\[]: /uri''';
       final expected = '''<p><a href="/uri">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8380,7 +8387,7 @@ bar>)</p>''';
 [bar\\\\]''';
       final expected = '''<p><a href="/uri">bar\\</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8395,7 +8402,7 @@ bar>)</p>''';
       final expected = '''<p>[]</p>
 <p>[]: /uri</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8414,7 +8421,7 @@ bar>)</p>''';
 <p>[
 ]: /uri</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8428,7 +8435,7 @@ bar>)</p>''';
 [foo]: /url "title"''';
       final expected = '''<p><a href="/url" title="title">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8442,7 +8449,7 @@ bar>)</p>''';
 [*foo* bar]: /url "title"''';
       final expected = '''<p><a href="/url" title="title"><em>foo</em> bar</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8456,7 +8463,7 @@ bar>)</p>''';
 [foo]: /url "title"''';
       final expected = '''<p><a href="/url" title="title">Foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8472,7 +8479,7 @@ bar>)</p>''';
       final expected = '''<p><a href="/url" title="title">foo</a>
 []</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8486,7 +8493,7 @@ bar>)</p>''';
 [foo]: /url "title"''';
       final expected = '''<p><a href="/url" title="title">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8500,7 +8507,7 @@ bar>)</p>''';
 [*foo* bar]: /url "title"''';
       final expected = '''<p><a href="/url" title="title"><em>foo</em> bar</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8514,7 +8521,7 @@ bar>)</p>''';
 [*foo* bar]: /url "title"''';
       final expected = '''<p>[<a href="/url" title="title"><em>foo</em> bar</a>]</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8528,7 +8535,7 @@ bar>)</p>''';
 [foo]: /url''';
       final expected = '''<p>[[bar <a href="/url">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8542,7 +8549,7 @@ bar>)</p>''';
 [foo]: /url "title"''';
       final expected = '''<p><a href="/url" title="title">Foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8556,7 +8563,7 @@ bar>)</p>''';
 [foo]: /url''';
       final expected = '''<p><a href="/url">foo</a> bar</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8570,7 +8577,7 @@ bar>)</p>''';
 [foo]: /url "title"''';
       final expected = '''<p>[foo]</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8584,7 +8591,7 @@ bar>)</p>''';
 *[foo*]''';
       final expected = '''<p>*<a href="/url">foo*</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8599,7 +8606,7 @@ bar>)</p>''';
 [bar]: /url2''';
       final expected = '''<p><a href="/url2">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8613,7 +8620,7 @@ bar>)</p>''';
 [foo]: /url1''';
       final expected = '''<p><a href="/url1">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8627,7 +8634,7 @@ bar>)</p>''';
 [foo]: /url1''';
       final expected = '''<p><a href="">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8641,7 +8648,7 @@ bar>)</p>''';
 [foo]: /url1''';
       final expected = '''<p><a href="/url1">foo</a>(not a link)</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8655,7 +8662,7 @@ bar>)</p>''';
 [baz]: /url''';
       final expected = '''<p>[foo]<a href="/url">bar</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8670,7 +8677,7 @@ bar>)</p>''';
 [bar]: /url2''';
       final expected = '''<p><a href="/url2">foo</a><a href="/url1">baz</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8685,7 +8692,7 @@ bar>)</p>''';
 [foo]: /url2''';
       final expected = '''<p>[foo]<a href="/url1">bar</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8697,7 +8704,7 @@ bar>)</p>''';
       final markdown = '''![foo](/url "title")''';
       final expected = '''<p><img src="/url" alt="foo" title="title" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8711,7 +8718,7 @@ bar>)</p>''';
 [foo *bar*]: train.jpg "train & tracks"''';
       final expected = '''<p><img src="train.jpg" alt="foo bar" title="train &amp; tracks" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8723,7 +8730,7 @@ bar>)</p>''';
       final markdown = '''![foo ![bar](/url)](/url2)''';
       final expected = '''<p><img src="/url2" alt="foo bar" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8735,7 +8742,7 @@ bar>)</p>''';
       final markdown = '''![foo [bar](/url)](/url2)''';
       final expected = '''<p><img src="/url2" alt="foo bar" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8749,7 +8756,7 @@ bar>)</p>''';
 [foo *bar*]: train.jpg "train & tracks"''';
       final expected = '''<p><img src="train.jpg" alt="foo bar" title="train &amp; tracks" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8763,7 +8770,7 @@ bar>)</p>''';
 [FOOBAR]: train.jpg "train & tracks"''';
       final expected = '''<p><img src="train.jpg" alt="foo bar" title="train &amp; tracks" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8775,7 +8782,7 @@ bar>)</p>''';
       final markdown = '''![foo](train.jpg)''';
       final expected = '''<p><img src="train.jpg" alt="foo" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8787,7 +8794,7 @@ bar>)</p>''';
       final markdown = '''My ![foo bar](/path/to/train.jpg  "title"   )''';
       final expected = '''<p>My <img src="/path/to/train.jpg" alt="foo bar" title="title" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8799,7 +8806,7 @@ bar>)</p>''';
       final markdown = '''![foo](<url>)''';
       final expected = '''<p><img src="url" alt="foo" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8811,7 +8818,7 @@ bar>)</p>''';
       final markdown = '''![](/url)''';
       final expected = '''<p><img src="/url" alt="" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8825,7 +8832,7 @@ bar>)</p>''';
 [bar]: /url''';
       final expected = '''<p><img src="/url" alt="foo" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8839,7 +8846,7 @@ bar>)</p>''';
 [BAR]: /url''';
       final expected = '''<p><img src="/url" alt="foo" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8853,7 +8860,7 @@ bar>)</p>''';
 [foo]: /url "title"''';
       final expected = '''<p><img src="/url" alt="foo" title="title" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8867,7 +8874,7 @@ bar>)</p>''';
 [*foo* bar]: /url "title"''';
       final expected = '''<p><img src="/url" alt="foo bar" title="title" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8881,7 +8888,7 @@ bar>)</p>''';
 [foo]: /url "title"''';
       final expected = '''<p><img src="/url" alt="Foo" title="title" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8897,7 +8904,7 @@ bar>)</p>''';
       final expected = '''<p><img src="/url" alt="foo" title="title" />
 []</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8911,7 +8918,7 @@ bar>)</p>''';
 [foo]: /url "title"''';
       final expected = '''<p><img src="/url" alt="foo" title="title" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8925,7 +8932,7 @@ bar>)</p>''';
 [*foo* bar]: /url "title"''';
       final expected = '''<p><img src="/url" alt="foo bar" title="title" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8940,7 +8947,7 @@ bar>)</p>''';
       final expected = '''<p>![[foo]]</p>
 <p>[[foo]]: /url &quot;title&quot;</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8954,7 +8961,7 @@ bar>)</p>''';
 [foo]: /url "title"''';
       final expected = '''<p><img src="/url" alt="Foo" title="title" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8968,7 +8975,7 @@ bar>)</p>''';
 [foo]: /url "title"''';
       final expected = '''<p>![foo]</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8982,7 +8989,7 @@ bar>)</p>''';
 [foo]: /url "title"''';
       final expected = '''<p>!<a href="/url" title="title">foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -8994,7 +9001,7 @@ bar>)</p>''';
       final markdown = '''<http://foo.bar.baz>''';
       final expected = '''<p><a href="http://foo.bar.baz">http://foo.bar.baz</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9006,7 +9013,7 @@ bar>)</p>''';
       final markdown = '''<http://foo.bar.baz/test?q=hello&id=22&boolean>''';
       final expected = '''<p><a href="http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean">http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9018,7 +9025,7 @@ bar>)</p>''';
       final markdown = '''<irc://foo.bar:2233/baz>''';
       final expected = '''<p><a href="irc://foo.bar:2233/baz">irc://foo.bar:2233/baz</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9030,7 +9037,7 @@ bar>)</p>''';
       final markdown = '''<MAILTO:FOO@BAR.BAZ>''';
       final expected = '''<p><a href="MAILTO:FOO@BAR.BAZ">MAILTO:FOO@BAR.BAZ</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9042,7 +9049,7 @@ bar>)</p>''';
       final markdown = '''<a+b+c:d>''';
       final expected = '''<p><a href="a+b+c:d">a+b+c:d</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9054,7 +9061,7 @@ bar>)</p>''';
       final markdown = '''<made-up-scheme://foo,bar>''';
       final expected = '''<p><a href="made-up-scheme://foo,bar">made-up-scheme://foo,bar</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9066,7 +9073,7 @@ bar>)</p>''';
       final markdown = '''<http://../>''';
       final expected = '''<p><a href="http://../">http://../</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9078,7 +9085,7 @@ bar>)</p>''';
       final markdown = '''<localhost:5001/foo>''';
       final expected = '''<p><a href="localhost:5001/foo">localhost:5001/foo</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9090,7 +9097,7 @@ bar>)</p>''';
       final markdown = '''<http://foo.bar/baz bim>''';
       final expected = '''<p>&lt;http://foo.bar/baz bim&gt;</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9102,7 +9109,7 @@ bar>)</p>''';
       final markdown = '''<http://example.com/\\[\\>''';
       final expected = '''<p><a href="http://example.com/%5C%5B%5C">http://example.com/\\[\\</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9114,7 +9121,7 @@ bar>)</p>''';
       final markdown = '''<foo@bar.example.com>''';
       final expected = '''<p><a href="mailto:foo@bar.example.com">foo@bar.example.com</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9126,7 +9133,7 @@ bar>)</p>''';
       final markdown = '''<foo+special@Bar.baz-bar0.com>''';
       final expected = '''<p><a href="mailto:foo+special@Bar.baz-bar0.com">foo+special@Bar.baz-bar0.com</a></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9138,7 +9145,7 @@ bar>)</p>''';
       final markdown = '''<foo\\+@bar.example.com>''';
       final expected = '''<p>&lt;foo+@bar.example.com&gt;</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9150,7 +9157,7 @@ bar>)</p>''';
       final markdown = '''<>''';
       final expected = '''<p>&lt;&gt;</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9162,7 +9169,7 @@ bar>)</p>''';
       final markdown = '''< http://foo.bar >''';
       final expected = '''<p>&lt; http://foo.bar &gt;</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9174,7 +9181,7 @@ bar>)</p>''';
       final markdown = '''<m:abc>''';
       final expected = '''<p>&lt;m:abc&gt;</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9186,7 +9193,7 @@ bar>)</p>''';
       final markdown = '''<foo.bar.baz>''';
       final expected = '''<p>&lt;foo.bar.baz&gt;</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9198,7 +9205,7 @@ bar>)</p>''';
       final markdown = '''http://example.com''';
       final expected = '''<p>http://example.com</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9210,7 +9217,7 @@ bar>)</p>''';
       final markdown = '''foo@bar.example.com''';
       final expected = '''<p>foo@bar.example.com</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9222,7 +9229,7 @@ bar>)</p>''';
       final markdown = '''<a><bab><c2c>''';
       final expected = '''<p><a><bab><c2c></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9234,7 +9241,7 @@ bar>)</p>''';
       final markdown = '''<a/><b2/>''';
       final expected = '''<p><a/><b2/></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9248,7 +9255,7 @@ data="foo" >''';
       final expected = '''<p><a  /><b2
 data="foo" ></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9262,7 +9269,7 @@ _boolean zoop:33=zoop:33 />''';
       final expected = '''<p><a foo="bar" bam = 'baz <em>"</em>'
 _boolean zoop:33=zoop:33 /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9274,7 +9281,7 @@ _boolean zoop:33=zoop:33 /></p>''';
       final markdown = '''Foo <responsive-image src="foo.jpg" />''';
       final expected = '''<p>Foo <responsive-image src="foo.jpg" /></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9286,7 +9293,7 @@ _boolean zoop:33=zoop:33 /></p>''';
       final markdown = '''<33> <__>''';
       final expected = '''<p>&lt;33&gt; &lt;__&gt;</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9298,7 +9305,7 @@ _boolean zoop:33=zoop:33 /></p>''';
       final markdown = '''<a h*#ref="hi">''';
       final expected = '''<p>&lt;a h*#ref=&quot;hi&quot;&gt;</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9310,7 +9317,7 @@ _boolean zoop:33=zoop:33 /></p>''';
       final markdown = '''<a href="hi'> <a href=hi'>''';
       final expected = '''<p>&lt;a href=&quot;hi'&gt; &lt;a href=hi'&gt;</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9328,7 +9335,7 @@ foo&gt;&lt;bar/ &gt;
 &lt;foo bar=baz
 bim!bop /&gt;</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9340,7 +9347,7 @@ bim!bop /&gt;</p>''';
       final markdown = '''<a href='bar'title=title>''';
       final expected = '''<p>&lt;a href='bar'title=title&gt;</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9352,7 +9359,7 @@ bim!bop /&gt;</p>''';
       final markdown = '''</a></foo >''';
       final expected = '''<p></a></foo ></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9364,7 +9371,7 @@ bim!bop /&gt;</p>''';
       final markdown = '''</a href="foo">''';
       final expected = '''<p>&lt;/a href=&quot;foo&quot;&gt;</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9378,7 +9385,7 @@ comment - with hyphens -->''';
       final expected = '''<p>foo <!-- this is a --
 comment - with hyphens --></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9393,7 +9400,7 @@ foo <!---> foo -->''';
       final expected = '''<p>foo <!--> foo --&gt;</p>
 <p>foo <!---> foo --&gt;</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9405,7 +9412,7 @@ foo <!---> foo -->''';
       final markdown = '''foo <?php echo \$a; ?>''';
       final expected = '''<p>foo <?php echo \$a; ?></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9417,7 +9424,7 @@ foo <!---> foo -->''';
       final markdown = '''foo <!ELEMENT br EMPTY>''';
       final expected = '''<p>foo <!ELEMENT br EMPTY></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9429,7 +9436,7 @@ foo <!---> foo -->''';
       final markdown = '''foo <![CDATA[>&<]]>''';
       final expected = '''<p>foo <![CDATA[>&<]]></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9441,7 +9448,7 @@ foo <!---> foo -->''';
       final markdown = '''foo <a href="&ouml;">''';
       final expected = '''<p>foo <a href="&ouml;"></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9453,7 +9460,7 @@ foo <!---> foo -->''';
       final markdown = '''foo <a href="\\*">''';
       final expected = '''<p>foo <a href="\\*"></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9465,7 +9472,7 @@ foo <!---> foo -->''';
       final markdown = '''<a href="\\"">''';
       final expected = '''<p>&lt;a href=&quot;&quot;&quot;&gt;</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9479,7 +9486,7 @@ baz''';
       final expected = '''<p>foo<br />
 baz</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9493,7 +9500,7 @@ baz''';
       final expected = '''<p>foo<br />
 baz</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9507,7 +9514,7 @@ baz''';
       final expected = '''<p>foo<br />
 baz</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9521,7 +9528,7 @@ baz</p>''';
       final expected = '''<p>foo<br />
 bar</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9535,7 +9542,7 @@ bar</p>''';
       final expected = '''<p>foo<br />
 bar</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9549,7 +9556,7 @@ bar*''';
       final expected = '''<p><em>foo<br />
 bar</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9563,7 +9570,7 @@ bar*''';
       final expected = '''<p><em>foo<br />
 bar</em></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9576,7 +9583,7 @@ bar</em></p>''';
 span`''';
       final expected = '''<p><code>code   span</code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9589,7 +9596,7 @@ span`''';
 span`''';
       final expected = '''<p><code>code\\ span</code></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9603,7 +9610,7 @@ bar">''';
       final expected = '''<p><a href="foo  
 bar"></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9617,7 +9624,7 @@ bar">''';
       final expected = '''<p><a href="foo\\
 bar"></p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9629,7 +9636,7 @@ bar"></p>''';
       final markdown = '''foo\\''';
       final expected = '''<p>foo\\</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9641,7 +9648,7 @@ bar"></p>''';
       final markdown = '''foo  ''';
       final expected = '''<p>foo</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9653,7 +9660,7 @@ bar"></p>''';
       final markdown = '''### foo\\''';
       final expected = '''<h3>foo\\</h3>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9665,7 +9672,7 @@ bar"></p>''';
       final markdown = '''### foo  ''';
       final expected = '''<h3>foo</h3>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9679,7 +9686,7 @@ baz''';
       final expected = '''<p>foo
 baz</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9693,7 +9700,7 @@ baz</p>''';
       final expected = '''<p>foo
 baz</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9705,7 +9712,7 @@ baz</p>''';
       final markdown = '''hello \$.;'there''';
       final expected = '''<p>hello \$.;'there</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9717,7 +9724,7 @@ baz</p>''';
       final markdown = '''Foo χρῆν''';
       final expected = '''<p>Foo χρῆν</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
@@ -9729,7 +9736,7 @@ baz</p>''';
       final markdown = '''Multiple     spaces''';
       final expected = '''<p>Multiple     spaces</p>''';
 
-      final parser = CmarkParser();
+      final parser = _createCommonmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);

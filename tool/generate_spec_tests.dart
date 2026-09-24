@@ -110,6 +110,13 @@ void _generateCommonmark() {
     ..writeln('// Generated from cmark-gfm/test/spec.txt')
     ..writeln('// DO NOT EDIT - regenerate with tool/generate_spec_tests.dart')
     ..writeln()
+    ..writeln('// The upstream CommonMark spec does not enable GFM autolinks.')
+    ..writeln('CmarkParser _createCommonmarkParser() => CmarkParser(')
+    ..writeln('      options: const CmarkParserOptions(')
+    ..writeln('        enableAutolinkExtension: false,')
+    ..writeln('      ),')
+    ..writeln('    );')
+    ..writeln()
     ..writeln('void main() {')
     ..writeln("  group('CommonMark Spec Tests', () {");
 
@@ -120,7 +127,7 @@ void _generateCommonmark() {
           "      final markdown = '''${_escapeTriple(example.markdown)}''';")
       ..writeln("      final expected = '''${_escapeTriple(example.html)}''';")
       ..writeln()
-      ..writeln('      final parser = CmarkParser();')
+      ..writeln('      final parser = _createCommonmarkParser();')
       ..writeln('      parser.feed(markdown);')
       ..writeln('      final doc = parser.finish();')
       ..writeln('      final html = HtmlRenderer().render(doc);')
@@ -159,9 +166,9 @@ List<_Example> _parseExamples(String raw, {required String suitePrefix}) {
       continue;
     }
     final trimmed = line.trim();
-    final startMatch = RegExp(r'^(\`+)[ \t]+example(?:[ \t]+(.*))?$',
-            multiLine: false)
-        .firstMatch(trimmed);
+    final startMatch =
+        RegExp(r'^(\`+)[ \t]+example(?:[ \t]+(.*))?$', multiLine: false)
+            .firstMatch(trimmed);
     if (startMatch == null) {
       if (trimmed.startsWith('## ')) {
         section = trimmed.substring(3).trim();

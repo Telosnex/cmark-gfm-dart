@@ -17,7 +17,7 @@ class CmarkParserOptions {
     this.enableMath = true,
     this.mathOptions = const CmarkMathOptions(),
     this.maxReferenceSize,
-    this.enableAutolinkExtension = false,
+    this.enableAutolinkExtension = true,
     this.singleTildeStrikethrough = true,
     this.allowExtraTableDelimiters = true,
   });
@@ -25,6 +25,9 @@ class CmarkParserOptions {
   final bool enableMath;
   final CmarkMathOptions mathOptions;
   final int? maxReferenceSize;
+
+  /// Link bare URLs, www domains, and email addresses as in GFM. Enabled by
+  /// default; set false to keep bare addresses as plain text.
   final bool enableAutolinkExtension;
 
   /// Ignore surplus delimiter cells after the last header cell. Generated
