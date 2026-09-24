@@ -11,7 +11,6 @@ import '../houdini/html_unescape.dart' as houdini;
 import '../util/strbuf.dart';
 import 'parser_options.dart';
 
-
 const int kCodeIndent = 4;
 const int kTabStop = 4;
 
@@ -832,7 +831,9 @@ class BlockParser {
           final alignments =
               _parseTableDelimiterRow(_currentLine.substring(firstNonspace));
 
-          if (headerCells.length == alignments.length &&
+          if (alignments.length >= headerCells.length &&
+              (options.allowExtraTableDelimiters ||
+                  alignments.length == headerCells.length) &&
               headerCells.isNotEmpty) {
             if (leadingText != null && leadingText.isNotEmpty) {
               final paragraphNode = CmarkNode(CmarkNodeType.paragraph)
@@ -861,7 +862,9 @@ class BlockParser {
             _finalize(headerRow);
 
             // Store alignments for body rows
-            _currentTableAlignments = alignments;
+            _currentTableAlignments = alignments.length == headerCells.length
+                ? alignments
+                : alignments.sublist(0, headerCells.length);
 
             // Consume delimiter line completely - don't add it as content
             _advanceOffset(_currentLine.length - offset, false);
