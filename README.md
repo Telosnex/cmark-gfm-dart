@@ -56,6 +56,10 @@ parser.feed(chunk);
 final snapshot = parser.finishClone(trailingText: '\n```');
 ```
 
+Each snapshot has new nodes. To find the blocks that did not change since the
+last snapshot, compare its top-level blocks with `CmarkNode.contentEquals`. A
+renderer can keep its output for those blocks.
+
 ### GFM Extensions
 
 #### Tables

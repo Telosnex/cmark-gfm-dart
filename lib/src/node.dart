@@ -558,6 +558,37 @@ class CmarkNode {
     }
   }
 
+  /// Whether this node and [other] hold the same document content, down to
+  /// the last descendant.
+  ///
+  /// Compares types, text, type-specific data, source positions, flags and
+  /// footnote fields. Ignores tree links, [userData], [firstContentByte] and
+  /// [parentFootnoteDefinition]. A renderer can use this to keep its output
+  /// for a block that a later snapshot parsed again.
+  bool contentEquals(CmarkNode other) {
+    if (identical(this, other)) return true;
+    if (type != other.type ||
+        startLine != other.startLine ||
+        startColumn != other.startColumn ||
+        endLine != other.endLine ||
+        endColumn != other.endColumn ||
+        flags != other.flags ||
+        contentString != other.contentString ||
+        !_htmlFieldsEqual(_html, other._html) ||
+        !_footnoteFieldsEqual(_footnote, other._footnote) ||
+        !_dataEqual(_data, other._data)) {
+      return false;
+    }
+    var child = firstChild;
+    var otherChild = other.firstChild;
+    while (child != null && otherChild != null) {
+      if (!child.contentEquals(otherChild)) return false;
+      child = child.next;
+      otherChild = otherChild.next;
+    }
+    return child == null && otherChild == null;
+  }
+
   CmarkNode deepCopy() {
     final copy = shallowCopy();
     var child = firstChild;
@@ -600,6 +631,65 @@ class CmarkNode {
     return copy;
   }
 }
+
+bool _htmlFieldsEqual(_HtmlBlockFields? a, _HtmlBlockFields? b) =>
+    (a?.internalOffset ?? 0) == (b?.internalOffset ?? 0) &&
+    (a?.htmlBlockType ?? 0) == (b?.htmlBlockType ?? 0) &&
+    a?.htmlBlockEndTag == b?.htmlBlockEndTag;
+
+bool _footnoteFieldsEqual(_FootnoteFields? a, _FootnoteFields? b) =>
+    (a?.referenceIndex ?? 0) == (b?.referenceIndex ?? 0) &&
+    (a?.defCount ?? 0) == (b?.defCount ?? 0) &&
+    (a?.refIndex ?? 0) == (b?.refIndex ?? 0) &&
+    (a?.defLabel ?? '') == (b?.defLabel ?? '');
+
+bool _dataEqual(Object? a, Object? b) {
+  if (identical(a, b)) return true;
+  // A data getter allocates default data on first read, so a node that was
+  // only read still equals one that was never read.
+  if (a == null) return _dataEqual(_defaultDataLike(b), b);
+  if (b == null) return _dataEqual(a, _defaultDataLike(a));
+  return switch ((a, b)) {
+    (CmarkListData a, CmarkListData b) => a.listType == b.listType &&
+        a.markerOffset == b.markerOffset &&
+        a.padding == b.padding &&
+        a.start == b.start &&
+        a.delimiter == b.delimiter &&
+        a.bulletChar == b.bulletChar &&
+        a.tight == b.tight &&
+        a.checked == b.checked,
+    (CmarkCodeData a, CmarkCodeData b) => a.info == b.info &&
+        a.literal == b.literal &&
+        a.fenceLength == b.fenceLength &&
+        a.fenceOffset == b.fenceOffset &&
+        a.fenceChar == b.fenceChar &&
+        a.isFenced == b.isFenced,
+    (CmarkHeadingData a, CmarkHeadingData b) =>
+      a.level == b.level && a.setext == b.setext,
+    (CmarkLinkData a, CmarkLinkData b) => a.url == b.url && a.title == b.title,
+    (CmarkCustomData a, CmarkCustomData b) =>
+      a.onEnter == b.onEnter && a.onExit == b.onExit,
+    (CmarkMathData a, CmarkMathData b) => a.literal == b.literal &&
+        a.display == b.display &&
+        a.openingDelimiter == b.openingDelimiter &&
+        a.closingDelimiter == b.closingDelimiter,
+    (CmarkTableRowData a, CmarkTableRowData b) => a.isHeader == b.isHeader,
+    (CmarkTableCellData a, CmarkTableCellData b) => a.align == b.align,
+    _ => false,
+  };
+}
+
+Object? _defaultDataLike(Object? data) => switch (data) {
+      CmarkListData() => CmarkListData(),
+      CmarkCodeData() => CmarkCodeData(),
+      CmarkHeadingData() => CmarkHeadingData(),
+      CmarkLinkData() => CmarkLinkData(),
+      CmarkCustomData() => CmarkCustomData(),
+      CmarkMathData() => CmarkMathData(),
+      CmarkTableRowData() => CmarkTableRowData(),
+      CmarkTableCellData() => CmarkTableCellData(),
+      _ => null,
+    };
 
 class _HtmlBlockFields {
   int internalOffset = 0;
