@@ -50,8 +50,7 @@ class CmarkNodeType {
       CmarkNodeType._inline(0x000b, 'footnote_reference');
   static const CmarkNodeType strikethrough =
       CmarkNodeType._inline(0x000c, 'strikethrough');
-  static const CmarkNodeType math =
-      CmarkNodeType._inline(0x000d, 'math');
+  static const CmarkNodeType math = CmarkNodeType._inline(0x000d, 'math');
 
   // GFM table extensions
   static const CmarkNodeType table = CmarkNodeType._block(0x000c, 'table');
@@ -317,57 +316,126 @@ class CmarkNode {
   int startColumn = 0;
   int endLine = 0;
   int endColumn = 0;
-  int internalOffset = 0;
-  int htmlBlockType = 0;
-  String? htmlBlockEndTag;
 
   /// Flag bits used by the parser and renderer.
   int flags = 0;
 
+  // Rarely used fields live in side objects, allocated on first write.
+  // Streaming snapshots copy every node, so node size matters.
+  _HtmlBlockFields? _html;
+  _FootnoteFields? _footnote;
+
+  int get internalOffset => _html?.internalOffset ?? 0;
+  set internalOffset(int value) {
+    if (value != 0 || _html != null)
+      (_html ??= _HtmlBlockFields()).internalOffset = value;
+  }
+
+  int get htmlBlockType => _html?.htmlBlockType ?? 0;
+  set htmlBlockType(int value) {
+    if (value != 0 || _html != null)
+      (_html ??= _HtmlBlockFields()).htmlBlockType = value;
+  }
+
+  String? get htmlBlockEndTag => _html?.htmlBlockEndTag;
+  set htmlBlockEndTag(String? value) {
+    if (value != null || _html != null)
+      (_html ??= _HtmlBlockFields()).htmlBlockEndTag = value;
+  }
+
   /// The number of references/definitions recorded for footnote bookkeeping.
-  int footnoteReferenceIndex = 0;
+  int get footnoteReferenceIndex => _footnote?.referenceIndex ?? 0;
+  set footnoteReferenceIndex(int value) {
+    if (value != 0 || _footnote != null)
+      (_footnote ??= _FootnoteFields()).referenceIndex = value;
+  }
 
   /// For footnote definitions: how many times this footnote has been referenced.
-  int footnoteDefCount = 0;
+  int get footnoteDefCount => _footnote?.defCount ?? 0;
+  set footnoteDefCount(int value) {
+    if (value != 0 || _footnote != null)
+      (_footnote ??= _FootnoteFields()).defCount = value;
+  }
 
   /// For footnote references: which reference number this is (1st, 2nd, 3rd...).
-  int footnoteRefIndex = 0;
+  int get footnoteRefIndex => _footnote?.refIndex ?? 0;
+  set footnoteRefIndex(int value) {
+    if (value != 0 || _footnote != null)
+      (_footnote ??= _FootnoteFields()).refIndex = value;
+  }
 
   /// For footnote references: the label of the definition.
-  String footnoteDefLabel = '';
+  String get footnoteDefLabel => _footnote?.defLabel ?? '';
+  set footnoteDefLabel(String value) {
+    if (value.isNotEmpty || _footnote != null)
+      (_footnote ??= _FootnoteFields()).defLabel = value;
+  }
 
   /// Link to the containing footnote definition node, if any.
-  CmarkNode? parentFootnoteDefinition;
+  CmarkNode? get parentFootnoteDefinition => _footnote?.parentDefinition;
+  set parentFootnoteDefinition(CmarkNode? value) {
+    if (value != null || _footnote != null)
+      (_footnote ??= _FootnoteFields()).parentDefinition = value;
+  }
 
   // ---- Lazy data fields ----
-  CmarkListData? _listData;
-  CmarkCodeData? _codeData;
-  CmarkHeadingData? _headingData;
-  CmarkLinkData? _linkData;
-  CmarkCustomData? _customData;
-  CmarkTableRowData? _tableRowData;
-  CmarkTableCellData? _tableCellData;
-  CmarkMathData? _mathData;
+  // One slot for the type-specific data: a node has one kind at a time.
+  // Asking for another kind replaces it (the node's type has changed).
+  Object? _data;
 
-  CmarkListData get listData => _listData ??= CmarkListData();
-  CmarkCodeData get codeData => _codeData ??= CmarkCodeData();
-  CmarkHeadingData get headingData => _headingData ??= CmarkHeadingData();
-  CmarkLinkData get linkData => _linkData ??= CmarkLinkData();
-  CmarkCustomData get customData => _customData ??= CmarkCustomData();
-  CmarkTableRowData get tableRowData => _tableRowData ??= CmarkTableRowData();
-  CmarkTableCellData get tableCellData =>
-      _tableCellData ??= CmarkTableCellData();
-  CmarkMathData get mathData => _mathData ??= CmarkMathData();
+  CmarkListData get listData {
+    final data = _data;
+    if (data is CmarkListData) return data;
+    return _data = CmarkListData();
+  }
+
+  CmarkCodeData get codeData {
+    final data = _data;
+    if (data is CmarkCodeData) return data;
+    return _data = CmarkCodeData();
+  }
+
+  CmarkHeadingData get headingData {
+    final data = _data;
+    if (data is CmarkHeadingData) return data;
+    return _data = CmarkHeadingData();
+  }
+
+  CmarkLinkData get linkData {
+    final data = _data;
+    if (data is CmarkLinkData) return data;
+    return _data = CmarkLinkData();
+  }
+
+  CmarkCustomData get customData {
+    final data = _data;
+    if (data is CmarkCustomData) return data;
+    return _data = CmarkCustomData();
+  }
+
+  CmarkTableRowData get tableRowData {
+    final data = _data;
+    if (data is CmarkTableRowData) return data;
+    return _data = CmarkTableRowData();
+  }
+
+  CmarkTableCellData get tableCellData {
+    final data = _data;
+    if (data is CmarkTableCellData) return data;
+    return _data = CmarkTableCellData();
+  }
+
+  CmarkMathData get mathData {
+    final data = _data;
+    if (data is CmarkMathData) return data;
+    return _data = CmarkMathData();
+  }
 
   /// Initialize heading data when converting from another type.
-  void initializeHeadingData() {
-    _headingData ??= CmarkHeadingData();
-  }
+  void initializeHeadingData() => headingData;
 
   /// Initialize table cell data when converting or creating cell.
-  void initializeTableCellData() {
-    _tableCellData ??= CmarkTableCellData();
-  }
+  void initializeTableCellData() => tableCellData;
 
   // ---- Tree operations ----
 
@@ -491,79 +559,70 @@ class CmarkNode {
   }
 
   CmarkNode deepCopy() {
-    final copy = CmarkNode(type);
-    // Copy content.
-    final s = contentString;
-    if (s.isNotEmpty) copy.setLiteral(s);
-    // Copy position / metadata.
-    copy.startLine = startLine;
-    copy.startColumn = startColumn;
-    copy.endLine = endLine;
-    copy.endColumn = endColumn;
-    copy.internalOffset = internalOffset;
-    copy.htmlBlockType = htmlBlockType;
-    copy.htmlBlockEndTag = htmlBlockEndTag;
-    copy.flags = flags;
-    copy.footnoteReferenceIndex = footnoteReferenceIndex;
-    copy.footnoteDefCount = footnoteDefCount;
-    copy.footnoteRefIndex = footnoteRefIndex;
-    copy.footnoteDefLabel = footnoteDefLabel;
-    copy.firstContentByte = firstContentByte;
-    copy.userData = userData;
-    // Copy data structs (only if allocated).
-    if (_listData != null) {
-      copy.listData
-        ..listType = _listData!.listType
-        ..markerOffset = _listData!.markerOffset
-        ..padding = _listData!.padding
-        ..start = _listData!.start
-        ..delimiter = _listData!.delimiter
-        ..bulletChar = _listData!.bulletChar
-        ..tight = _listData!.tight;
-    }
-    if (_codeData != null) {
-      copy.codeData
-        ..info = _codeData!.info
-        ..literal = _codeData!.literal
-        ..fenceLength = _codeData!.fenceLength
-        ..fenceOffset = _codeData!.fenceOffset
-        ..fenceChar = _codeData!.fenceChar
-        ..isFenced = _codeData!.isFenced;
-    }
-    if (_headingData != null) {
-      copy.headingData
-        ..level = _headingData!.level
-        ..setext = _headingData!.setext;
-    }
-    if (_linkData != null) {
-      copy.linkData
-        ..url = _linkData!.url
-        ..title = _linkData!.title;
-    }
-    if (_customData != null) {
-      copy.customData
-        ..onEnter = _customData!.onEnter
-        ..onExit = _customData!.onExit;
-    }
-    if (_mathData != null) {
-      copy.mathData
-        ..literal = _mathData!.literal
-        ..display = _mathData!.display
-        ..openingDelimiter = _mathData!.openingDelimiter
-        ..closingDelimiter = _mathData!.closingDelimiter;
-    }
-    if (_tableRowData != null) {
-      copy.tableRowData.isHeader = _tableRowData!.isHeader;
-    }
-    if (_tableCellData != null) {
-      copy.tableCellData.align = _tableCellData!.align;
-    }
-    // Recursively copy children.
+    final copy = shallowCopy();
     var child = firstChild;
     while (child != null) {
-      copy.appendChild(child.deepCopy());
+      copy.appendNewChild(child.deepCopy());
       child = child.next;
     }
     return copy;
   }
+
+  /// Copies this node without its children and without tree links.
+  CmarkNode shallowCopy() {
+    final copy = CmarkNode(type);
+    // Share the content string; copying a StringBuffer would copy the text.
+    final s = contentString;
+    if (s.isNotEmpty) copy._literal = s;
+    copy.startLine = startLine;
+    copy.startColumn = startColumn;
+    copy.endLine = endLine;
+    copy.endColumn = endColumn;
+    copy.flags = flags;
+    copy._html = _html?.copy();
+    copy._footnote = _footnote?.copy();
+    copy.firstContentByte = firstContentByte;
+    copy.userData = userData;
+    final data = _data;
+    if (data != null) {
+      copy._data = switch (data) {
+        CmarkListData() => data.copy(),
+        CmarkCodeData() => data.copy(),
+        CmarkHeadingData() => data.copy(),
+        CmarkLinkData() => data.copy(),
+        CmarkCustomData() => data.copy(),
+        CmarkMathData() => data.copy(),
+        CmarkTableRowData() => data.copy(),
+        CmarkTableCellData() => data.copy(),
+        _ => data,
+      };
+    }
+    return copy;
+  }
+}
+
+class _HtmlBlockFields {
+  int internalOffset = 0;
+  int htmlBlockType = 0;
+  String? htmlBlockEndTag;
+
+  _HtmlBlockFields copy() => _HtmlBlockFields()
+    ..internalOffset = internalOffset
+    ..htmlBlockType = htmlBlockType
+    ..htmlBlockEndTag = htmlBlockEndTag;
+}
+
+class _FootnoteFields {
+  int referenceIndex = 0;
+  int defCount = 0;
+  int refIndex = 0;
+  String defLabel = '';
+  CmarkNode? parentDefinition;
+
+  /// A copy belongs to another tree, so it does not keep [parentDefinition].
+  _FootnoteFields copy() => _FootnoteFields()
+    ..referenceIndex = referenceIndex
+    ..defCount = defCount
+    ..refIndex = refIndex
+    ..defLabel = defLabel;
 }

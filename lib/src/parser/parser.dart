@@ -41,5 +41,10 @@ class CmarkParser {
   /// Create a finalized clone of the current tree for rendering,
   /// but keep the parser alive to accept more feed() calls.
   /// Use this for streaming/incremental rendering of AI responses.
-  CmarkNode finishClone() => _blockParser.finishClone();
+  ///
+  /// The result is what [finish] would return for the text fed so far
+  /// followed by [trailingText]. [trailingText] is not kept: use it for
+  /// text that the next chunk may replace, such as a closing code fence.
+  CmarkNode finishClone({String trailingText = ''}) =>
+      _blockParser.finishClone(trailingText: trailingText);
 }

@@ -46,6 +46,34 @@ class CmarkReferenceMap {
     _refSize = 0;
   }
 
+  /// A position in the insertion history. [rollback] removes the entries
+  /// added after it. Entries are never replaced, so this restores the map.
+  int get checkpoint => _entries.length;
+
+  void rollback(int checkpoint) {
+    if (_entries.length > checkpoint) {
+      _entries.removeWhere((_, reference) => reference.age >= checkpoint);
+    }
+  }
+
+  /// Identifies the entries added after [checkpoint]: equal keys mean
+  /// equal lookups, given the same entries before [checkpoint].
+  String keySince(int checkpoint) {
+    if (_entries.length == checkpoint) return '$checkpoint';
+    final key = StringBuffer('${_entries.length}');
+    for (final reference in _entries.values) {
+      if (reference.age < checkpoint) continue;
+      key
+        ..writeCharCode(0)
+        ..write(reference.label)
+        ..writeCharCode(1)
+        ..write(utf8.decode(reference.url.data, allowMalformed: true))
+        ..writeCharCode(1)
+        ..write(utf8.decode(reference.title.data, allowMalformed: true));
+    }
+    return key.toString();
+  }
+
   bool addStrings(String labelStr, String urlStr, String titleStr) {
     final label = CmarkChunk.literal(labelStr);
     final url = CmarkChunk.literal(urlStr);

@@ -46,6 +46,16 @@ final doc = parser.finish();
 final html = HtmlRenderer().render(doc);
 ```
 
+To render while text streams in, take a snapshot after each chunk. The
+parser keeps accepting input, and each snapshot equals `finish()` on the
+text so far. `trailingText` is parsed for that snapshot only, for text the
+next chunk may replace, such as a closing code fence:
+
+```dart
+parser.feed(chunk);
+final snapshot = parser.finishClone(trailingText: '\n```');
+```
+
 ### GFM Extensions
 
 #### Tables
@@ -110,6 +120,11 @@ parser.feed('''
 ## Performance
 
 This parser is designed to avoid O(N*M) reprocessing during streaming. Each `feed()` call processes only the new content, maintaining parser state between calls.
+
+`finishClone()` parses the inline content of a closed block once and copies
+the result into later snapshots. Each snapshot still copies the whole tree,
+so its cost grows with the document. `dart run
+test/perf/streaming_snapshot_benchmark.dart` measures it.
 
 ## Current Status
 

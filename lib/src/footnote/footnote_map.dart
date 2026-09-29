@@ -17,6 +17,8 @@ class CmarkFootnoteMap {
 
   int get size => _entries.length;
 
+  void clear() => _entries.clear();
+
   void add(String label, CmarkNode node) {
     final normalized = _normalizeLabel(label);
     if (normalized == null || normalized.isEmpty) return;
@@ -42,8 +44,19 @@ class CmarkFootnoteMap {
     return referenced;
   }
 
+  // Streaming snapshots resolve the same few labels again and again, and
+  // normalizing (UTF-8 encode, case fold, decode) is the expensive part.
+  static final Map<String, String?> _normalized = <String, String?>{};
+
   static String? _normalizeLabel(String label) {
     if (label.isEmpty) return null;
+    final cached = _normalized[label];
+    if (cached != null || _normalized.containsKey(label)) return cached;
+    if (_normalized.length >= 1024) _normalized.clear();
+    return _normalized[label] = _normalizeUncached(label);
+  }
+
+  static String? _normalizeUncached(String label) {
     final buffer = CmarkStrbuf();
     CmarkUtf8.caseFold(buffer, utf8.encode(label));
     buffer.trim();

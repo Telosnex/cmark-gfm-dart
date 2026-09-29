@@ -5,7 +5,6 @@ import '../reference/reference_map.dart';
 import '../reference/reference_parser.dart';
 import '../inline/inline_parser.dart';
 import '../inline/autolink_postprocess.dart';
-import '../util/node_iterator.dart';
 import '../footnote/footnote_map.dart';
 import '../houdini/html_unescape.dart' as houdini;
 import '../util/strbuf.dart';
@@ -94,7 +93,11 @@ class BlockParser {
   final CmarkReferenceMap referenceMap;
   final CmarkFootnoteMap footnoteMap;
 
-  final CmarkNode root = CmarkNode(CmarkNodeType.document);
+  /// The document being parsed. While a snapshot is built, the parser
+  /// temporarily works on the snapshot's copy instead.
+  CmarkNode get root => _root;
+  final CmarkNode _liveRoot = CmarkNode(CmarkNodeType.document);
+  late CmarkNode _root = _liveRoot;
   late CmarkNode current;
   bool _initialized = false;
   InlineParser? _inlineParser;
@@ -190,44 +193,210 @@ class BlockParser {
   /// After calling this, the parser cannot accept more input.
   CmarkNode finish() {
     _initialize();
-    return _finishInternal(root);
+    return _finishInternal(_liveRoot);
   }
 
   /// Create a finalized clone of the current tree for rendering,
   /// but keep the parser alive to accept more feed() calls.
   /// Use this for streaming/incremental rendering.
-  CmarkNode finishClone() {
+  ///
+  /// The result equals [finish] on a new parser fed the same text followed
+  /// by [trailingText]. [trailingText] is parsed for this snapshot only.
+  ///
+  /// The parser's own tree and state are not changed. Closed blocks never
+  /// change, so their parsed form is kept and copied into later snapshots
+  /// instead of being parsed again.
+  CmarkNode finishClone({String trailingText = ''}) {
     _initialize();
 
-    // Save complete parser state
-    final savedTreeClone = root.deepCopy();
-    final savedPending = _pending;
-    final savedPendingStart = _pendingStart;
-    final savedLineNumber = lineNumber;
-    final savedOffset = offset;
-    final savedColumn = column;
-    final savedBlank = blank;
-    final savedPartiallyConsumedTab = partiallyConsumedTab;
+    final saved = _LineState.save(this);
+    final liveCurrent = current;
+    final referenceCheckpoint = referenceMap.checkpoint;
+    final copies = _SnapshotCopies();
+    // The tip can be a block that was just closed, such as a setext
+    // heading. Its path must be copied as is so that the snapshot's tip is
+    // the same block.
+    for (CmarkNode? node = current; node != null; node = node.parent) {
+      copies.currentPath.add(node);
+    }
+    final snapshot = _copyForSnapshot(_liveRoot, copies, closedAncestor: false);
 
-    // Build a path from root to current (so we can restore current pointer later)
-    final pathToCurrent = <int>[];
-    var node = current;
-    while (node != root) {
-      final parent = node.parent;
-      if (parent == null) break;
-
-      // Find the index of this node among its siblings
-      var index = 0;
-      var sibling = parent.firstChild;
-      while (sibling != null && sibling != node) {
-        index++;
-        sibling = sibling.next;
+    _root = snapshot;
+    current = copies.current ?? snapshot;
+    _buildingSnapshot = true;
+    try {
+      final pending = _pendingRemaining();
+      if (trailingText.isEmpty) {
+        // The pending text is one partial line. Avoid copying it.
+        if (pending.isNotEmpty) _processLine(pending);
+      } else {
+        _processTrailingText(pending + trailingText);
       }
-      pathToCurrent.insert(0, index);
-      node = parent;
+      return _finishSnapshot(snapshot, copies, referenceCheckpoint);
+    } finally {
+      _buildingSnapshot = false;
+      _root = _liveRoot;
+      current = liveCurrent;
+      saved.restore(this);
+      referenceMap.rollback(referenceCheckpoint);
+    }
+  }
+
+  /// Processes [text] as the end of the input: complete lines, then a final
+  /// partial line. This is what [feed] followed by [finish] does.
+  void _processTrailingText(String text) {
+    var start = 0;
+    while (start < text.length) {
+      var end = start;
+      while (end < text.length) {
+        final c = text.codeUnitAt(end);
+        if (c == 0x0A || c == 0x0D) break;
+        end++;
+      }
+      _processLine(text.substring(start, end));
+      if (end == text.length) break;
+      if (text.codeUnitAt(end) == 0x0D &&
+          end + 1 < text.length &&
+          text.codeUnitAt(end + 1) == 0x0A) {
+        end++;
+      }
+      start = end + 1;
+    }
+  }
+
+  // ---- Snapshot cache ----
+
+  /// Set on a snapshot's copy of a cached parsed block. Finalization and
+  /// inline parsing skip these subtrees.
+  static const int _flagInlinesParsed = 8;
+
+  /// Set on a snapshot's copy of a cached block that has no footnote
+  /// definition or reference, so footnote resolution can skip it.
+  static const int _flagNoFootnotes = 32;
+
+  /// Parsed copies of closed live blocks. Only the highest closed block of
+  /// a subtree has an entry.
+  final Map<CmarkNode, _ParsedBlock> _parsedBlocks =
+      Map<CmarkNode, _ParsedBlock>.identity();
+
+  /// Closed live blocks seen by one snapshot. A block gets a parsed copy
+  /// when a second snapshot sees it, so a single snapshot keeps no copy.
+  final Set<CmarkNode> _seenClosedBlocks = Set<CmarkNode>.identity();
+
+  bool _buildingSnapshot = false;
+
+  /// Copies the live tree for a snapshot. Open blocks are copied without
+  /// their parsed form. Closed blocks use a cached parsed copy if one
+  /// exists; otherwise they are copied and recorded for parsing.
+  CmarkNode _copyForSnapshot(
+    CmarkNode live,
+    _SnapshotCopies copies, {
+    required bool closedAncestor,
+  }) {
+    final closed = (live.flags & 1) == 0;
+    if (closed && !copies.currentPath.contains(live)) {
+      final parsed = _parsedBlocks[live];
+      if (parsed != null) {
+        final copy = parsed.node.deepCopy()
+          ..flags = live.flags |
+              _flagInlinesParsed |
+              (parsed.hasFootnoteNode ? 0 : _flagNoFootnotes);
+        copies.reused.add(_ReusedBlock(live, copy, parsed));
+        return copy;
+      }
     }
 
-    // Process pending text into the real tree (so block structure is recognized)
+    final copy = live.shallowCopy();
+    if (identical(live, current)) copies.current = copy;
+    final isHighestClosed = closed && !closedAncestor;
+    var child = live.firstChild;
+    while (child != null) {
+      copy.appendNewChild(
+        _copyForSnapshot(child, copies, closedAncestor: closed),
+      );
+      child = child.next;
+    }
+    if (isHighestClosed) copies.parsedHere.add((live, copy));
+    return copy;
+  }
+
+  CmarkNode _finishSnapshot(
+    CmarkNode snapshot,
+    _SnapshotCopies copies,
+    int referenceCheckpoint,
+  ) {
+    _finalizeTreeRecursive(snapshot);
+
+    // Cached blocks were parsed with some reference map. If this snapshot's
+    // map differs, parse them again.
+    final references = referenceMap.keySince(referenceCheckpoint);
+    for (final reused in copies.reused) {
+      if (reused.parsed.references == references) continue;
+      final copy = reused.live.deepCopy();
+      reused.copy.parent!.insertAfter(reused.copy, copy);
+      reused.copy.unlink();
+      _finalizeTreeRecursive(copy);
+      copies.parsedHere.add((reused.live, copy));
+      _parsedBlocks.remove(reused.live);
+      _seenClosedBlocks.add(reused.live); // parse once, then cache again
+    }
+
+    final hasCachedFootnoteReference = copies.reused.any(
+      (reused) =>
+          reused.parsed.references == references &&
+          reused.parsed.hasFootnoteReference,
+    );
+    _processAllInlines(snapshot);
+
+    for (final (live, copy) in copies.parsedHere) {
+      // Finalization removes some blocks, such as reference definitions.
+      if (copy.parent == null) continue;
+      if (!_seenClosedBlocks.remove(live)) {
+        _seenClosedBlocks.add(live);
+        continue;
+      }
+      _forgetParsedDescendants(live);
+      final hasReference = _containsType(copy, CmarkNodeType.footnoteReference);
+      _parsedBlocks[live] = _ParsedBlock(
+        copy.deepCopy(),
+        references,
+        hasFootnoteReference: hasReference,
+        hasFootnoteNode: hasReference ||
+            _containsType(copy, CmarkNodeType.footnoteDefinition),
+      );
+    }
+
+    _resolveFootnotes(
+      snapshot,
+      CmarkFootnoteMap(),
+      sawReference: _sawFootnoteReference || hasCachedFootnoteReference,
+    );
+    return snapshot;
+  }
+
+  /// A new parsed copy of [live] replaces those of its descendants.
+  void _forgetParsedDescendants(CmarkNode live) {
+    var child = live.firstChild;
+    while (child != null) {
+      _parsedBlocks.remove(child);
+      _seenClosedBlocks.remove(child);
+      _forgetParsedDescendants(child);
+      child = child.next;
+    }
+  }
+
+  static bool _containsType(CmarkNode node, CmarkNodeType type) {
+    if (node.type == type) return true;
+    var child = node.firstChild;
+    while (child != null) {
+      if (_containsType(child, type)) return true;
+      child = child.next;
+    }
+    return false;
+  }
+
+  CmarkNode _finishInternal(CmarkNode rootToFinalize) {
+    // Process pending and close all containers.
     if (_hasPending) {
       final remaining = _pendingRemaining();
       if (remaining.isNotEmpty) {
@@ -235,71 +404,24 @@ class BlockParser {
       }
       _clearPending();
     }
+    _parsedBlocks.clear();
+    _seenClosedBlocks.clear();
 
-    // Clone the now-updated tree
-    final clonedRoot = root.deepCopy();
+    _finalizeTreeRecursive(rootToFinalize);
+    _processAllInlines(rootToFinalize);
 
-    // Restore the original tree by swapping children back
-    while (root.firstChild != null) {
-      root.firstChild!.unlink();
-    }
-    var child = savedTreeClone.firstChild;
-    while (child != null) {
-      final next = child.next;
-      child.unlink();
-      root.appendChild(child);
-      child = next;
-    }
-
-    // Restore current pointer by following the saved path
-    current = root;
-    for (final index in pathToCurrent) {
-      var child = current.firstChild;
-      for (var i = 0; i < index && child != null; i++) {
-        child = child.next;
-      }
-      if (child != null) {
-        current = child;
-      } else {
-        break; // Path is invalid, stay at current level
-      }
-    }
-
-    // IMPORTANT: Finalize clone BEFORE restoring parser state!
-    // Otherwise _finalizeTreeRecursive will use wrong lineNumber for end
-    // positions
-    final finalizedClone = _finishInternal(clonedRoot);
-
-    // NOW restore all other parser state
-    _pending = savedPending;
-    _pendingStart = savedPendingStart;
-    lineNumber = savedLineNumber;
-    offset = savedOffset;
-    column = savedColumn;
-    blank = savedBlank;
-    partiallyConsumedTab = savedPartiallyConsumedTab;
-
-    return finalizedClone;
+    // Build the map from this tree. Nodes registered while feeding may
+    // belong to an earlier tree.
+    footnoteMap.clear();
+    _resolveFootnotes(
+      rootToFinalize,
+      footnoteMap,
+      sawReference: _sawFootnoteReference,
+    );
+    return rootToFinalize;
   }
 
-  CmarkNode _finishInternal(CmarkNode rootToFinalize) {
-    final isClone = rootToFinalize != root;
-
-    if (!isClone) {
-      // For real finish, process pending and close all containers
-      if (_hasPending) {
-        final remaining = _pendingRemaining();
-        if (remaining.isNotEmpty) {
-          _processLine(remaining);
-        }
-        _clearPending();
-      }
-    }
-
-    // Finalize all nodes in the tree (both for finish and finishClone)
-    _finalizeTreeRecursive(rootToFinalize);
-
-    // Process inlines
+  void _processAllInlines(CmarkNode rootToFinalize) {
     _inlineParser ??= InlineParser(
       referenceMap,
       parserOptions: options,
@@ -315,20 +437,27 @@ class BlockParser {
       }
       candidates.clear(); // do not retain the finished tree
     }
+  }
 
-    // Link footnote references to definitions and set indices
-    final bool hasFootnoteDefs = footnoteMap.size > 0 || _sawFootnoteDefinition;
-    if (hasFootnoteDefs || _sawFootnoteReference) {
-      _linkFootnotes(rootToFinalize);
+  /// Links footnote references to definitions and moves the definitions to
+  /// the end of the document.
+  void _resolveFootnotes(
+    CmarkNode rootToFinalize,
+    CmarkFootnoteMap footnotes, {
+    required bool sawReference,
+  }) {
+    final bool hasFootnoteDefs = _sawFootnoteDefinition;
+    if (hasFootnoteDefs || sawReference) {
+      _linkFootnotes(rootToFinalize, footnotes);
       if (hasFootnoteDefs) {
-        _appendFootnotes(rootToFinalize);
+        _appendFootnotes(rootToFinalize, footnotes);
       }
     }
-
-    return rootToFinalize;
   }
 
   void _finalizeTreeRecursive(CmarkNode node) {
+    if ((node.flags & _flagInlinesParsed) != 0) return;
+
     // Clear OPEN flag
     node.flags &= ~1;
 
@@ -400,50 +529,64 @@ class BlockParser {
     }
   }
 
-  void _linkFootnotes(CmarkNode root) {
+  void _linkFootnotes(CmarkNode root, CmarkFootnoteMap footnoteMap) {
+    final definitions = <CmarkNode>[];
+    final references = <CmarkNode>[];
+    _collectFootnoteNodes(root, definitions, references);
+
     // First pass: collect all footnote definitions
-    final iter1 = CmarkIter(root);
-    var evType = iter1.next();
-    while (evType != CmarkEventType.done) {
-      final node = iter1.node;
-      if (evType == CmarkEventType.exit &&
-          node.type == CmarkNodeType.footnoteDefinition) {
-        footnoteMap.add(node.content.toString(), node);
-      }
-      evType = iter1.next();
+    for (final node in definitions) {
+      footnoteMap.add(node.contentString, node);
     }
 
     // Second pass: link references to definitions and assign indices
     var ix = 0;
-    final iter2 = CmarkIter(root);
-    evType = iter2.next();
-    while (evType != CmarkEventType.done) {
-      final node = iter2.node;
-      if (evType == CmarkEventType.exit &&
-          node.type == CmarkNodeType.footnoteReference) {
-        final label = node.content.toString();
-        final footnote = footnoteMap.lookup(label);
-        if (footnote != null) {
-          // Assign index to definition if first time
-          if (footnote.node.footnoteReferenceIndex == 0) {
-            ix++;
-            footnote.node.footnoteReferenceIndex = ix;
-          }
+    for (final node in references) {
+      final label = node.contentString;
+      final footnote = footnoteMap.lookup(label);
+      if (footnote != null) {
+        // Assign index to definition if first time
+        if (footnote.node.footnoteReferenceIndex == 0) {
+          ix++;
+          footnote.node.footnoteReferenceIndex = ix;
+        }
 
-          // Set reference to point to definition
-          footnote.node.footnoteDefCount++;
-          node.footnoteRefIndex = footnote.node.footnoteDefCount;
+        // Set reference to point to definition
+        footnote.node.footnoteDefCount++;
+        node.footnoteRefIndex = footnote.node.footnoteDefCount;
 
-          // Copy definition's index to reference for rendering
-          node.footnoteReferenceIndex = footnote.node.footnoteReferenceIndex;
+        // Copy definition's index to reference for rendering
+        node.footnoteReferenceIndex = footnote.node.footnoteReferenceIndex;
 
-          // For rendering, we need to access the definition's label
-          node.footnoteDefLabel = label;
-        } else {
-          _convertFootnoteReferenceToText(node, label);
+        // For rendering, we need to access the definition's label
+        node.footnoteDefLabel = label;
+      } else {
+        _convertFootnoteReferenceToText(node, label);
+      }
+    }
+  }
+
+  /// Footnote definitions in the order their CmarkIter exit events come,
+  /// and references in document order. Skips cached subtrees that have
+  /// neither.
+  static void _collectFootnoteNodes(
+    CmarkNode node,
+    List<CmarkNode> definitions,
+    List<CmarkNode> references,
+  ) {
+    var child = node.firstChild;
+    while (child != null) {
+      if (child.type == CmarkNodeType.footnoteReference) {
+        references.add(child);
+      } else if ((child.flags & _flagNoFootnotes) == 0) {
+        if (child.firstChild != null) {
+          _collectFootnoteNodes(child, definitions, references);
+        }
+        if (child.type == CmarkNodeType.footnoteDefinition) {
+          definitions.add(child);
         }
       }
-      evType = iter2.next();
+      child = child.next;
     }
   }
 
@@ -452,8 +595,8 @@ class BlockParser {
       return;
     }
 
-    root.flags |= 1; // OPEN
-    current = root;
+    _liveRoot.flags |= 1; // OPEN
+    current = _liveRoot;
     _initialized = true;
   }
 
@@ -1353,7 +1496,7 @@ class BlockParser {
         // Register footnote in map
         final label = node.content.toString();
         if (label.isNotEmpty) {
-          footnoteMap.add(label, node);
+          if (!_buildingSnapshot) footnoteMap.add(label, node);
           _sawFootnoteDefinition = true;
         }
         break;
@@ -1389,18 +1532,25 @@ class BlockParser {
     return true;
   }
 
+  /// Port of S_ends_with_blank_line. C checks each node once. This port
+  /// finalizes blocks again (at finish and for snapshots), so a list or item
+  /// also caches its result: bit 16, because its answer comes from its last
+  /// child, not from its own LAST_LINE_BLANK.
   bool _endsWithBlank(CmarkNode node) {
+    final viaLastChild =
+        (node.type == CmarkNodeType.list || node.type == CmarkNodeType.item) &&
+            node.lastChild != null;
     if ((node.flags & 4) != 0) {
       // LAST_LINE_CHECKED
-      return (node.flags & 2) != 0; // LAST_LINE_BLANK
-    }
-    if ((node.type == CmarkNodeType.list || node.type == CmarkNodeType.item) &&
-        node.lastChild != null) {
-      node.flags |= 4;
-      return _endsWithBlank(node.lastChild!);
+      return (node.flags & (viaLastChild ? 16 : 2)) != 0;
     }
     node.flags |= 4;
-    return (node.flags & 2) != 0;
+    if (viaLastChild) {
+      final result = _endsWithBlank(node.lastChild!);
+      if (result) node.flags |= 16;
+      return result;
+    }
+    return (node.flags & 2) != 0; // LAST_LINE_BLANK
   }
 
   /// Port of resolve_reference_link_definitions from blocks.c
@@ -2168,6 +2318,7 @@ class BlockParser {
   bool _isDigit(int c) => c >= 0x30 && c <= 0x39;
 
   void _processInlines(CmarkNode node, InlineParser inlineParser) {
+    if ((node.flags & _flagInlinesParsed) != 0) return;
     inlineParser.parseInlines(node);
     var child = node.firstChild;
     while (child != null) {
@@ -2180,7 +2331,7 @@ class BlockParser {
     }
   }
 
-  void _appendFootnotes(CmarkNode root) {
+  void _appendFootnotes(CmarkNode root, CmarkFootnoteMap footnoteMap) {
     // Move footnote definitions to end of document (C's create_footnote_list)
     final entries = footnoteMap.entries.toList();
     for (final entry in entries) {
@@ -2484,4 +2635,89 @@ class _ListMarkerResult {
   final CmarkDelimType delimiter;
   int padding = 0;
   int markerOffset = 0;
+}
+
+class _ParsedBlock {
+  _ParsedBlock(
+    this.node,
+    this.references, {
+    required this.hasFootnoteReference,
+    required this.hasFootnoteNode,
+  });
+
+  /// Finalized and inline-parsed, before footnote resolution.
+  final CmarkNode node;
+
+  /// [CmarkReferenceMap.keySince] when [node] was parsed.
+  final String references;
+  final bool hasFootnoteReference;
+
+  /// Has a footnote reference or definition.
+  final bool hasFootnoteNode;
+}
+
+class _ReusedBlock {
+  _ReusedBlock(this.live, this.copy, this.parsed);
+
+  final CmarkNode live;
+  final CmarkNode copy;
+  final _ParsedBlock parsed;
+}
+
+class _SnapshotCopies {
+  CmarkNode? current;
+  final Set<CmarkNode> currentPath = Set<CmarkNode>.identity();
+  final List<_ReusedBlock> reused = [];
+
+  /// Copies of closed live blocks that this snapshot parses.
+  final List<(CmarkNode, CmarkNode)> parsedHere = [];
+}
+
+/// Parser fields that processing a line changes.
+class _LineState {
+  _LineState.save(BlockParser p)
+      : offset = p.offset,
+        column = p.column,
+        firstNonspace = p.firstNonspace,
+        firstNonspaceColumn = p.firstNonspaceColumn,
+        indent = p.indent,
+        blank = p.blank,
+        partiallyConsumedTab = p.partiallyConsumedTab,
+        lineNumber = p.lineNumber,
+        lastLineLength = p.lastLineLength,
+        currentLine = p._currentLine,
+        tableAlignments = p._currentTableAlignments,
+        skipAddText = p._skipAddText,
+        sawFootnoteDefinition = p._sawFootnoteDefinition;
+
+  final int offset;
+  final int column;
+  final int firstNonspace;
+  final int firstNonspaceColumn;
+  final int indent;
+  final bool blank;
+  final bool partiallyConsumedTab;
+  final int lineNumber;
+  final int lastLineLength;
+  final String currentLine;
+  final List<CmarkTableAlign>? tableAlignments;
+  final bool skipAddText;
+  final bool sawFootnoteDefinition;
+
+  void restore(BlockParser p) {
+    p
+      ..offset = offset
+      ..column = column
+      ..firstNonspace = firstNonspace
+      ..firstNonspaceColumn = firstNonspaceColumn
+      ..indent = indent
+      ..blank = blank
+      ..partiallyConsumedTab = partiallyConsumedTab
+      ..lineNumber = lineNumber
+      ..lastLineLength = lastLineLength
+      .._currentLine = currentLine
+      .._currentTableAlignments = tableAlignments
+      .._skipAddText = skipAddText
+      .._sawFootnoteDefinition = sawFootnoteDefinition;
+  }
 }

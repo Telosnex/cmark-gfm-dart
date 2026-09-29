@@ -4,122 +4,440 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'perf_profiler.dart';
+
+/// A named implementation entry for [PerfTester].
+class PerfImpl<Input, Output> {
+  final String name;
+  final FutureOr<Output?> Function(Input) fn;
+  const PerfImpl(this.name, this.fn);
+}
+
+/// Small utility for comparing implementations on the same inputs.
+///
+/// Supports one or more implementations (a single implementation is allowed
+/// for pure measurement/profiling runs). When two or more are given, the
+/// first implementation in the list is treated as the **baseline** for
+/// comparison.
+///
+/// ## Two-implementation usage (original API)
+///
+/// ```dart
+/// final tester = PerfTester<String, dynamic>(
+///   testName: 'my test',
+///   testCases: inputs,
+///   implementation1: fnA,
+///   implementation2: fnB,
+///   impl1Name: 'Baseline',
+///   impl2Name: 'Candidate',
+/// );
+/// ```
+///
+/// ## Multi-implementation usage
+///
+/// ```dart
+/// final tester = PerfTester<String, dynamic>.multi(
+///   testName: 'my test',
+///   testCases: inputs,
+///   implementations: [
+///     PerfImpl('Baseline', fnA),
+///     PerfImpl('Candidate B', fnB),
+///     PerfImpl('Candidate C', fnC),
+///   ],
+/// );
+/// ```
+///
+/// It verifies output parity first, then runs a warmup phase and a benchmark
+/// phase, finally printing a human-readable summary of the results.
+///
+/// ## Testing after you've already edited the file
+///
+/// The most common scenario: you've already changed a method and want to
+/// benchmark old vs new. The old code lives in `git diff` — here's how to
+/// recover it.
+///
+/// 1. **Extract the old version** next to the current one:
+///    ```bash
+///    # Dump the committed (pre-edit) file:
+///    git show HEAD:lib/path/to/foo.dart > test/perf/foo_old.dart
+///    ```
+///    Then trim it to just the function(s) you care about. Remove
+///    framework imports that won't resolve in a plain `dart run` context.
+///
+/// 2. **Extract the new version** the same way — copy the function(s) from
+///    the working-tree file into `test/perf/foo_new.dart`.
+///
+///    Why copy both instead of importing the real file? If the real file
+///    has framework imports (Flutter, provider, etc.) and you want to run
+///    outside Flutter, standalone copies keep the test runnable with
+///    `dart run`. If you're fine using `flutter test`, you can import
+///    the real file directly.
+///
+/// 3. **Make private methods public** in the copies. The copies are
+///    throwaway test scaffolding — visibility doesn't matter.
+///
+/// 4. **Import with prefixes** in your perf test:
+///    ```dart
+///    import 'foo_old.dart' as old;
+///    import 'foo_new.dart' as current;
+///    ```
+///
+/// 5. **Wire into PerfTester** as `implementation1` / `implementation2`
+///    or entries in the `implementations` list.
+///
+/// 6. **Run:**
+///    ```bash
+///    # Pure Dart:
+///    dart run test/perf/some_perf_test.dart
+///
+///    # Flutter (code imports flutter packages):
+///    flutter test test/perf/some_perf_test.dart
+///
+///    # Flutter + CPU profiling:
+///    flutter test --enable-vmservice --no-dds test/perf/some_perf_test.dart
+///    ```
 class PerfTester<Input, Output> {
+  /// A short label used in the benchmark output.
   final String testName;
+
+  /// Inputs that will be fed to all implementations.
   final List<Input> testCases;
-  final FutureOr<Output?> Function(Input) implementation1;
-  final FutureOr<Output?> Function(Input) implementation2;
-  final String impl1Name;
-  final String impl2Name;
+
+  /// All implementations being compared. The first is the baseline.
+  final List<PerfImpl<Input, Output>> implementations;
+
+  /// Optional custom equality check for result comparison.
   final bool Function(Output?, Output?)? equalityCheck;
 
+  /// Stable RNG used to select warmup inputs reproducibly.
   final _random = math.Random(42);
-  final List<double> impl1Times = [];
-  final List<double> impl2Times = [];
 
+  /// Measured runtime samples per implementation, in milliseconds.
+  /// Index corresponds to [implementations] index.
+  late final List<List<double>> implTimes = List.generate(
+    implementations.length,
+    (_) => <double>[],
+  );
+
+  // Legacy accessors for 2-impl callers.
+  List<double> get impl1Times => implTimes[0];
+  List<double> get impl2Times =>
+      implTimes.length > 1 ? implTimes[1] : implTimes[0];
+
+  /// Original constructor: compares exactly two implementations.
   PerfTester({
     required this.testName,
     required this.testCases,
-    required this.implementation1,
-    required this.implementation2,
-    this.impl1Name = 'Original',
-    this.impl2Name = 'Optimized',
+    required FutureOr<Output?> Function(Input) implementation1,
+    required FutureOr<Output?> Function(Input) implementation2,
+    String impl1Name = 'Original',
+    String impl2Name = 'Optimized',
     this.equalityCheck,
-  });
+  }) : implementations = [
+         PerfImpl(impl1Name, implementation1),
+         PerfImpl(impl2Name, implementation2),
+       ];
 
+  /// Multi-implementation constructor: measures one or more implementations.
+  /// With two or more, the first in the list is the baseline.
+  PerfTester.multi({
+    required this.testName,
+    required this.testCases,
+    required this.implementations,
+    this.equalityCheck,
+  }) : assert(implementations.isNotEmpty, 'Need at least 1 implementation');
+
+  // ── Output helpers ──────────────────────────────────────────────────
+
+  static const _ruleDouble =
+      '══════════════════════════════════════════════════════';
+  static const _ruleSingle =
+      '──────────────────────────────────────────────────────';
+
+  void _header(String title) {
+    print('');
+    print(_ruleDouble);
+    print(' PerfTester: $title');
+    print(_ruleDouble);
+  }
+
+  void _step(int n, int total, String msg) {
+    print('');
+    print('[$n/$total] $msg');
+  }
+
+  void _sub(String msg) => print('      $msg');
+
+  // ── Public entry point ──────────────────────────────────────────────
+
+  /// Runs the full comparison flow.
+  ///
+  /// The default flow is: verify outputs, warm up all implementations, then
+  /// benchmark them and print a summary.
+  ///
+  /// ## CPU profiling
+  ///
+  /// Set [profile] to `true` to collect a CPU sample profile during the
+  /// benchmark phase and print the top-N hottest functions afterward.
+  ///
+  /// ### Pure Dart tests
+  ///
+  /// ```bash
+  /// dart run --enable-vm-service test/perf/some_perf_test.dart
+  /// ```
+  ///
+  /// ### Flutter tests (code depends on Flutter)
+  ///
+  /// Flutter tests need two extra flags and one code change:
+  ///
+  /// ```bash
+  /// flutter test --enable-vmservice --no-dds test/perf/some_perf_test.dart
+  /// ```
+  ///
+  /// Why both flags:
+  /// - `--enable-vmservice` starts the VM service (off by default in tests).
+  /// - `--no-dds` disables the Dart Development Service, which otherwise
+  ///   puts the VM service in single-client mode and silently drops our
+  ///   WebSocket connection (causing an infinite hang).
+  ///
+  /// In your test, pass `tester.runAsync` to escape the fake async zone
+  /// that Flutter's test framework uses. Without it, the VM service
+  /// WebSocket connection (real I/O) never completes:
+  ///
+  /// ```dart
+  /// testWidgets('perf', (tester) async {
+  ///   await myTester.run(
+  ///     profile: true,
+  ///     runAsync: tester.runAsync,
+  ///   );
+  /// });
+  /// ```
+  ///
+  /// Only the VM-service I/O (connect/clear/collect) runs inside `runAsync`;
+  /// implementation invocations run in the normal test zone, so impls that
+  /// call `tester.pump*` are fine.
+  ///
+  /// Without the VM service flags, profiling is silently skipped and the
+  /// benchmark runs normally.
+  ///
+  /// [profileSaveDir], when set, additionally writes each implementation's
+  /// samples as DevTools cpu-profiler JSON to
+  /// `<profileSaveDir>/cpu_profile_<implName>.json` for offline analysis.
   Future<void> run({
     int warmupRuns = 100,
     int benchmarkRuns = 100,
     bool skipEqualityCheck = false,
+    bool profile = false,
+    int profileTopN = 50,
+    int profileRuns = 100,
+    String? profileSaveDir,
+
+    /// Pass `tester.runAsync` when running inside a Flutter widget test.
+    /// Real I/O (VM service connection) needs to escape the fake async zone.
+    Future<T?> Function<T>(
+      Future<T> Function() callback, {
+      Duration additionalTime,
+    })?
+    runAsync,
   }) async {
+    final totalSteps = 2 + (skipEqualityCheck ? 0 : 1) + (profile ? 1 : 0);
+    var step = 0;
+
+    _header(testName);
+    final steps = [
+      if (!skipEqualityCheck) 'Verify',
+      'Warmup',
+      'Benchmark',
+      if (profile) 'Profile (×${implementations.length})',
+    ];
+    print(' Implementations: ${implementations.map((e) => e.name).join(', ')}');
+    print(' Steps: ${steps.join(' → ')}');
+    print(_ruleSingle);
+
+    // ── Verify ──
     if (!skipEqualityCheck) {
+      step++;
+      _step(
+        step,
+        totalSteps,
+        'Verify: checking all implementations produce identical output...',
+      );
       await _verifyImplementations();
     }
+
+    // ── Warmup ──
+    step++;
+    _step(
+      step,
+      totalSteps,
+      'Warmup: $warmupRuns randomly selected test case${warmupRuns == 1 ? '' : 's'}...',
+    );
     await _warmup(warmupRuns);
+
+    // ── Benchmark ──
+    step++;
+    _step(
+      step,
+      totalSteps,
+      'Benchmark: $benchmarkRuns run${benchmarkRuns == 1 ? '' : 's'}, ${testCases.length} test case${testCases.length == 1 ? '' : 's'} each...',
+    );
     await _benchmark(benchmarkRuns);
     _printResults();
+
+    // ── Profile ──
+    if (profile) {
+      step++;
+
+      // Real I/O (VM service websocket) must run outside the fake async
+      // zone; implementation invocations must stay INSIDE it (widget-test
+      // impls call tester.pump*, which is illegal within runAsync).
+      Future<T?> io<T>(Future<T> Function() fn) {
+        if (runAsync != null) return runAsync(fn);
+        return fn();
+      }
+
+      final profiler = PerfProfiler();
+      final connected = await io(profiler.connect) ?? false;
+      if (connected) {
+        _step(
+          step,
+          totalSteps,
+          'Profile: running each implementation separately...',
+        );
+        for (final impl in implementations) {
+          await io(profiler.clearSamples);
+          for (int r = 0; r < profileRuns; r++) {
+            for (final input in testCases) {
+              await _invoke(impl.fn, input);
+            }
+          }
+          // One snapshot, shared by the printed table and the saved JSON:
+          // fetching twice makes the second fetch profile the first.
+          await io(profiler.capture);
+          await io(
+            () => profiler.collectAndPrint(topN: profileTopN, label: impl.name),
+          );
+          if (profileSaveDir != null) {
+            final safeName = impl.name.replaceAll(
+              RegExp(r'[^A-Za-z0-9_-]'),
+              '_',
+            );
+            await io(
+              () => profiler.saveAsDevToolsJson(
+                '$profileSaveDir/cpu_profile_$safeName.json',
+              ),
+            );
+          }
+        }
+        await io(profiler.dispose);
+      } else {
+        _step(step, totalSteps, 'Profile: skipped (VM service not available).');
+      }
+    }
   }
 
+  // ── Verify ────────────────────────────────────────────────────────────
+
+  /// Executes all implementations for every test case and checks that the
+  /// outputs match the baseline (first implementation).
   Future<void> _verifyImplementations() async {
-    print('Verifying implementations...');
     var allEqual = true;
+    final baseline = implementations[0];
 
     for (var i = 0; i < testCases.length; i++) {
       final input = testCases[i];
-      final result1 = await _invoke(implementation1, input);
-      final result2 = await _invoke(implementation2, input);
+      final baseResult = await _invoke(baseline.fn, input);
+      final baseEncoded = _safeEncode(baseResult);
 
-      final encoded1 = _safeEncode(result1);
-      final encoded2 = _safeEncode(result2);
-      final isEqual = equalityCheck != null
-          ? equalityCheck!(result1, result2)
-          : encoded1 == encoded2;
+      for (var k = 1; k < implementations.length; k++) {
+        final impl = implementations[k];
+        final result = await _invoke(impl.fn, input);
+        final encoded = _safeEncode(result);
+        final isEqual = equalityCheck != null
+            ? equalityCheck!(baseResult, result)
+            : baseEncoded == encoded;
 
-      if (!isEqual) {
-        print('\nMismatch found for test case $i:');
-        print('Input: $input');
+        if (!isEqual) {
+          _sub('❌ Mismatch on test case $i: ${baseline.name} vs ${impl.name}');
+          _sub('Input: $input');
 
-        if (encoded1.length > 1000 || encoded2.length > 1000) {
-          _printStringDiff(
-            encoded1,
-            encoded2,
-            labelA: impl1Name,
-            labelB: impl2Name,
-          );
-        } else {
-          // Fall back to concise output
-          print('$impl1Name: $encoded1');
-          print('$impl2Name: $encoded2');
+          if (baseEncoded.length > 1000 || encoded.length > 1000) {
+            _printStringDiff(
+              baseEncoded,
+              encoded,
+              labelA: baseline.name,
+              labelB: impl.name,
+            );
+          } else {
+            _sub('${baseline.name}: $baseEncoded');
+            _sub('${impl.name}: $encoded');
+          }
+          allEqual = false;
         }
-        allEqual = false;
       }
     }
 
     if (allEqual) {
-      print('\nAll test cases produced identical output! ✅');
+      _sub(
+        '✅ All ${testCases.length} test case${testCases.length == 1 ? '' : 's'} match across ${implementations.length} implementations.',
+      );
     } else {
-      print('\nWarning: Differences found in outputs! ❌');
+      _sub('❌ Differences found in outputs!');
     }
   }
 
+  // ── Warmup ────────────────────────────────────────────────────────────
+
+  /// Performs a short warmup using random test cases to reduce cold-start
+  /// effects before the timed benchmark begins.
   Future<void> _warmup(int runs) async {
-    print('\nWarming up...');
+    final sw = Stopwatch()..start();
     for (var i = 0; i < runs; i++) {
       final input = testCases[_random.nextInt(testCases.length)];
-      await _invoke(implementation1, input);
-      await _invoke(implementation2, input);
+      for (final impl in implementations) {
+        await _invoke(impl.fn, input);
+      }
     }
+    sw.stop();
+    _sub('Done (${sw.elapsedMilliseconds} ms).');
   }
 
+  // ── Benchmark ─────────────────────────────────────────────────────────
+
+  /// Measures all implementations across the full test suite.
+  ///
+  /// The order of implementations is rotated each run to reduce bias from
+  /// cache or VM effects.
   Future<void> _benchmark(int runs) async {
-    print('\nRunning benchmark...');
+    final n = implementations.length;
+
     for (var run = 0; run < runs; run++) {
-      var testA = run % 2 == 0;
-      // print('\nRun ${run + 1}:');
+      final runIterationSw = Stopwatch()..start();
 
-      // First run
-      final stopwatch1 = Stopwatch()..start();
-      for (var input in testCases) {
-        await _invoke(testA ? implementation1 : implementation2, input);
+      // Build a rotated order for this run to reduce ordering bias.
+      final order = List.generate(n, (k) => (k + run) % n);
+
+      final stopwatches = List.generate(n, (_) => Stopwatch());
+
+      for (final idx in order) {
+        final sw = stopwatches[idx]..start();
+        for (var input in testCases) {
+          await _invoke(implementations[idx].fn, input);
+        }
+        sw.stop();
       }
-      stopwatch1.stop();
-      var time1 = stopwatch1.elapsedMicroseconds / 1000.0;
 
-      // Second run
-      final stopwatch2 = Stopwatch()..start();
-      for (var input in testCases) {
-        await _invoke(testA ? implementation2 : implementation1, input);
+      for (var idx = 0; idx < n; idx++) {
+        implTimes[idx].add(stopwatches[idx].elapsedMicroseconds / 1000.0);
       }
-      stopwatch2.stop();
-      var time2 = stopwatch2.elapsedMicroseconds / 1000.0;
 
-      // Store results
-      if (testA) {
-        impl1Times.add(time1);
-        impl2Times.add(time2);
-      } else {
-        impl2Times.add(time1);
-        impl1Times.add(time2);
+      runIterationSw.stop();
+      // Print at most 10 progress messages.
+      final printStep = math.max(1, runs ~/ 10);
+      if ((run + 1) % printStep == 0 || run == runs - 1) {
+        _sub(
+          'Run ${run + 1}/$runs (${runIterationSw.elapsedMilliseconds} ms).',
+        );
       }
     }
   }
@@ -135,102 +453,54 @@ class PerfTester<Input, Output> {
     return result;
   }
 
+  // ── Results ───────────────────────────────────────────────────────────
+
+  /// Prints the final timing summary and a distribution view.
   void _printResults() {
     _printStats();
     _printVisualizations();
   }
 
+  /// Prints aggregate statistics for all implementations, comparing each
+  /// against the baseline (first implementation).
   void _printStats() {
-    impl1Times.sort();
-    impl2Times.sort();
+    final n = implementations.length;
+
+    // Sort each timing list for percentile calculations.
+    for (final times in implTimes) {
+      times.sort();
+    }
 
     double mean(List<double> list) =>
         list.reduce((a, b) => a + b) / list.length;
     double median(List<double> list) => list.length.isOdd
         ? list[list.length ~/ 2]
         : (list[list.length ~/ 2 - 1] + list[list.length ~/ 2]) / 2;
-    double stdDev(List<double> list, double mean) {
-      var squaredDiffs = list.map((x) => math.pow(x - mean, 2));
+    double stdDev(List<double> list, double m) {
+      var squaredDiffs = list.map((x) => math.pow(x - m, 2));
       return math.sqrt(
         squaredDiffs.reduce((a, b) => a + b) / (list.length - 1),
       );
     }
 
-    var impl1Mean = mean(impl1Times);
-    var impl2Mean = mean(impl2Times);
+    // Pre-compute stats for each implementation.
+    final means = <double>[];
+    final medians = <double>[];
+    final stdDevs = <double>[];
+    final totals = <double>[];
+    final opsPerSecs = <double>[];
 
-    // Calculate totals and ops/sec
-    var impl1Total = impl1Times.reduce((a, b) => a + b);
-    var impl2Total = impl2Times.reduce((a, b) => a + b);
-    var totalOps = impl1Times.length * testCases.length;
-    var impl1OpsPerSec = (totalOps / impl1Total) * 1000;
-    var impl2OpsPerSec = (totalOps / impl2Total) * 1000;
-
-    // Calculate maximum widths based on actual data
-    var allValues = {
-      'Total Time': [impl1Total, impl2Total],
-      'Ops/Second': [impl1OpsPerSec, impl2OpsPerSec],
-      'Min': [impl1Times.first, impl2Times.first],
-      'Max': [impl1Times.last, impl2Times.last],
-      'Median': [median(impl1Times), median(impl2Times)],
-      'Mean': [impl1Mean, impl2Mean],
-      'Std Dev': [stdDev(impl1Times, impl1Mean), stdDev(impl2Times, impl2Mean)],
-    };
-
-    // Find maximum width needed for labels
-    var maxLabelWidth =
-        allValues.keys.map((label) => '$label (ms):'.length).reduce(math.max) +
-        2;
-
-    // Find maximum width needed for each column's values
-    var maxWidth1 = math.max(
-      impl2Name.length,
-      allValues.values
-          .map(
-            (vals) => vals[1]
-                .toStringAsFixed(
-                  vals[1] >= 1000
-                      ? 0
-                      : vals[1] >= 100
-                      ? 1
-                      : 3,
-                )
-                .length,
-          )
-          .reduce(math.max),
-    );
-
-    var maxWidth2 = math.max(
-      impl1Name.length,
-      allValues.values
-          .map(
-            (vals) => vals[0]
-                .toStringAsFixed(
-                  vals[0] >= 1000
-                      ? 0
-                      : vals[0] >= 100
-                      ? 1
-                      : 3,
-                )
-                .length,
-          )
-          .reduce(math.max),
-    );
-
-    // Add padding
-    maxWidth1 += 2;
-    maxWidth2 += 2;
-
-    print('\n=== $testName Performance Summary ===');
-    print('Total Operations: $totalOps');
-
-    // Print header
-    print(
-      '${''.padRight(maxLabelWidth)}'
-      '${impl2Name.padRight(maxWidth1)}'
-      '${impl1Name.padRight(maxWidth2)}'
-      'Comparison',
-    );
+    for (var k = 0; k < n; k++) {
+      final times = implTimes[k];
+      final m = mean(times);
+      means.add(m);
+      medians.add(median(times));
+      stdDevs.add(stdDev(times, m));
+      final total = times.reduce((a, b) => a + b);
+      totals.add(total);
+      final totalOps = times.length * testCases.length;
+      opsPerSecs.add((totalOps / total) * 1000);
+    }
 
     // Helper function to format numbers intelligently
     String formatNumber(double value) {
@@ -247,131 +517,131 @@ class PerfTester<Input, Output> {
       }
     }
 
-    // Helper function to format a row with improvement percentage and speedup factor
+    // Metrics: label → values per implementation
+    final metrics = {
+      'Total Time (ms)': totals,
+      'Ops/Second': opsPerSecs,
+      'Min (ms)': [for (var k = 0; k < n; k++) implTimes[k].first],
+      'Max (ms)': [for (var k = 0; k < n; k++) implTimes[k].last],
+      'Median (ms)': medians,
+      'Mean (ms)': means,
+      'Std Dev (ms)': stdDevs,
+    };
+
+    final names = implementations.map((e) => e.name).toList();
+
+    final maxLabelWidth =
+        metrics.keys.map((label) => label.length).reduce(math.max) + 2;
+
+    // Column widths per implementation.
+    final colWidths = <int>[];
+    for (var k = 0; k < n; k++) {
+      var maxW = names[k].length;
+      for (final vals in metrics.values) {
+        final v = vals[k];
+        final formatted = v >= 1000 ? formatNumber(v) : v.toStringAsFixed(3);
+        if (formatted.length > maxW) maxW = formatted.length;
+      }
+      colWidths.add(maxW + 2);
+    }
+
+    print('');
+    _sub('Results:');
+
+    // Header row.
+    final headerBuf = StringBuffer(''.padRight(maxLabelWidth));
+    for (var k = 0; k < n; k++) {
+      headerBuf.write(names[k].padRight(colWidths[k]));
+    }
+    if (n > 1) headerBuf.write('vs ${names[0]}');
+    _sub(headerBuf.toString());
+
+    // Row printer.
     void printRow(
       String label,
-      double val1,
-      double val2, {
+      List<double> vals, {
       bool formatLarge = false,
       bool higherIsBetter = false,
     }) {
-      var formattedVal1 = formatLarge
-          ? formatNumber(val1)
-          : val1.toStringAsFixed(3);
-      var formattedVal2 = formatLarge
-          ? formatNumber(val2)
-          : val2.toStringAsFixed(3);
-
-      // Calculate improvement and speedup
-      var improvement = ((val2 - val1) / val2 * 100);
-      var speedupFactor = val2 / val1;
-
-      // For metrics where higher is better (like Ops/Second), invert the comparison
-      if (higherIsBetter) {
-        improvement = -improvement;
-        speedupFactor = 1 / speedupFactor;
+      final buf = StringBuffer(label.padRight(maxLabelWidth));
+      for (var k = 0; k < n; k++) {
+        final formatted = formatLarge
+            ? formatNumber(vals[k])
+            : vals[k].toStringAsFixed(3);
+        buf.write(formatted.padRight(colWidths[k]));
       }
 
-      // Format the comparison info
-      String comparisonInfo;
-      if (improvement > 0) {
-        // Handle infinity cases
-        String speedupStr = speedupFactor.isInfinite
-            ? 'Infinity'
-            : speedupFactor.toStringAsFixed(1);
+      // Comparison: each non-baseline vs baseline.
+      final comparisons = <String>[];
+      for (var k = 1; k < n; k++) {
+        // ignore: avoid-accessing-collections-by-constant-index
+        final baseVal = vals[0];
+        final implVal = vals[k];
 
-        comparisonInfo =
-            '↑${improvement.toStringAsFixed(1)}% (${speedupStr}x faster)';
-      } else if (improvement < 0) {
-        comparisonInfo =
-            '↓${(-improvement).toStringAsFixed(1)}% (${(1 / speedupFactor).toStringAsFixed(1)}x slower)';
-      } else {
-        comparisonInfo = 'No difference';
+        var improvement = ((baseVal - implVal) / baseVal * 100);
+        var speedupFactor = baseVal / implVal;
+
+        if (higherIsBetter) {
+          improvement = -improvement;
+          speedupFactor = 1 / speedupFactor;
+        }
+
+        String comp;
+        if (improvement > 0) {
+          String speedupStr = speedupFactor.isInfinite
+              ? 'Infinity'
+              : speedupFactor.toStringAsFixed(1);
+          comp = '↑${improvement.toStringAsFixed(1)}% (${speedupStr}x faster)';
+        } else if (improvement < 0) {
+          comp =
+              '↓${(-improvement).toStringAsFixed(1)}% (${(1 / speedupFactor).toStringAsFixed(1)}x slower)';
+        } else {
+          comp = 'No difference';
+        }
+        comparisons.add('${names[k]}: $comp');
       }
-
-      print(
-        '${label.padRight(maxLabelWidth)}'
-        '${formattedVal1.padRight(maxWidth1)}'
-        '${formattedVal2.padRight(maxWidth2)}'
-        '$comparisonInfo',
-      );
+      buf.write(comparisons.join('  '));
+      _sub(buf.toString());
     }
 
-    // Print each row with consistent formatting
-    printRow('Total Time (ms):', impl2Total, impl1Total);
+    printRow('Total Time (ms):', totals);
     printRow(
       'Ops/Second:',
-      impl2OpsPerSec,
-      impl1OpsPerSec,
+      opsPerSecs,
       formatLarge: true,
       higherIsBetter: true,
     );
-    printRow('Min (ms):', impl2Times.first, impl1Times.first);
-    printRow('Max (ms):', impl2Times.last, impl1Times.last);
-    printRow('Median (ms):', median(impl2Times), median(impl1Times));
-    printRow('Mean (ms):', impl2Mean, impl1Mean);
-    printRow(
-      'Std Dev (ms):',
-      stdDev(impl2Times, impl2Mean),
-      stdDev(impl1Times, impl1Mean),
-    );
+    printRow('Min (ms):', metrics['Min (ms)']!);
+    printRow('Max (ms):', metrics['Max (ms)']!);
+    printRow('Median (ms):', medians);
+    printRow('Mean (ms):', means);
+    printRow('Std Dev (ms):', stdDevs);
   }
 
-  String _generateDistributionPair(
-    List<double> data1,
-    List<double> data2, {
-    String label1 = 'Data 1',
-    String label2 = 'Data 2',
-    int width = 30,
-  }) {
-    if (data1.isEmpty || data2.isEmpty) return '';
+  /// Prints histogram-style timing visualizations for all implementations.
+  void _printVisualizations() {
+    if (implTimes.any((t) => t.isEmpty)) return;
+    // With a single sample (or identical samples) there is no range to bin;
+    // binSize would be 0 and produce NaN.
+    final totalSamples = implTimes.fold(0, (a, t) => a + t.length);
+    if (totalSamples < 2) return;
 
-    // Calculate full ranges and percentiles
-    var sorted1 = List<double>.of(data1)..sort();
-    var sorted2 = List<double>.of(data2)..sort();
-
-    var min1 = sorted1.first;
-    var min2 = sorted2.first;
-    var max1 = sorted1.last;
-    var max2 = sorted2.last;
-
-    // Use p99 for visualization range
-    var p99_1 = sorted1[(data1.length * 0.99).floor()];
-    var p99_2 = sorted2[(data2.length * 0.99).floor()];
-    var visMax = math.min(math.max(p99_1, p99_2) * 1.2, math.max(max1, max2));
-    var visMin = math.min(min1, min2);
-
-    // Create histograms
-    var binCount = width;
-    var binSize = (visMax - visMin) / binCount;
-    var histogram1 = List<int>.filled(binCount, 0);
-    var histogram2 = List<int>.filled(binCount, 0);
-    var outliers1 = 0;
-    var outliers2 = 0;
-
-    for (var value in data1) {
-      if (value > visMax) {
-        outliers1++;
-        continue;
-      }
-      var bin = ((value - visMin) / binSize).floor();
-      bin = math.min(math.max(bin, 0), binCount - 1);
-      histogram1[bin]++;
-    }
-    for (var value in data2) {
-      if (value > visMax) {
-        outliers2++;
-        continue;
-      }
-      var bin = ((value - visMin) / binSize).floor();
-      bin = math.min(math.max(bin, 0), binCount - 1);
-      histogram2[bin]++;
+    // Compute shared range across all implementations.
+    final allSorted = <List<double>>[];
+    for (final times in implTimes) {
+      allSorted.add(List.of(times)..sort());
     }
 
-    var maxCount = math.max(
-      histogram1.reduce(math.max),
-      histogram2.reduce(math.max),
-    );
+    var visMin = allSorted.map((s) => s.first).reduce(math.min);
+    var visMax =
+        allSorted.map((s) => s[(s.length * 0.99).floor()]).reduce(math.max) *
+        1.2;
+    final absMax = allSorted.map((s) => s.last).reduce(math.max);
+    if (visMax > absMax) visMax = absMax;
+
+    final binCount = 30;
+    final binSize = (visMax - visMin) / binCount;
+    if (binSize <= 0 || !binSize.isFinite) return;
 
     String formatValue(double val) {
       if (val < 0.001) return val.toStringAsFixed(6);
@@ -381,6 +651,37 @@ class PerfTester<Input, Output> {
       return val.toStringAsFixed(1);
     }
 
+    // Build all histograms first to find global max count.
+    final histograms = <List<int>>[];
+    final outlierCounts = <int>[];
+    for (final times in implTimes) {
+      final hist = List.filled(binCount, 0);
+      var outliers = 0;
+      for (var value in times) {
+        if (value > visMax) {
+          outliers++;
+          continue;
+        }
+        var bin = ((value - visMin) / binSize).floor();
+        bin = math.min(math.max(bin, 0), binCount - 1);
+        hist[bin]++;
+      }
+      histograms.add(hist);
+      outlierCounts.add(outliers);
+    }
+
+    var maxCount = 0;
+    for (final hist in histograms) {
+      final m = hist.reduce(math.max);
+      if (m > maxCount) maxCount = m;
+    }
+
+    // Pad label to the longest implementation name (min 15).
+    final maxNameLen = implementations
+        .map((e) => e.name.length)
+        .reduce(math.max);
+    final labelWidth = math.max(15, maxNameLen + 1);
+
     String getDistributionLine(
       List<int> hist,
       String label,
@@ -389,7 +690,7 @@ class PerfTester<Input, Output> {
       double max,
     ) {
       var line = StringBuffer();
-      line.write('${label.padRight(15)}│');
+      line.write('${label.padRight(labelWidth)}│');
 
       // Use square root scaling for better visibility
       for (var count in hist) {
@@ -420,35 +721,27 @@ class PerfTester<Input, Output> {
       return line.toString();
     }
 
-    var result = StringBuffer();
-    result.writeln(
+    print('');
+    _sub(
       'Distribution (showing ${formatValue(visMin)}-${formatValue(visMax)}ms):',
     );
-    result.writeln(
-      getDistributionLine(histogram1, label1, outliers1, min1, max1),
-    );
-    result.writeln(
-      getDistributionLine(histogram2, label2, outliers2, min2, max2),
-    );
-
-    return result.toString();
-  }
-
-  void _printVisualizations() {
-    print('\n');
-    print(
-      _generateDistributionPair(
-        impl1Times,
-        impl2Times,
-        label1: impl1Name,
-        label2: impl2Name,
-      ),
-    );
+    for (var k = 0; k < implementations.length; k++) {
+      final sorted = allSorted[k];
+      _sub(
+        getDistributionLine(
+          histograms[k],
+          implementations[k].name,
+          outlierCounts[k],
+          sorted.first,
+          sorted.last,
+        ),
+      );
+    }
   }
 }
 
-// Prints a compact diff between two long strings by showing the common
-// prefix/suffix and the differing middle segments with context.
+/// Encodes a value for comparison, falling back to `toString()` if JSON
+/// encoding is not possible.
 String _safeEncode(Object? value) {
   try {
     return jsonEncode(value);
@@ -457,12 +750,17 @@ String _safeEncode(Object? value) {
   }
 }
 
+/// Prints a compact diff between two long strings by showing the common
+/// prefix/suffix and the differing middle segments with context.
 void _printStringDiff(
   String a,
   String b, {
   String labelA = 'A',
   String labelB = 'B',
+  // rationale: clarity for callers
+  // ignore: avoid-never-passed-parameters
   int context = 200,
+  // ignore: avoid-never-passed-parameters
   int maxMiddle = 600,
 }) {
   // Find common prefix
