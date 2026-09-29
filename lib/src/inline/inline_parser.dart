@@ -11,6 +11,8 @@ import '../houdini/html_unescape.dart' as houdini;
 import 'subject.dart';
 import 'delimiter.dart';
 import 'link_parsing.dart';
+import 'autolink_postprocess.dart'
+    show consolidateTextNodes, matchInlineAutolink;
 
 /// Optimized inline parser. Key changes vs V1:
 /// 1. Fused main loop — scans for special chars inline instead of per-call dispatch
@@ -46,12 +48,21 @@ class InlineParser {
   Delimiter? _lastDelim;
   Bracket? _lastBracket;
   bool _noLinkOpeners = true;
+  bool _mayContainEmail = false;
+  final List<CmarkNode> _emailCandidateBlocks = <CmarkNode>[];
+
+  /// Blocks whose inline text may contain an '@'. Only these need the email
+  /// autolink postprocess. Entities and backslash escapes can produce an '@'
+  /// that is not in the source, so those results are checked too.
+  List<CmarkNode> get emailCandidateBlocks => _emailCandidateBlocks;
 
   void reset() {
     _subject.reset();
     _lastDelim = null;
     _lastBracket = null;
     _noLinkOpeners = true;
+    _mayContainEmail = false;
+    _emailCandidateBlocks.clear();
   }
 
   void parseInlines(CmarkNode block) {
@@ -82,6 +93,7 @@ class InlineParser {
     _lastDelim = null;
     _lastBracket = null;
     _noLinkOpeners = true;
+    _mayContainEmail = false;
 
     // ---- Fused main loop ----
     // Instead of calling _parseInline() per iteration (function call + switch),
@@ -89,14 +101,28 @@ class InlineParser {
     final input = subj.input;
     final len = input.length;
     final specials = Subject.specialChars;
+    final autolinkEnabled = options.enableAutolinkExtension;
 
     while (subj.pos < len) {
       // Scan ahead for next special char (inlined findSpecialChar, no c<256 check)
       final textStart = subj.pos;
       var n = textStart;
       var allAscii = true;
-      while (n < len && !specials[input[n]]) {
-        if (input[n] >= 0x80) allAscii = false;
+      while (n < len) {
+        final ch = input[n];
+        if (specials[ch]) break;
+        if (autolinkEnabled) {
+          if (ch == 0x40) _mayContainEmail = true;
+          // C stops at every ':' and 'w'. Stop only where its matchers can
+          // succeed ("://" or "www."), so ordinary prose stays one text run.
+          if ((ch == 0x3a && n + 2 < len &&
+                  input[n + 1] == 0x2f && input[n + 2] == 0x2f) ||
+              (ch == 0x77 && n + 3 < len && input[n + 1] == 0x77 &&
+                  input[n + 2] == 0x77 && input[n + 3] == 0x2e)) {
+            break;
+          }
+        }
+        if (ch >= 0x80) allAscii = false;
         n++;
       }
 
@@ -133,6 +159,26 @@ class InlineParser {
 
       if (options.enableMath && (c == 0x24 || c == 0x5C)) {
         newInl = _tryParseMath(subj, c);
+      }
+
+      if (newInl == null && autolinkEnabled &&
+          (c == 0x3a || c == 0x77) && _lastBracket == null) {
+        final match = matchInlineAutolink(input, subj.pos);
+        if (match != null) {
+          final rewind = subj.pos - match.start;
+          if (rewind == 0 || _removeAutolinkPrefix(block, input, match.start, rewind)) {
+            subj.pos = match.end;
+            newInl = CmarkNode(CmarkNodeType.link)
+              ..linkData.url = match.url
+              ..linkData.title = ''
+              ..startLine = subj.line
+              ..endLine = subj.line
+              ..startColumn = match.start + 1 + subj.columnOffset + subj.blockOffset
+              ..endColumn = match.end + subj.columnOffset + subj.blockOffset;
+            newInl.appendChild(CmarkNode(CmarkNodeType.text)
+              ..setLiteral(match.text));
+          }
+        }
       }
 
       if (newInl == null) {
@@ -197,6 +243,14 @@ class InlineParser {
         }
       }
 
+      // An entity or backslash escape can produce an @ without one in the
+      // source. Inspect only these generated text nodes, not every plain &.
+      if (autolinkEnabled && !_mayContainEmail &&
+          (c == 0x26 || c == 0x5c) &&
+          newInl?.type == CmarkNodeType.text &&
+          newInl!.contentString.contains('@')) {
+        _mayContainEmail = true;
+      }
       if (newInl != null) {
         block.appendChild(newInl);
       }
@@ -210,9 +264,34 @@ class InlineParser {
     while (_lastBracket != null) {
       _popBracket();
     }
+
+    if (autolinkEnabled) {
+      // cmark-gfm consolidates adjacent text nodes when the autolink
+      // extension is enabled, whether or not any link is found.
+      consolidateTextNodes(block);
+      if (_mayContainEmail) _emailCandidateBlocks.add(block);
+    }
   }
 
   // ---- Everything below is identical to V1 except for the removed parseInline/findSpecialChar calls ----
+
+  // A scheme is emitted as ordinary text before the ':' hook fires. Only
+  // remove it if those exact bytes are still at the end of the last text node.
+  bool _removeAutolinkPrefix(
+      CmarkNode block, Uint8List input, int start, int length) {
+    final last = block.lastChild;
+    if (last == null || last.type != CmarkNodeType.text) return false;
+    final text = last.contentString;
+    final prefix = String.fromCharCodes(input, start, start + length);
+    if (!text.endsWith(prefix)) return false;
+    final remaining = text.substring(0, text.length - prefix.length);
+    if (remaining.isEmpty) {
+      last.unlink();
+    } else {
+      last.setLiteral(remaining);
+    }
+    return true;
+  }
 
   CmarkNode? _tryParseMath(Subject subj, int leadingChar) {
     if (leadingChar == 0x5C && mathOptions.allowBracketDelimiters) {
@@ -437,7 +516,10 @@ class InlineParser {
     } else {
       final codeBytes = Uint8List.sublistView(subj.input, startpos + numticks, endpos - numticks);
       var code = utf8.decode(codeBytes, allowMalformed: true);
-      code = code.replaceAll(RegExp(r'[\r\n]+'), ' ');
+      // Most code spans have no line ending. Do not run a RegExp for those.
+      if (code.contains('\n') || code.contains('\r')) {
+        code = code.replaceAll(_lineEndingsRe, ' ');
+      }
       if (code.isNotEmpty && code.trim().isNotEmpty) {
         if (code.startsWith(' ') && code.endsWith(' ') && code.length > 2) {
           code = code.substring(1, code.length - 1);
@@ -520,6 +602,7 @@ class InlineParser {
     return _makeStr(subj, subj.pos - 1, subj.pos - 1, '<');
   }
 
+  static final _lineEndingsRe = RegExp(r'[\r\n]+');
   static final _autolinkUriRe = RegExp(r'^[A-Za-z][A-Za-z0-9.+-]{1,31}:[^\x00-\x20<>]*>');
   static final _autolinkEmailRe = RegExp(
     r'^[a-zA-Z0-9.!#$%&' "'" r'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*>',
@@ -530,7 +613,8 @@ class InlineParser {
     final first = data[pos];
     if (!((first >= 0x41 && first <= 0x5A) || (first >= 0x61 && first <= 0x7A))) return 0;
     final remaining = utf8.decode(Uint8List.sublistView(data, pos), allowMalformed: true);
-    return _autolinkUriRe.firstMatch(remaining)?.group(0)?.length ?? 0;
+    final match = _autolinkUriRe.firstMatch(remaining)?.group(0);
+    return match == null ? 0 : utf8.encode(match).length;
   }
 
   int _scanAutolinkEmail(Uint8List data, int pos) {
@@ -538,7 +622,8 @@ class InlineParser {
     final first = data[pos];
     if (first < 0x21 || first > 0x7E) return 0;
     final remaining = utf8.decode(Uint8List.sublistView(data, pos), allowMalformed: true);
-    return _autolinkEmailRe.firstMatch(remaining)?.group(0)?.length ?? 0;
+    final match = _autolinkEmailRe.firstMatch(remaining)?.group(0);
+    return match == null ? 0 : utf8.encode(match).length;
   }
 
   CmarkNode _makeAutolink(Subject subj, int startCol, int endCol, String url, bool isEmail) {

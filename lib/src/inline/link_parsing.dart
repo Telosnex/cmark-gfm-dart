@@ -301,6 +301,7 @@ String cleanUrl(String url) {
   if (trimmed.isEmpty) {
     return '';
   }
+  if (!_mayNeedUnescape(trimmed)) return trimmed;
   
   final buf = CmarkStrbuf();
   final bytes = utf8.encode(trimmed);
@@ -329,6 +330,7 @@ String cleanTitle(String title) {
       (first == 0x22 && last == 0x22)) { // ""
     content = title.substring(1, title.length - 1);
   }
+  if (!_mayNeedUnescape(content)) return content;
   
   final buf = CmarkStrbuf();
   final bytes = utf8.encode(content);
@@ -336,6 +338,17 @@ String cleanTitle(String title) {
   
   final unescaped = utf8.decode(buf.detach(), allowMalformed: true);
   return _strbufUnescape(unescaped);
+}
+
+/// Entity and backslash unescaping change only text with '&' or '\'. The
+/// UTF-8 round trip changes only unpaired surrogates, so text without these
+/// is already clean.
+bool _mayNeedUnescape(String s) {
+  for (var i = 0; i < s.length; i++) {
+    final c = s.codeUnitAt(i);
+    if (c == 0x26 || c == 0x5C || (c >= 0xD800 && c <= 0xDFFF)) return true;
+  }
+  return false;
 }
 
 /// Port of cmark_strbuf_unescape - removes backslashes before punctuation

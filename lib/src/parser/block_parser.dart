@@ -309,7 +309,11 @@ class BlockParser {
     _sawFootnoteReference = false;
     _processInlines(rootToFinalize, _inlineParser!);
     if (options.enableAutolinkExtension) {
-      applyAutolinks(rootToFinalize);
+      final candidates = _inlineParser!.emailCandidateBlocks;
+      for (final block in candidates) {
+        applyEmailAutolinks(block);
+      }
+      candidates.clear(); // do not retain the finished tree
     }
 
     // Link footnote references to definitions and set indices

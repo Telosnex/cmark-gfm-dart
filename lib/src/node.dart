@@ -278,6 +278,7 @@ class CmarkNode {
   /// Fast path for text nodes — avoids StringBuffer entirely.
   void setLiteral(String s) {
     _literal = s;
+    _contentBuf = null; // otherwise [content] would return stale text
   }
 
   /// StringBuffer access for block nodes that accumulate content.
