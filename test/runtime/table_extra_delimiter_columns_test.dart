@@ -1,7 +1,10 @@
 import 'package:cmark_gfm/cmark_gfm.dart';
 import 'package:test/test.dart';
 
-const _markdown = '''
+/// Real-world LLM output: 3 header cells, but the delimiter row has 4
+/// columns. Strict GFM rejects this as a table; `allowExtraTableDelimiters`
+/// (default on) ignores the extra column.
+const _extraDelimiterTable = '''
 ### Unlocking an already signed-in device
 
 | Device | Before | Proposed |
@@ -16,10 +19,12 @@ const _markdown = '''
 void main() {
   for (final trailingNewline in [false, true]) {
     test(
-        'unlocking device comparison is a table with five body rows (trailing newline: $trailingNewline)',
+        'extra delimiter columns are ignored: header-width table with all body rows and inline content (trailing newline: $trailingNewline)',
         () {
       final parser = CmarkParser()
-        ..feed(trailingNewline ? _markdown : _markdown.trimRight());
+        ..feed(trailingNewline
+            ? _extraDelimiterTable
+            : _extraDelimiterTable.trimRight());
       final document = parser.finish();
       final blocks = <CmarkNode>[];
       for (var child = document.firstChild; child != null; child = child.next) {
@@ -51,9 +56,11 @@ void main() {
   for (final trailingNewline in [false, true]) {
     for (final chunkSize in [1, 3, 16, 97]) {
       test(
-          'streaming in $chunkSize-character chunks matches whole parse (trailing newline: $trailingNewline)',
+          'extra delimiter column table streamed in $chunkSize-character chunks matches whole parse (trailing newline: $trailingNewline)',
           () {
-        final markdown = trailingNewline ? _markdown : _markdown.trimRight();
+        final markdown = trailingNewline
+            ? _extraDelimiterTable
+            : _extraDelimiterTable.trimRight();
         final oneShot = CmarkParser()..feed(markdown);
         final expected = HtmlRenderer().render(oneShot.finish());
         final streaming = CmarkParser();
@@ -70,7 +77,7 @@ void main() {
   test('GFM strict mode keeps mismatched delimiter counts as prose', () {
     final parser = CmarkParser(
       options: const CmarkParserOptions(allowExtraTableDelimiters: false),
-    )..feed(_markdown);
+    )..feed(_extraDelimiterTable);
     expect(parser.finish().lastChild!.type, CmarkNodeType.paragraph);
   });
 
@@ -100,7 +107,7 @@ void main() {
     final parser = CmarkParser(
       options: const CmarkParserOptions(allowExtraTableDelimiters: false),
       maxReferenceSize: 100,
-    )..feed(_markdown);
+    )..feed(_extraDelimiterTable);
     expect(parser.finish().lastChild!.type, CmarkNodeType.paragraph);
   });
 }
