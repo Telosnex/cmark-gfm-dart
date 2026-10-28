@@ -27,7 +27,7 @@ void main() {
     final nonstreamingOutput = getStringForTree(doc1);
     print('--- finish() ---');
     print(nonstreamingOutput);
-    
+
     // Streaming (critical: C without trailing newline should still create list item)
     final parser2 = CmarkParser();
     final chunks = ['- A\n', '  - B\n', '  - C'];
@@ -43,6 +43,7 @@ void main() {
     }
 
     final finalCloneOutput = getStringForTree(lastClone!);
-    expect(finalCloneOutput, expected, reason: 'Streaming parse matches finish()');
+    expect(finalCloneOutput, expected,
+        reason: 'Streaming parse matches finish()');
   });
 }

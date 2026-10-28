@@ -8,7 +8,7 @@ void main() {
       parser.feed('Text with footnote[^1].\n\n[^1]: Footnote content');
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
-      
+
       expect(html, contains('footnote-ref'));
       expect(html, contains('href="#fn-1"'));
       expect(html, contains('Footnote content'));
@@ -24,7 +24,7 @@ First[^1] and second[^2].
 ''');
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
-      
+
       expect(html, contains('First footnote'));
       expect(html, contains('Second footnote'));
       expect(html, contains('href="#fn-1"'));
@@ -39,7 +39,7 @@ First[^1] and second[^2].
 Text with footnote[^1].
 ''');
       final doc = parser.finish();
-      
+
       // Verify footnote definition is last child
       var lastChild = doc.firstChild;
       while (lastChild?.next != null) {
@@ -57,7 +57,7 @@ Text[^note].
 ''');
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
-      
+
       expect(html, contains('<strong>bold</strong>'));
       expect(html, contains('<em>italic</em>'));
     });

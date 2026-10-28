@@ -45,7 +45,7 @@ Here is ref one [^1^] and ref three [^3^] and ref nine [^9^].
       // Each reference should have a unique index
       expect(refs, hasLength(3));
       expect(refs[0], 1); // [^1^] → index 1
-      expect(refs[1], 2); // [^3^] → index 2  
+      expect(refs[1], 2); // [^3^] → index 2
       expect(refs[2], 3); // [^9^] → index 3
     });
 
@@ -67,11 +67,11 @@ Ref [^1^] here.
 
       expect(ref, isNotNull, reason: 'Should find footnote reference');
       expect(def, isNotNull, reason: 'Should find footnote definition');
-      
+
       print('Reference content: "${ref!.content}"');
       print('Definition content (label): "${def!.content}"');
       print('Reference index: ${ref!.footnoteReferenceIndex}');
-      
+
       // The reference should be linked to the definition
       expect(ref!.footnoteReferenceIndex, 1);
     });
@@ -103,10 +103,10 @@ Ref [^1^] here.
       }
 
       expect(refs, hasLength(3), reason: 'Should find 3 footnote references');
-      
+
       // All indices should be different
       expect(refs.toSet().length, 3, reason: 'All indices should be unique');
-      
+
       // Indices should be 1, 2, 3 (order of first appearance)
       expect(refs, containsAll([1, 2, 3]));
     });
@@ -154,7 +154,8 @@ void _collectFootnoteReferenceIndices(CmarkNode node, List<int> indices) {
   }
 }
 
-void _collectFootnoteReferenceData(CmarkNode node, List<int> indices, List<String> contents) {
+void _collectFootnoteReferenceData(
+    CmarkNode node, List<int> indices, List<String> contents) {
   if (node.type == CmarkNodeType.footnoteReference) {
     indices.add(node.footnoteReferenceIndex);
     contents.add(node.content.toString());

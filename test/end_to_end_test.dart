@@ -56,7 +56,7 @@ void main() {
         '| # | Fix |\n'
         '|---|-----|\n'
         '| 2 | Restored content in ````lua` block + response. '
-            'Restored `Icons.calculate` icon and `"Code"` fallback label |\n',
+        'Restored `Icons.calculate` icon and `"Code"` fallback label |\n',
       );
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);

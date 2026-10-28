@@ -456,7 +456,8 @@ fff | ggg | hhh | iii | jjj''';
 | Here's a link to [Freedom Planet 2][] in a table row. |
 
 [Freedom Planet 2]: http://www.freedomplanet2.com/''';
-      final expected = '''<p>Here's a link to <a href="http://www.freedomplanet2.com/">Freedom Planet 2</a>.</p>
+      final expected =
+          '''<p>Here's a link to <a href="http://www.freedomplanet2.com/">Freedom Planet 2</a>.</p>
 <table>
 <thead>
 <tr>
@@ -668,7 +669,8 @@ Full stop outside parens shouldn't be included http://google.com/ok.
 'http://google.com'
 
 http://🍄.ga/ http://x🍄.ga/''';
-      final expected = '''<p>: <a href="http://google.com">http://google.com</a> <a href="https://google.com">https://google.com</a></p>
+      final expected =
+          '''<p>: <a href="http://google.com">http://google.com</a> <a href="https://google.com">https://google.com</a></p>
 <p><a href="http://google.com/%C3%A5">http://google.com/å</a> <a href="http://google.com/%C3%A5">http://google.com/å</a></p>
 <p><a href="mailto:scyther@pokemon.com">scyther@pokemon.com</a></p>
 <p><a href="mailto:scy.the_rbe-edr+ill@pokemon.com">scy.the_rbe-edr+ill@pokemon.com</a></p>
@@ -741,7 +743,8 @@ http://🍄.ga/ http://x🍄.ga/''';
     });
 
     test('HTML tag filter - Example 1', () {
-      final markdown = '''This is <xmp> not okay, but **this** <strong>is</strong>.
+      final markdown =
+          '''This is <xmp> not okay, but **this** <strong>is</strong>.
 
 <p>This is <xmp> not okay, but **this** <strong>is</strong>.</p>
 
@@ -762,7 +765,8 @@ Even with {"x":"y"} or 1 > 2 or whatever. Even **markdown**.
 <!--- Support everything CommonMark's parser does. -->
 <!---->
 <!--thistoo-->''';
-      final expected = '''<p>This is &lt;xmp> not okay, but <strong>this</strong> <strong>is</strong>.</p>
+      final expected =
+          '''<p>This is &lt;xmp> not okay, but <strong>this</strong> <strong>is</strong>.</p>
 <p>This is &lt;xmp> not okay, but **this** <strong>is</strong>.</p>
 <p>Nope, I won't have &lt;textarea>.</p>
 <p>No &lt;textarea> here either.</p>
@@ -813,7 +817,8 @@ Hi!
     or, naturally, simple paragraphs.
 
 [^unused]: This is unused.''';
-      final expected = '''<p>This is some text!<sup class="footnote-ref"><a href="#fn-1" id="fnref-1" data-footnote-ref>1</a></sup>. Other text.<sup class="footnote-ref"><a href="#fn-footnote" id="fnref-footnote" data-footnote-ref>2</a></sup>.</p>
+      final expected =
+          '''<p>This is some text!<sup class="footnote-ref"><a href="#fn-1" id="fnref-1" data-footnote-ref>1</a></sup>. Other text.<sup class="footnote-ref"><a href="#fn-footnote" id="fnref-footnote" data-footnote-ref>2</a></sup>.</p>
 <p>Here's a thing<sup class="footnote-ref"><a href="#fn-other-note" id="fnref-other-note" data-footnote-ref>3</a></sup>.</p>
 <p>And another thing<sup class="footnote-ref"><a href="#fn-codeblock-note" id="fnref-codeblock-note" data-footnote-ref>4</a></sup>.</p>
 <p>This doesn't have a referent[^nope].</p>
@@ -850,13 +855,16 @@ Hi!
       _expectHtml(html, expected);
     });
 
-    test('When a footnote is used multiple times, we insert multiple backrefs. - Example 1', () {
+    test(
+        'When a footnote is used multiple times, we insert multiple backrefs. - Example 1',
+        () {
       final markdown = '''This is some text. It has a footnote[^a-footnote].
 
 This footnote is referenced[^a-footnote] multiple times, in lots of different places.[^a-footnote]
 
 [^a-footnote]: This footnote definition should have three backrefs.''';
-      final expected = '''<p>This is some text. It has a footnote<sup class="footnote-ref"><a href="#fn-a-footnote" id="fnref-a-footnote" data-footnote-ref>1</a></sup>.</p>
+      final expected =
+          '''<p>This is some text. It has a footnote<sup class="footnote-ref"><a href="#fn-a-footnote" id="fnref-a-footnote" data-footnote-ref>1</a></sup>.</p>
 <p>This footnote is referenced<sup class="footnote-ref"><a href="#fn-a-footnote" id="fnref-a-footnote-2" data-footnote-ref>1</a></sup> multiple times, in lots of different places.<sup class="footnote-ref"><a href="#fn-a-footnote" id="fnref-a-footnote-3" data-footnote-ref>1</a></sup></p>
 <section class="footnotes" data-footnotes>
 <ol>
@@ -878,7 +886,8 @@ This footnote is referenced[^a-footnote] multiple times, in lots of different pl
       final markdown = '''Hello[^"><script>alert(1)</script>]
 
 [^"><script>alert(1)</script>]: pwned''';
-      final expected = '''<p>Hello<sup class="footnote-ref"><a href="#fn-%22%3E%3Cscript%3Ealert(1)%3C/script%3E" id="fnref-%22%3E%3Cscript%3Ealert(1)%3C/script%3E" data-footnote-ref>1</a></sup></p>
+      final expected =
+          '''<p>Hello<sup class="footnote-ref"><a href="#fn-%22%3E%3Cscript%3Ealert(1)%3C/script%3E" id="fnref-%22%3E%3Cscript%3Ealert(1)%3C/script%3E" data-footnote-ref>1</a></sup></p>
 <section class="footnotes" data-footnotes>
 <ol>
 <li id="fn-%22%3E%3Cscript%3Ealert(1)%3C/script%3E">
@@ -899,7 +908,8 @@ This footnote is referenced[^a-footnote] multiple times, in lots of different pl
       final markdown = '''~~www.google.com~~
 
 ~~http://google.com~~''';
-      final expected = '''<p><del><a href="http://www.google.com">www.google.com</a></del></p>
+      final expected =
+          '''<p><del><a href="http://www.google.com">www.google.com</a></del></p>
 <p><del><a href="http://google.com">http://google.com</a></del></p>''';
 
       final parser = _createGfmParser();
@@ -1030,6 +1040,5 @@ Show a regular (non task) list to show that it has the same structure
 
       _expectHtml(html, expected);
     });
-
   });
 }

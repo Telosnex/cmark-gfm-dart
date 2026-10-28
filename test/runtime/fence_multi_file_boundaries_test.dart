@@ -118,7 +118,8 @@ C section
 ''';
 
       final html = _render(markdown);
-      _expectLaterSectionsAreSeparate(html, const ['/tmp/b.txt:', '/tmp/c.txt:']);
+      _expectLaterSectionsAreSeparate(
+          html, const ['/tmp/b.txt:', '/tmp/c.txt:']);
     });
 
     test('Example E - first file ends with fence-like text', () {
@@ -161,7 +162,8 @@ If this appears inside A\'s block, rendering is broken
                 'Streaming finishClone output diverged from one-shot parse for ${sample.name}');
       });
 
-      test('${sample.name} - character streaming with finishClone snapshots', () {
+      test('${sample.name} - character streaming with finishClone snapshots',
+          () {
         final html = _renderStreamedWithFinishClone(
           sample.markdown,
           chunkSize: 1,
@@ -324,7 +326,8 @@ String _render(String markdown) {
   return HtmlRenderer().render(parser.finish());
 }
 
-String _renderStreamedWithFinishClone(String markdown, {required int chunkSize}) {
+String _renderStreamedWithFinishClone(String markdown,
+    {required int chunkSize}) {
   final parser = CmarkParser();
   final chunks = splitIntoChunks(markdown, chunkSize: chunkSize);
 

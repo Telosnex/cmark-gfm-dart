@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 void main() {
   test('Comprehensive GFM feature test', () {
     final parser = CmarkParser();
-    
+
     // This is a kitchen-sink test of all major features
     final markdown = '''
 # Main Document

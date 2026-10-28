@@ -43,7 +43,7 @@ void dream() {
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
-      
+
       // Verify key elements are present
       expect(
           html,
@@ -91,19 +91,19 @@ void dream() {
           '<p><sub>© 2025 · Rendered with ❤️ by cmark-gfm-widget</sub></p>\n'
           '');
     });
-    
+
     test('Strikethrough in poem line', () {
       final markdown = 'A _whisper_ echoes ~~loud~~ soft and low,  ';
-      
+
       final parser = CmarkParser();
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
-      
+
       expect(html, contains('<del>loud</del>'));
       expect(html, isNot(contains('~~loud~~')));
     });
-    
+
     test('Nested code block in markdown code block', () {
       final markdown = '''```dart
 void dream() {
@@ -115,7 +115,7 @@ void dream() {
       parser.feed(markdown);
       final doc = parser.finish();
       final html = HtmlRenderer().render(doc);
-      
+
       expect(html, contains('<pre><code class="language-dart">'));
       expect(html, contains('Hello, parsed world! 🚀'));
     });

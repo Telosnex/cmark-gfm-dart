@@ -31,7 +31,7 @@ void main() {
   for (var i = 0; i < chunks.length; i++) {
     final chunk = chunks[i];
     parser.feed(chunk);
-    
+
     // In a real app, you could render intermediate state here
     // (though the current implementation only provides final output)
     if (i % 5 == 0) {
@@ -47,7 +47,8 @@ void main() {
   print(html);
 
   print('\n=== Performance Note ===');
-  print('Traditional approach: O(N*M) where N=message length, M=number of chunks');
+  print(
+      'Traditional approach: O(N*M) where N=message length, M=number of chunks');
   print('Streaming approach: O(N) - process each chunk only once');
   print('\nFor a 100-page message with 1000 chunks, this is ~1000x faster!');
 }

@@ -54,7 +54,8 @@ Future<void> main() async {
 
   // Simulate chunks arriving over time
   for (final chunk in responseChunks) {
-    await Future.delayed(Duration(milliseconds: 10)); // Simulate network latency
+    await Future.delayed(
+        Duration(milliseconds: 10)); // Simulate network latency
     parser.feed(chunk);
     chunkCount++;
 
@@ -87,12 +88,16 @@ Future<void> main() async {
   var allGood = true;
   for (final expectation in expectations) {
     var found = false;
-    if (expectation == 'Key Findings heading') found = html.contains('<h2>Key Findings</h2>');
-    if (expectation == 'Performance improved') found = html.contains('<strong>Performance</strong>');
+    if (expectation == 'Key Findings heading')
+      found = html.contains('<h2>Key Findings</h2>');
+    if (expectation == 'Performance improved')
+      found = html.contains('<strong>Performance</strong>');
     if (expectation == 'Metrics table') found = html.contains('<table>');
     if (expectation == 'Code example') found = html.contains('language-dart');
-    if (expectation == 'Footnote reference') found = html.contains('footnote-ref');
-    if (expectation == 'Footnote content') found = html.contains('incremental parsing');
+    if (expectation == 'Footnote reference')
+      found = html.contains('footnote-ref');
+    if (expectation == 'Footnote content')
+      found = html.contains('incremental parsing');
 
     final status = found ? '✅' : '❌';
     print('$status $expectation');
@@ -101,7 +106,9 @@ Future<void> main() async {
 
   if (allGood) {
     print('\n🎉 Perfect! All content parsed and rendered correctly!');
-    print('\n📊 Performance: Processed ${responseChunks.length} chunks with NO reparsing.');
-    print('💡 In the old approach, this would have required ${responseChunks.length} full parses!');
+    print(
+        '\n📊 Performance: Processed ${responseChunks.length} chunks with NO reparsing.');
+    print(
+        '💡 In the old approach, this would have required ${responseChunks.length} full parses!');
   }
 }

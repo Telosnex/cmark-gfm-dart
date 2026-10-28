@@ -16,11 +16,16 @@ which solves \(ax^2 + bx + c = 0\).''';
     const expected = 'document: ""\n'
         '  paragraph: "Consider the quadratic formula:"\n'
         '    text: "Consider the quadratic formula:"\n'
-        r'  math_block: "" literal="x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}"' '\n'
-        r'  paragraph: "which solves \(ax^2 + bx + c = 0\)."' '\n'
-        r'    text: "which solves "' '\n'
-        r'    math: "\(ax^2 + bx + c = 0\)" literal="ax^2 + bx + c = 0"' '\n'
-        r'    text: "."' '\n'
+        r'  math_block: "" literal="x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}"'
+        '\n'
+        r'  paragraph: "which solves \(ax^2 + bx + c = 0\)."'
+        '\n'
+        r'    text: "which solves "'
+        '\n'
+        r'    math: "\(ax^2 + bx + c = 0\)" literal="ax^2 + bx + c = 0"'
+        '\n'
+        r'    text: "."'
+        '\n'
         '';
 
     // Non-streaming
@@ -45,10 +50,14 @@ which solves \(ax^2 + bx + c = 0\).''';
     const markdown = r'which solves \(ax^2 + bx + c = 0\).';
 
     const expected = 'document: ""\n'
-        r'  paragraph: "which solves \(ax^2 + bx + c = 0\)."' '\n'
-        r'    text: "which solves "' '\n'
-        r'    math: "\(ax^2 + bx + c = 0\)" literal="ax^2 + bx + c = 0"' '\n'
-        r'    text: "."' '\n'
+        r'  paragraph: "which solves \(ax^2 + bx + c = 0\)."'
+        '\n'
+        r'    text: "which solves "'
+        '\n'
+        r'    math: "\(ax^2 + bx + c = 0\)" literal="ax^2 + bx + c = 0"'
+        '\n'
+        r'    text: "."'
+        '\n'
         '';
 
     final parser = CmarkParser(

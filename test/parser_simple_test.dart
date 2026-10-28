@@ -19,14 +19,16 @@ void main() {
       expect(doc.firstChild, isNotNull);
       expect(doc.firstChild!.next, isNotNull);
       expect(doc.firstChild!.content.toString().trimRight(), 'Hello world');
-      expect(doc.firstChild!.next!.content.toString().trimRight(), 'Second paragraph');
+      expect(doc.firstChild!.next!.content.toString().trimRight(),
+          'Second paragraph');
     });
 
     test('handles multi-line paragraph', () {
       final parser = CmarkParser();
       parser.feed('Hello world\nSecond line');
       final doc = parser.finish();
-      expect(doc.firstChild!.content.toString().trimRight(), 'Hello world\nSecond line');
+      expect(doc.firstChild!.content.toString().trimRight(),
+          'Hello world\nSecond line');
     });
 
     test('allows incremental feed', () {
@@ -36,7 +38,8 @@ void main() {
       parser.feed(' paragraph');
       final doc = parser.finish();
       expect(doc.firstChild!.content.toString().trimRight(), 'Hello world');
-      expect(doc.firstChild!.next!.content.toString().trimRight(), 'Second paragraph');
+      expect(doc.firstChild!.next!.content.toString().trimRight(),
+          'Second paragraph');
     });
 
     test('parses ATX headings', () {
@@ -113,7 +116,8 @@ void main() {
       expect(firstItem.firstChild!.content.toString().trimRight(), 'item one');
       final secondItem = firstItem.next;
       expect(secondItem, isNotNull);
-      expect(secondItem!.firstChild!.content.toString().trimRight(), 'item two');
+      expect(
+          secondItem!.firstChild!.content.toString().trimRight(), 'item two');
     });
 
     test('parses ordered list with numbering', () {

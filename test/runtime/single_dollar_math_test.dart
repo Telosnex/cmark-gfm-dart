@@ -113,8 +113,7 @@ void main() {
     });
 
     test('rejects: OData query params \$filter/\$search', () {
-      final html = render(
-          r'GET /users?$filter=... or GET /people?$search=...');
+      final html = render(r'GET /users?$filter=... or GET /people?$search=...');
       expect(html, contains(r'$filter'));
       expect(html, contains(r'$search'));
       expect(html, isNot(contains('class="math')));

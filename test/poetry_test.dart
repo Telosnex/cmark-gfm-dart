@@ -27,17 +27,17 @@ void main() {
     // Verify ordered list with bold title
     expect(html, contains('<ol start="4">'));
     expect(html, contains('<strong>The Ever‑Waving Symphony</strong>'));
-    
+
     // Verify line breaks are preserved (trailing two spaces)
     expect(html, contains('<br />'));
-    
+
     // Verify thematic break
     expect(html, contains('<hr />'));
-    
+
     // Verify italic closing paragraph
     expect(html, contains('<em>May the verses'));
     expect(html, contains('waiting page.</em>'));
-    
+
     // Verify em dashes are preserved
     expect(html, contains('Ever‑Waving'));
     expect(html, contains('again—to'));

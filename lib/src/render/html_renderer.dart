@@ -58,15 +58,15 @@ class HtmlRenderer {
         }
         continue; // Skip normal rendering for children of plain text node
       }
-      
+
       _renderNode(node, evType == CmarkEventType.enter);
     }
-    
+
     // Close footnote section if it was opened
     if (_inFootnoteSection) {
       _output.write('</ol>\n</section>\n');
     }
-    
+
     return _output.toString();
   }
 
@@ -85,7 +85,7 @@ class HtmlRenderer {
             tight = grandparent.listData.tight;
           }
         }
-        
+
         if (!tight) {
           if (entering) {
             _renderCr();
@@ -195,7 +195,7 @@ class HtmlRenderer {
             _output.write('<section class="footnotes" data-footnotes>\n<ol>\n');
             _inFootnoteSection = true;
           }
-          
+
           final label = escapeHref(node.content.toString());
           _output.write('<li id="fn-$label">\n');
         } else {
@@ -239,7 +239,10 @@ class HtmlRenderer {
             var allEmpty = true;
             var cell = node.firstChild;
             while (cell != null) {
-              if (cell.firstChild != null) { allEmpty = false; break; }
+              if (cell.firstChild != null) {
+                allEmpty = false;
+                break;
+              }
               cell = cell.next;
             }
             if (allEmpty) {
@@ -443,7 +446,7 @@ class HtmlRenderer {
       _output.write('\n');
     }
   }
-  
+
   String _filterHtmlInline(String literal) => _filterHtmlContent(literal);
 
   String _filterHtmlBlock(String literal) => _filterHtmlContent(literal);
@@ -491,8 +494,6 @@ class HtmlRenderer {
   String _escapeAngleBrackets(String text) {
     return _escapeOpeningBracket(text).replaceAll('>', '&gt;');
   }
-
-  
 
   String _escapeHtml(String text) {
     return text

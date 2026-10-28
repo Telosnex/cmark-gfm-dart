@@ -3,7 +3,9 @@ import 'package:test/test.dart';
 
 void main() {
   group('Fence separation across sections', () {
-    test('input 1: nested triple backticks in md fence do not swallow /tmp/b.txt', () {
+    test(
+        'input 1: nested triple backticks in md fence do not swallow /tmp/b.txt',
+        () {
       const markdown = '''
 /tmp/a.md:
 ````md
@@ -24,7 +26,8 @@ B should be separate
       _expectBSectionIsSeparate(html, expectedBText: 'B should be separate');
     });
 
-    test('input 2: mixed ~~~ outer with ``` inner do not swallow /tmp/b.txt', () {
+    test('input 2: mixed ~~~ outer with ``` inner do not swallow /tmp/b.txt',
+        () {
       const markdown = '''
 /tmp/a.md:
 ~~~md

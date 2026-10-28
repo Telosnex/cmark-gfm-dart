@@ -2685,7 +2685,8 @@ Hi
       final markdown = '''[Foo*bar\\]]:my_(url) 'title (with parens)'
 
 [Foo*bar\\]]''';
-      final expected = '''<p><a href="my_(url)" title="title (with parens)">Foo*bar]</a></p>''';
+      final expected =
+          '''<p><a href="my_(url)" title="title (with parens)">Foo*bar]</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -2701,7 +2702,8 @@ Hi
 'title'
 
 [Foo bar]''';
-      final expected = '''<p><a href="my%20url" title="title">Foo bar</a></p>''';
+      final expected =
+          '''<p><a href="my%20url" title="title">Foo bar</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -2814,7 +2816,8 @@ with blank line'
       final markdown = '''[foo]: /url\\bar\\*baz "foo\\"bar\\baz"
 
 [foo]''';
-      final expected = '''<p><a href="/url%5Cbar*baz" title="foo&quot;bar\\baz">foo</a></p>''';
+      final expected =
+          '''<p><a href="/url%5Cbar*baz" title="foo&quot;bar\\baz">foo</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -3205,7 +3208,7 @@ bbb</p>''';
     });
 
     test('Blank lines - Example 1', () {
-      final markdown = '''  
+      final markdown = '''
 
 aaa
   
@@ -5260,8 +5263,10 @@ baz</li>
     });
 
     test('Backslash escapes - Example 1', () {
-      final markdown = '''\\!\\"\\#\\\$\\%\\&\\'\\(\\)\\*\\+\\,\\-\\.\\/\\:\\;\\<\\=\\>\\?\\@\\[\\\\\\]\\^\\_\\`\\{\\|\\}\\~''';
-      final expected = '''<p>!&quot;#\$%&amp;'()*+,-./:;&lt;=&gt;?@[\\]^_`{|}~</p>''';
+      final markdown =
+          '''\\!\\"\\#\\\$\\%\\&\\'\\(\\)\\*\\+\\,\\-\\.\\/\\:\\;\\<\\=\\>\\?\\@\\[\\\\\\]\\^\\_\\`\\{\\|\\}\\~''';
+      final expected =
+          '''<p>!&quot;#\$%&amp;'()*+,-./:;&lt;=&gt;?@[\\]^_`{|}~</p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -5379,7 +5384,8 @@ bar</p>''';
 
     test('Backslash escapes - Example 9', () {
       final markdown = '''<http://example.com?find=\\*>''';
-      final expected = '''<p><a href="http://example.com?find=%5C*">http://example.com?find=\\*</a></p>''';
+      final expected =
+          '''<p><a href="http://example.com?find=%5C*">http://example.com?find=\\*</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -5538,7 +5544,8 @@ foo
 
     test('Entity and numeric character references - Example 8', () {
       final markdown = '''[foo](/f&ouml;&ouml; "f&ouml;&ouml;")''';
-      final expected = '''<p><a href="/f%C3%B6%C3%B6" title="föö">foo</a></p>''';
+      final expected =
+          '''<p><a href="/f%C3%B6%C3%B6" title="föö">foo</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -5552,7 +5559,8 @@ foo
       final markdown = '''[foo]
 
 [foo]: /f&ouml;&ouml; "f&ouml;&ouml;"''';
-      final expected = '''<p><a href="/f%C3%B6%C3%B6" title="föö">foo</a></p>''';
+      final expected =
+          '''<p><a href="/f%C3%B6%C3%B6" title="föö">foo</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -5898,7 +5906,8 @@ baz`''';
 
     test('Code spans - Example 19', () {
       final markdown = '''<http://foo.bar.`baz>`''';
-      final expected = '''<p><a href="http://foo.bar.%60baz">http://foo.bar.`baz</a>`</p>''';
+      final expected =
+          '''<p><a href="http://foo.bar.%60baz">http://foo.bar.`baz</a>`</p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -6467,7 +6476,8 @@ foo bar__</p>''';
     test('Emphasis and strong emphasis - Example 44', () {
       final markdown = '''**Gomphocarpus (*Gomphocarpus physocarpus*, syn.
 *Asclepias physocarpa*)**''';
-      final expected = '''<p><strong>Gomphocarpus (<em>Gomphocarpus physocarpus</em>, syn.
+      final expected =
+          '''<p><strong>Gomphocarpus (<em>Gomphocarpus physocarpus</em>, syn.
 <em>Asclepias physocarpa</em>)</strong></p>''';
 
       final parser = _createCommonmarkParser();
@@ -6480,7 +6490,8 @@ foo bar__</p>''';
 
     test('Emphasis and strong emphasis - Example 45', () {
       final markdown = '''**foo "*bar*" foo**''';
-      final expected = '''<p><strong>foo &quot;<em>bar</em>&quot; foo</strong></p>''';
+      final expected =
+          '''<p><strong>foo &quot;<em>bar</em>&quot; foo</strong></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -6758,7 +6769,8 @@ bar</em></p>''';
 
     test('Emphasis and strong emphasis - Example 68', () {
       final markdown = '''*foo **bar *baz* bim** bop*''';
-      final expected = '''<p><em>foo <strong>bar <em>baz</em> bim</strong> bop</em></p>''';
+      final expected =
+          '''<p><em>foo <strong>bar <em>baz</em> bim</strong> bop</em></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -6770,7 +6782,8 @@ bar</em></p>''';
 
     test('Emphasis and strong emphasis - Example 69', () {
       final markdown = '''*foo [*bar*](/url)*''';
-      final expected = '''<p><em>foo <a href="/url"><em>bar</em></a></em></p>''';
+      final expected =
+          '''<p><em>foo <a href="/url"><em>bar</em></a></em></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -6942,7 +6955,8 @@ bim</em> bop</strong></p>''';
 
     test('Emphasis and strong emphasis - Example 83', () {
       final markdown = '''**foo [*bar*](/url)**''';
-      final expected = '''<p><strong>foo <a href="/url"><em>bar</em></a></strong></p>''';
+      final expected =
+          '''<p><strong>foo <a href="/url"><em>bar</em></a></strong></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -7386,7 +7400,8 @@ bim</em> bop</strong></p>''';
 
     test('Emphasis and strong emphasis - Example 120', () {
       final markdown = '''*foo __bar *baz bim__ bam*''';
-      final expected = '''<p><em>foo <strong>bar *baz bim</strong> bam</em></p>''';
+      final expected =
+          '''<p><em>foo <strong>bar *baz bim</strong> bam</em></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -7506,7 +7521,8 @@ bim</em> bop</strong></p>''';
 
     test('Emphasis and strong emphasis - Example 130', () {
       final markdown = '''**a<http://foo.bar/?q=**>''';
-      final expected = '''<p>**a<a href="http://foo.bar/?q=**">http://foo.bar/?q=**</a></p>''';
+      final expected =
+          '''<p>**a<a href="http://foo.bar/?q=**">http://foo.bar/?q=**</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -7518,7 +7534,8 @@ bim</em> bop</strong></p>''';
 
     test('Emphasis and strong emphasis - Example 131', () {
       final markdown = '''__a<http://foo.bar/?q=__>''';
-      final expected = '''<p>__a<a href="http://foo.bar/?q=__">http://foo.bar/?q=__</a></p>''';
+      final expected =
+          '''<p>__a<a href="http://foo.bar/?q=__">http://foo.bar/?q=__</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -7800,7 +7817,8 @@ bar>)</p>''';
 
     test('Links - Example 22', () {
       final markdown = '''[link](/url "title \\"&quot;")''';
-      final expected = '''<p><a href="/url" title="title &quot;&quot;">link</a></p>''';
+      final expected =
+          '''<p><a href="/url" title="title &quot;&quot;">link</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -7824,7 +7842,8 @@ bar>)</p>''';
 
     test('Links - Example 24', () {
       final markdown = '''[link](/url "title "and" title")''';
-      final expected = '''<p>[link](/url &quot;title &quot;and&quot; title&quot;)</p>''';
+      final expected =
+          '''<p>[link](/url &quot;title &quot;and&quot; title&quot;)</p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -7836,7 +7855,8 @@ bar>)</p>''';
 
     test('Links - Example 25', () {
       final markdown = '''[link](/url 'title "and" title')''';
-      final expected = '''<p><a href="/url" title="title &quot;and&quot; title">link</a></p>''';
+      final expected =
+          '''<p><a href="/url" title="title &quot;and&quot; title">link</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -7921,7 +7941,8 @@ bar>)</p>''';
 
     test('Links - Example 32', () {
       final markdown = '''[link *foo **bar** `#`*](/uri)''';
-      final expected = '''<p><a href="/uri">link <em>foo <strong>bar</strong> <code>#</code></em></a></p>''';
+      final expected =
+          '''<p><a href="/uri">link <em>foo <strong>bar</strong> <code>#</code></em></a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -7933,7 +7954,8 @@ bar>)</p>''';
 
     test('Links - Example 33', () {
       final markdown = '''[![moon](moon.jpg)](/uri)''';
-      final expected = '''<p><a href="/uri"><img src="moon.jpg" alt="moon" /></a></p>''';
+      final expected =
+          '''<p><a href="/uri"><img src="moon.jpg" alt="moon" /></a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -7957,7 +7979,8 @@ bar>)</p>''';
 
     test('Links - Example 35', () {
       final markdown = '''[foo *[bar [baz](/uri)](/uri)*](/uri)''';
-      final expected = '''<p>[foo <em>[bar <a href="/uri">baz</a>](/uri)</em>](/uri)</p>''';
+      final expected =
+          '''<p>[foo <em>[bar <a href="/uri">baz</a>](/uri)</em>](/uri)</p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -8041,7 +8064,8 @@ bar>)</p>''';
 
     test('Links - Example 42', () {
       final markdown = '''[foo<http://example.com/?search=](uri)>''';
-      final expected = '''<p>[foo<a href="http://example.com/?search=%5D(uri)">http://example.com/?search=](uri)</a></p>''';
+      final expected =
+          '''<p>[foo<a href="http://example.com/?search=%5D(uri)">http://example.com/?search=](uri)</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -8097,7 +8121,8 @@ bar>)</p>''';
       final markdown = '''[link *foo **bar** `#`*][ref]
 
 [ref]: /uri''';
-      final expected = '''<p><a href="/uri">link <em>foo <strong>bar</strong> <code>#</code></em></a></p>''';
+      final expected =
+          '''<p><a href="/uri">link <em>foo <strong>bar</strong> <code>#</code></em></a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -8111,7 +8136,8 @@ bar>)</p>''';
       final markdown = '''[![moon](moon.jpg)][ref]
 
 [ref]: /uri''';
-      final expected = '''<p><a href="/uri"><img src="moon.jpg" alt="moon" /></a></p>''';
+      final expected =
+          '''<p><a href="/uri"><img src="moon.jpg" alt="moon" /></a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -8125,7 +8151,8 @@ bar>)</p>''';
       final markdown = '''[foo [bar](/uri)][ref]
 
 [ref]: /uri''';
-      final expected = '''<p>[foo <a href="/uri">bar</a>]<a href="/uri">ref</a></p>''';
+      final expected =
+          '''<p>[foo <a href="/uri">bar</a>]<a href="/uri">ref</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -8139,7 +8166,8 @@ bar>)</p>''';
       final markdown = '''[foo *bar [baz][ref]*][ref]
 
 [ref]: /uri''';
-      final expected = '''<p>[foo <em>bar <a href="/uri">baz</a></em>]<a href="/uri">ref</a></p>''';
+      final expected =
+          '''<p>[foo <em>bar <a href="/uri">baz</a></em>]<a href="/uri">ref</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -8209,7 +8237,8 @@ bar>)</p>''';
       final markdown = '''[foo<http://example.com/?search=][ref]>
 
 [ref]: /uri''';
-      final expected = '''<p>[foo<a href="http://example.com/?search=%5D%5Bref%5D">http://example.com/?search=][ref]</a></p>''';
+      final expected =
+          '''<p>[foo<a href="http://example.com/?search=%5D%5Bref%5D">http://example.com/?search=][ref]</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -8237,7 +8266,8 @@ bar>)</p>''';
       final markdown = '''[Толпой][Толпой] is a Russian word.
 
 [ТОЛПОЙ]: /url''';
-      final expected = '''<p><a href="/url">Толпой</a> is a Russian word.</p>''';
+      final expected =
+          '''<p><a href="/url">Толпой</a> is a Russian word.</p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -8447,7 +8477,8 @@ bar>)</p>''';
       final markdown = '''[*foo* bar][]
 
 [*foo* bar]: /url "title"''';
-      final expected = '''<p><a href="/url" title="title"><em>foo</em> bar</a></p>''';
+      final expected =
+          '''<p><a href="/url" title="title"><em>foo</em> bar</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -8505,7 +8536,8 @@ bar>)</p>''';
       final markdown = '''[*foo* bar]
 
 [*foo* bar]: /url "title"''';
-      final expected = '''<p><a href="/url" title="title"><em>foo</em> bar</a></p>''';
+      final expected =
+          '''<p><a href="/url" title="title"><em>foo</em> bar</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -8519,7 +8551,8 @@ bar>)</p>''';
       final markdown = '''[[*foo* bar]]
 
 [*foo* bar]: /url "title"''';
-      final expected = '''<p>[<a href="/url" title="title"><em>foo</em> bar</a>]</p>''';
+      final expected =
+          '''<p>[<a href="/url" title="title"><em>foo</em> bar</a>]</p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -8675,7 +8708,8 @@ bar>)</p>''';
 
 [baz]: /url1
 [bar]: /url2''';
-      final expected = '''<p><a href="/url2">foo</a><a href="/url1">baz</a></p>''';
+      final expected =
+          '''<p><a href="/url2">foo</a><a href="/url1">baz</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -8716,7 +8750,8 @@ bar>)</p>''';
       final markdown = '''![foo *bar*]
 
 [foo *bar*]: train.jpg "train & tracks"''';
-      final expected = '''<p><img src="train.jpg" alt="foo bar" title="train &amp; tracks" /></p>''';
+      final expected =
+          '''<p><img src="train.jpg" alt="foo bar" title="train &amp; tracks" /></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -8754,7 +8789,8 @@ bar>)</p>''';
       final markdown = '''![foo *bar*][]
 
 [foo *bar*]: train.jpg "train & tracks"''';
-      final expected = '''<p><img src="train.jpg" alt="foo bar" title="train &amp; tracks" /></p>''';
+      final expected =
+          '''<p><img src="train.jpg" alt="foo bar" title="train &amp; tracks" /></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -8768,7 +8804,8 @@ bar>)</p>''';
       final markdown = '''![foo *bar*][foobar]
 
 [FOOBAR]: train.jpg "train & tracks"''';
-      final expected = '''<p><img src="train.jpg" alt="foo bar" title="train &amp; tracks" /></p>''';
+      final expected =
+          '''<p><img src="train.jpg" alt="foo bar" title="train &amp; tracks" /></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -8792,7 +8829,8 @@ bar>)</p>''';
 
     test('Images - Example 8', () {
       final markdown = '''My ![foo bar](/path/to/train.jpg  "title"   )''';
-      final expected = '''<p>My <img src="/path/to/train.jpg" alt="foo bar" title="title" /></p>''';
+      final expected =
+          '''<p>My <img src="/path/to/train.jpg" alt="foo bar" title="title" /></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -8872,7 +8910,8 @@ bar>)</p>''';
       final markdown = '''![*foo* bar][]
 
 [*foo* bar]: /url "title"''';
-      final expected = '''<p><img src="/url" alt="foo bar" title="title" /></p>''';
+      final expected =
+          '''<p><img src="/url" alt="foo bar" title="title" /></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -8930,7 +8969,8 @@ bar>)</p>''';
       final markdown = '''![*foo* bar]
 
 [*foo* bar]: /url "title"''';
-      final expected = '''<p><img src="/url" alt="foo bar" title="title" /></p>''';
+      final expected =
+          '''<p><img src="/url" alt="foo bar" title="title" /></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -8999,7 +9039,8 @@ bar>)</p>''';
 
     test('Autolinks - Example 1', () {
       final markdown = '''<http://foo.bar.baz>''';
-      final expected = '''<p><a href="http://foo.bar.baz">http://foo.bar.baz</a></p>''';
+      final expected =
+          '''<p><a href="http://foo.bar.baz">http://foo.bar.baz</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -9011,7 +9052,8 @@ bar>)</p>''';
 
     test('Autolinks - Example 2', () {
       final markdown = '''<http://foo.bar.baz/test?q=hello&id=22&boolean>''';
-      final expected = '''<p><a href="http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean">http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean</a></p>''';
+      final expected =
+          '''<p><a href="http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean">http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -9023,7 +9065,8 @@ bar>)</p>''';
 
     test('Autolinks - Example 3', () {
       final markdown = '''<irc://foo.bar:2233/baz>''';
-      final expected = '''<p><a href="irc://foo.bar:2233/baz">irc://foo.bar:2233/baz</a></p>''';
+      final expected =
+          '''<p><a href="irc://foo.bar:2233/baz">irc://foo.bar:2233/baz</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -9035,7 +9078,8 @@ bar>)</p>''';
 
     test('Autolinks - Example 4', () {
       final markdown = '''<MAILTO:FOO@BAR.BAZ>''';
-      final expected = '''<p><a href="MAILTO:FOO@BAR.BAZ">MAILTO:FOO@BAR.BAZ</a></p>''';
+      final expected =
+          '''<p><a href="MAILTO:FOO@BAR.BAZ">MAILTO:FOO@BAR.BAZ</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -9059,7 +9103,8 @@ bar>)</p>''';
 
     test('Autolinks - Example 6', () {
       final markdown = '''<made-up-scheme://foo,bar>''';
-      final expected = '''<p><a href="made-up-scheme://foo,bar">made-up-scheme://foo,bar</a></p>''';
+      final expected =
+          '''<p><a href="made-up-scheme://foo,bar">made-up-scheme://foo,bar</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -9083,7 +9128,8 @@ bar>)</p>''';
 
     test('Autolinks - Example 8', () {
       final markdown = '''<localhost:5001/foo>''';
-      final expected = '''<p><a href="localhost:5001/foo">localhost:5001/foo</a></p>''';
+      final expected =
+          '''<p><a href="localhost:5001/foo">localhost:5001/foo</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -9107,7 +9153,8 @@ bar>)</p>''';
 
     test('Autolinks - Example 10', () {
       final markdown = '''<http://example.com/\\[\\>''';
-      final expected = '''<p><a href="http://example.com/%5C%5B%5C">http://example.com/\\[\\</a></p>''';
+      final expected =
+          '''<p><a href="http://example.com/%5C%5B%5C">http://example.com/\\[\\</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -9119,7 +9166,8 @@ bar>)</p>''';
 
     test('Autolinks - Example 11', () {
       final markdown = '''<foo@bar.example.com>''';
-      final expected = '''<p><a href="mailto:foo@bar.example.com">foo@bar.example.com</a></p>''';
+      final expected =
+          '''<p><a href="mailto:foo@bar.example.com">foo@bar.example.com</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -9131,7 +9179,8 @@ bar>)</p>''';
 
     test('Autolinks - Example 12', () {
       final markdown = '''<foo+special@Bar.baz-bar0.com>''';
-      final expected = '''<p><a href="mailto:foo+special@Bar.baz-bar0.com">foo+special@Bar.baz-bar0.com</a></p>''';
+      final expected =
+          '''<p><a href="mailto:foo+special@Bar.baz-bar0.com">foo+special@Bar.baz-bar0.com</a></p>''';
 
       final parser = _createCommonmarkParser();
       parser.feed(markdown);
@@ -9743,6 +9792,5 @@ baz</p>''';
 
       expect(html.trim(), expected.trim());
     });
-
   });
 }

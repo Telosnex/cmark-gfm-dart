@@ -7,38 +7,41 @@ import 'reference_map.dart';
 /// Port of cmark_parse_reference_inline from inlines.c
 int parseReferenceInline(Uint8List input, CmarkReferenceMap refmap) {
   var pos = 0;
-  
+
   // Parse label [label]
   final labelResult = LinkLabelResult();
   if (!linkLabel(input, pos, labelResult) || labelResult.label.isEmpty) {
     return 0;
   }
   pos = labelResult.endPos;
-  
+
   // Expect colon
-  if (pos >= input.length || input[pos] != 0x3A) { // :
+  if (pos >= input.length || input[pos] != 0x3A) {
+    // :
     return 0;
   }
   pos++;
-  
+
   // Skip spaces/newline (spnl)
   pos = _spnl(input, pos);
-  
+
   // Parse URL (use reference-style scanner, not inline-link scanner)
   final urlResult = LinkUrlResult();
   final urlLen = scanLinkUrlForReference(input, pos, urlResult);
-  if (urlLen <= 0) { // URL must be non-empty for reference definitions
+  if (urlLen <= 0) {
+    // URL must be non-empty for reference definitions
     return 0;
   }
   pos += urlLen;
-  
+
   // Parse optional title
   final beforeTitle = pos;
   pos = _spnl(input, pos);
-  
+
   final titleResult = LinkTitleResult();
-  final titleLen = (pos == beforeTitle) ? 0 : scanLinkTitle(input, pos, titleResult);
-  
+  final titleLen =
+      (pos == beforeTitle) ? 0 : scanLinkTitle(input, pos, titleResult);
+
   String title;
   if (titleLen > 0) {
     title = titleResult.title;
@@ -47,7 +50,7 @@ int parseReferenceInline(Uint8List input, CmarkReferenceMap refmap) {
     pos = beforeTitle;
     title = '';
   }
-  
+
   // Parse final spaces and newline
   pos = _skipSpaces(input, pos);
   if (!_skipLineEnd(input, pos)) {
@@ -62,7 +65,7 @@ int parseReferenceInline(Uint8List input, CmarkReferenceMap refmap) {
       return 0;
     }
   }
-  
+
   // Skip the line ending (include it in consumed bytes)
   if (pos < input.length && input[pos] == 0x0D) {
     pos++;
@@ -70,10 +73,10 @@ int parseReferenceInline(Uint8List input, CmarkReferenceMap refmap) {
   if (pos < input.length && input[pos] == 0x0A) {
     pos++;
   }
-  
+
   // Insert reference into map
   refmap.addStrings(labelResult.label, urlResult.url, title);
-  
+
   return pos;
 }
 

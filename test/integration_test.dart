@@ -97,7 +97,8 @@ End of document.
       expect(html, contains('checked=""'));
       expect(html, contains('<a href="http://example.com" title="Title">'));
       expect(html, contains('<a href="http://reference.com"'));
-      expect(html, contains('<a href="http://example.com">http://example.com</a>'));
+      expect(html,
+          contains('<a href="http://example.com">http://example.com</a>'));
       expect(html, contains('<a href="mailto:user@example.com">'));
       expect(html, contains('language-python'));
       expect(html, contains('def hello()'));

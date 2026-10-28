@@ -80,7 +80,7 @@ class CmarkReferenceMap {
     final title = CmarkChunk.literal(titleStr);
     return add(label, url, title);
   }
-  
+
   bool add(CmarkChunk label, CmarkChunk url, CmarkChunk title) {
     if (label.length == 0 || label.length > kMaxLinkLabelLength) {
       return false;
@@ -111,11 +111,11 @@ class CmarkReferenceMap {
     if (labelStr.isEmpty || labelStr.length > kMaxLinkLabelLength) {
       return null;
     }
-    
+
     final label = CmarkChunk.literal(labelStr);
     return lookup(label, cloneResult: cloneResult);
   }
-  
+
   CmarkReference? lookup(CmarkChunk label, {bool cloneResult = true}) {
     if (label.length == 0 || label.length > kMaxLinkLabelLength) {
       return null;
