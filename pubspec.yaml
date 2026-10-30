@@ -1,5 +1,5 @@
 name: cmark_gfm_dart
-version: 0.1.0-dev
+version: 0.1.0
 description: >-
   Pure Dart port of the cmark-gfm Markdown parser with streaming support.
 repository: https://github.com/Telosnex/cmark_gfm_dart
