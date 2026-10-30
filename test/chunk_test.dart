@@ -1,5 +1,5 @@
-import 'package:cmark_gfm/src/util/chunk.dart';
-import 'package:cmark_gfm/src/util/strbuf.dart';
+import 'package:cmark_gfm_dart/src/util/chunk.dart';
+import 'package:cmark_gfm_dart/src/util/strbuf.dart';
 import 'package:test/test.dart';
 
 void main() {

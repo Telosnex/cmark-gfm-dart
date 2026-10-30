@@ -2,7 +2,7 @@
 
 import 'dart:io';
 
-import 'package:cmark_gfm/cmark_gfm.dart';
+import 'package:cmark_gfm_dart/cmark_gfm_dart.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 

@@ -16,7 +16,7 @@ A pure Dart port of the [cmark-gfm](https://github.com/github/cmark-gfm) Markdow
 ### Basic Parsing
 
 ```dart
-import 'package:cmark_gfm/cmark_gfm.dart';
+import 'package:cmark_gfm_dart/cmark_gfm_dart.dart';
 
 final parser = CmarkParser();
 parser.feed('# Hello **World**\n\nThis is a paragraph.');

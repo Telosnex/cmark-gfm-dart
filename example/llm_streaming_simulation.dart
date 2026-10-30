@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:cmark_gfm/cmark_gfm.dart';
+import 'package:cmark_gfm_dart/cmark_gfm_dart.dart';
 
 /// Simulates how this would be used with an LLM streaming response.
 ///
