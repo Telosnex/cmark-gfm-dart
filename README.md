@@ -1,4 +1,4 @@
-# cmark-gfm-dart
+# cmark_gfm_dart
 
 A pure Dart port of the [cmark-gfm](https://github.com/github/cmark-gfm) Markdown parser with streaming support.
 

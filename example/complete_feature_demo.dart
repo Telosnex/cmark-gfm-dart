@@ -1,6 +1,6 @@
 import 'package:cmark_gfm_dart/cmark_gfm_dart.dart';
 
-/// Complete demonstration of all cmark-gfm-dart features.
+/// Complete demonstration of all cmark_gfm_dart features.
 ///
 /// This shows every supported markdown construct parsing and rendering correctly.
 void main() {
