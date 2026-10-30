@@ -9,7 +9,7 @@
 // "Fresh parse" parses the whole text so far for every snapshot. It is the
 // reference output and the cost of not streaming. Before timing, every
 // snapshot of every fixture is checked against it.
-import 'package:cmark_gfm/cmark_gfm.dart';
+import 'package:cmark_gfm_dart/cmark_gfm_dart.dart';
 
 import 'perf_tester.dart';
 import 'streaming_fixture.dart';

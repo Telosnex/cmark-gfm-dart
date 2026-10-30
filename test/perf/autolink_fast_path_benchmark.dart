@@ -8,7 +8,7 @@
 // Output: seven times in milliseconds per parse or streaming session.
 import 'dart:math';
 
-import 'package:cmark_gfm/cmark_gfm.dart';
+import 'package:cmark_gfm_dart/cmark_gfm_dart.dart';
 
 int _sink = 0;
 

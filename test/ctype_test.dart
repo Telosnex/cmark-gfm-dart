@@ -1,4 +1,4 @@
-import 'package:cmark_gfm/src/util/ctype.dart';
+import 'package:cmark_gfm_dart/src/util/ctype.dart';
 import 'package:test/test.dart';
 
 void main() {

@@ -2,7 +2,7 @@
 //   cmark-gfm 0.29.0.gfm.13 (github/cmark-gfm 587a12b), built from source,
 //   cmark-gfm --unsafe -e autolink -e strikethrough -e table -e tasklist
 // Math is disabled because C has no math extension.
-import 'package:cmark_gfm/cmark_gfm.dart';
+import 'package:cmark_gfm_dart/cmark_gfm_dart.dart';
 import 'package:test/test.dart';
 
 String _render(String markdown) {

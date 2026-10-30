@@ -36,7 +36,7 @@ void _generateGfm() {
   }
 
   final out = StringBuffer()
-    ..writeln("import 'package:cmark_gfm/cmark_gfm.dart';")
+    ..writeln("import 'package:cmark_gfm_dart/cmark_gfm_dart.dart';")
     ..writeln("import 'package:test/test.dart';")
     ..writeln()
     ..writeln('// Generated from cmark-gfm/test/extensions.txt')
@@ -104,7 +104,7 @@ void _generateCommonmark() {
   }
 
   final out = StringBuffer()
-    ..writeln("import 'package:cmark_gfm/cmark_gfm.dart';")
+    ..writeln("import 'package:cmark_gfm_dart/cmark_gfm_dart.dart';")
     ..writeln("import 'package:test/test.dart';")
     ..writeln()
     ..writeln('// Generated from cmark-gfm/test/spec.txt')

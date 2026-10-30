@@ -1,4 +1,4 @@
-import 'package:cmark_gfm/cmark_gfm.dart';
+import 'package:cmark_gfm_dart/cmark_gfm_dart.dart';
 import 'package:test/test.dart';
 
 /// Real-world LLM output: 3 header cells, but the delimiter row has 4
